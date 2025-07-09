@@ -1,0 +1,55 @@
+line-length = 119
+
+[lint]
+fixable = ["ALL"]
+select = [
+    "E",
+    "F",
+    "UP",
+    "I",
+    "COM",
+    "ANN",
+    "PL",
+    "RET",
+    "ARG",
+    "SIM",
+    "RSE",
+    "PT",
+    "T20",
+    "PIE",
+    "G",
+    "LOG",
+    "ISC",
+    "C4",
+    "A",
+    "BLE",
+]
+ignore = [
+    "COM819",
+    "ANN101",
+    "ANN102",
+    "ANN204",
+    "ANN001",
+    "ANN002",
+    "ANN003",
+
+]
+
+[lint.extend-per-file-ignores]
+"*/views.py" = [
+    "ARG002",  # args
+    "ANN201",  # return type in views
+]
+
+"*/serializers.py" = [
+    "ARG002",  # args
+    #"ANN201",  # return type in serializers
+]
+"*/test_*.py" = [
+    "ANN201",
+]
+
+[format]
+quote-style = "double"
+indent-style = "space"
+
