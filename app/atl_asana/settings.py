@@ -12,6 +12,7 @@ load_dotenv(BASE_DIR.parent / ".env")
 
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = os.environ["DJANGO_SECRET_KEY"]
+ASANA_HOOK_SECRET = os.environ["ASANA_HOOK_SECRET"]
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = os.environ.get("DJANGO_DEBUG", "false").lower() == "true"

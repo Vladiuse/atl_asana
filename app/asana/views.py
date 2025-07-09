@@ -1,15 +1,16 @@
 from rest_framework import status
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
+from django.conf import settings
 
 from .models import AsanaWebhookRequestData
 
 
 @api_view(http_method_names=["GET", "POST"])
 def webhook(request, format=None):
-    secret = request.headers.get("X-Hook-Secret")
-    if not secret:
-        return Response(data={"error": '"X-Hook-Secret" header required'}, status=status.HTTP_400_BAD_REQUEST)
+    # secret = request.headers.get("X-Hook-Secret")
+    # if not secret:
+    #     return Response(data={"error": '"X-Hook-Secret" header required'}, status=status.HTTP_400_BAD_REQUEST)
     AsanaWebhookRequestData.objects.create(
         headers=dict(request.headers),
         payload=dict(request.data),
@@ -20,5 +21,5 @@ def webhook(request, format=None):
         "headers": request.headers,
     }
     response =Response(data=data)
-    response['X-Hook-Secret'] = secret
+    response['X-Hook-Secret'] = settings.ASANA_HOOK_SECRET
     return response
