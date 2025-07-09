@@ -26,6 +26,8 @@ CSRF_TRUSTED_ORIGINS = [
     "http://83.222.20.96",
     "http://atl-asana.vim-store.ru",
     "https://atl-asana.vim-store.ru",
+    "http://atl-asana.vim-store.ru:81",
+    "https://atl-asana.vim-store.ru:81",
 ]
 
 # Application definition
