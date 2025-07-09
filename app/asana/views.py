@@ -19,4 +19,6 @@ def webhook(request, format=None):
         "method": request.method,
         "headers": request.headers,
     }
-    return Response(data=data)
+    response =Response(data=data)
+    response['X-Hook-Secret'] = secret
+    return response
