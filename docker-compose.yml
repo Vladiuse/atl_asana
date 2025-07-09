@@ -16,5 +16,6 @@ services:
       - ./nginx/default.conf:/etc/nginx/conf.d/default.conf
       - ./app/static:/app/static
       - ./app/media:/app/media
+      - /etc/letsencrypt:/etc/letsencrypt:ro
     depends_on:
       - atl_asana_web
