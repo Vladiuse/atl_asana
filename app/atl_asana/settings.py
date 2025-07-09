@@ -22,6 +22,11 @@ ALLOWED_HOSTS = [
     "atl-asana.vim-store.ru",
 ]
 
+CSRF_TRUSTED_ORIGINS = [
+    "http://83.222.20.96",
+    "http://atl-asana.vim-store.ru",
+    "https://atl-asana.vim-store.ru",
+]
 
 # Application definition
 
