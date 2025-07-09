@@ -18,6 +18,7 @@ DEBUG = os.environ.get("DJANGO_DEBUG", "false").lower() == "true"
 
 ALLOWED_HOSTS = [
     "127.0.0.1",
+    "83.222.20.96",
     "atl-asana.vim-store.ru",
 ]
 
