@@ -44,7 +44,9 @@ class AsanaWebhookView(APIView):
             "status": True,
             "message": f"webhook created for project {project.name}",
         }
-        return Response(data=data, status=status.HTTP_201_CREATED)
+        response = Response(data=data, status=status.HTTP_201_CREATED)
+        response["X-Hook-Secret"] = project.secret
+        return response
 
 
 class AsanaWebhookRequestDataView(ModelViewSet):
