@@ -31,11 +31,11 @@ class TableSender:
             json=data,
         )
 
-    def send_message(self, handler: str, message: str) -> str:
+    def send_message(self, handler: str, data: dict) -> str:
         if handler not in self.AVAILABLE_URL:
             raise TypeError(f"Incorrect handler, allowed {self.AVAILABLE_URL}")
         try:
-            return self._send_message(handler=handler, message=message)
+            return self._send_message(handler=handler, data=data)
         except (HTTPError, RequestException) as error:
             if isinstance(error, HTTPError):
                 msg = (

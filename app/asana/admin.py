@@ -1,3 +1,6 @@
+import json
+from json.decoder import JSONDecodeError
+
 from django.contrib import admin
 
 from .models import AsanaProject, AsanaWebhookRequestData, CompletedTask
@@ -14,8 +17,16 @@ class AsanaWebhookRequestDataAdmin(admin.ModelAdmin):
 
 
 class CompletedTaskAdmin(admin.ModelAdmin):
-    list_display = ["id", "task_id", "project__name", "created"]
+    list_display = ["id", "task_id", "project__name", "is_send_in_table", "to_status", "created"]
     list_display_links = ["id", "task_id"]
+
+    @admin.display(boolean=True, description="To")
+    def to_status(self, obj) -> bool | None:
+        try:
+            data = json.loads(obj.response_text)
+            return data.get("success")
+        except JSONDecodeError:
+            return None
 
 
 admin.site.register(AsanaProject, AsanaProjectAdmin)

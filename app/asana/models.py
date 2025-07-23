@@ -22,7 +22,7 @@ class AsanaWebhookRequestData(models.Model):
 
 class CompletedTask(models.Model):
     created = models.DateTimeField(auto_now_add=True)
-    project = models.OneToOneField(to=AsanaProject, on_delete=models.CASCADE)
+    project = models.ForeignKey(to=AsanaProject, on_delete=models.CASCADE)
     webhook = models.ForeignKey(to=AsanaWebhookRequestData, on_delete=models.CASCADE)
     event_data = models.JSONField()
     task_id = models.CharField(max_length=100)
