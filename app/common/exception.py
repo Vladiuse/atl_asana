@@ -4,3 +4,6 @@ class AppException(Exception):
 
 class MessageSenderError(AppException):
     """MessageSenderError"""
+
+class TableSenderError(AppException):
+    """TableSenderError"""

@@ -26,5 +26,6 @@ class CompletedTask(models.Model):
     webhook = models.ForeignKey(to=AsanaWebhookRequestData, on_delete=models.CASCADE)
     event_data = models.JSONField()
     task_id = models.CharField(max_length=100)
-    status_code = models.CharField(blank=True)
+    is_send_in_table = models.BooleanField(null=True, default=None)
     response_text = models.TextField(blank=True)
+    error_text = models.TextField(blank=True)
