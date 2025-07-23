@@ -14,5 +14,6 @@ class ProcessAsanaWebhookUseCase:
             message = f"Completed Tasks: {created_tasks}"
             message_sender.send_message(handler="kva_test", message=message)
         asana_webhook.is_target_event = len(created) != 0
+        print(asana_webhook.is_target_event)
         asana_webhook.save()
         return created

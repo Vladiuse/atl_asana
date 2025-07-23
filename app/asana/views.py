@@ -13,9 +13,15 @@ from .tasks import process_asana_webhook
 class AsanaWebhookView(APIView):
     def post(self, request, project_name, format=None):
         project = get_object_or_404(AsanaProject, name=project_name)
-        secret = request.headers.get("X-Hook-Secret")
-        if secret:
-            return self.create_webhook_response(project=project, secret=secret)
+        header_secret = request.headers.get("X-Hook-Secret")
+        if header_secret and project.secret == "":
+            return self.create_webhook_response(project=project, secret=header_secret)
+        if project.secret == "":
+            data = {
+                "success": False,
+                "message": f"Project {project.name} has no secret key!",
+            }
+            return Response(data=data, status=status.HTTP_400_BAD_REQUEST)
         asana_webhook = AsanaWebhookRequestData.objects.create(
             headers=dict(request.headers),
             payload=dict(request.data),
