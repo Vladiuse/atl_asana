@@ -11,10 +11,6 @@ table_sender = TableSender(request_sender=RequestsSender())
 class ProcessAsanaWebhookUseCase:
     def execute(self, asana_webhook: AsanaWebhookRequestData) -> list:
         created: list[CompletedTask] = completed_task_creator(asana_webhook_model=asana_webhook)
-        if created:
-            created_tasks = [task.task_id for task in created]
-            message = f"Completed Tasks: {created_tasks}"
-            message_sender.send_message(handler="kva_test", message=message)
         asana_webhook.is_target_event = len(created) != 0
         asana_webhook.save()
 
@@ -27,9 +23,12 @@ class ProcessAsanaWebhookUseCase:
                 completed_task.response_text = response_text
                 completed_task.is_send_in_table = True
                 completed_task.save()
+                message = f"Task add {completed_task.task_id} to table: {response_text}"
             except TableSenderError as error:
                 message_sender.send_message(handler="kva_test", message=str(error))
                 completed_task.is_send_in_table = False
                 completed_task.error_text = str(error)
                 completed_task.save()
+                message = f"Error add task {completed_task.task_id}: {error}"
+            message_sender.send_message(handler="kva_test", message=message)
         return created
