@@ -1,36 +1,44 @@
-from common import MessageSender, RequestsSender
-from django.conf import settings
-from rest_framework.decorators import action, api_view
+from django.shortcuts import get_object_or_404
+from rest_framework import status
+from rest_framework.decorators import action
 from rest_framework.response import Response
+from rest_framework.views import APIView
 from rest_framework.viewsets import ModelViewSet
 
-from .models import AsanaWebhookRequestData
+from .models import AsanaProject, AsanaWebhookRequestData
 from .serializers import AsanaWebhookRequestDataSerializer
-from .usecase import ProcessAsanaWebhookUseCase
-
-message_sender = MessageSender(request_sender=RequestsSender())
+from .tasks import process_asana_webhook
 
 
-@api_view(http_method_names=["POST"])
-def webhook(request, format=None):
-    secret = request.headers.get("X-Hook-Secret")
-    asana_webhook = AsanaWebhookRequestData.objects.create(
-        headers=dict(request.headers),
-        payload=dict(request.data),
-    )
-    try:
-        usecase = ProcessAsanaWebhookUseCase()
-        usecase.execute(asana_webhook=asana_webhook)
-    except Exception as error:
-        message_sender.send_message(handler="kva_test", message=f"Error: {error}")
-    data = {
-        "success": True,
-        "method": request.method,
-        "headers": request.headers,
-    }
-    response = Response(data=data)
-    response["X-Hook-Secret"] = settings.ASANA_HOOK_SECRET if settings.ASANA_HOOK_SECRET else secret
-    return response
+class AsanaWebhookView(APIView):
+    def post(self, request, project_name, format=None):
+        project = get_object_or_404(AsanaProject, name=project_name)
+        secret = request.headers.get("X-Hook-Secret")
+        if secret:
+            return self.create_webhook_response(project=project, secret=secret)
+        asana_webhook = AsanaWebhookRequestData.objects.create(
+            headers=dict(request.headers),
+            payload=dict(request.data),
+            project=project,
+        )
+        process_asana_webhook.delay(asana_webhook_id=asana_webhook.pk)
+        data = {
+            "success": True,
+            "method": request.method,
+            "headers": request.headers,
+        }
+        response = Response(data=data)
+        response["X-Hook-Secret"] = project.secret
+        return response
+
+    def create_webhook_response(self, project: AsanaProject, secret: str) -> Response:
+        project.secret = secret
+        project.save()
+        data = {
+            "status": True,
+            "message": f"webhook created for project {project.name}",
+        }
+        return Response(data=data, status=status.HTTP_201_CREATED)
 
 
 class AsanaWebhookRequestDataView(ModelViewSet):

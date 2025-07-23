@@ -8,6 +8,6 @@ router.register("asana-webhooks", views.AsanaWebhookRequestDataView)
 
 
 urlpatterns = [
-    path("webhook/", views.webhook),
+    path("webhook/<str:project_name>/", views.AsanaWebhookView.as_view()),
     path("", include(router.urls)),
 ]

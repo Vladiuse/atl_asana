@@ -20,6 +20,7 @@ def completed_task_creator(asana_webhook_model: AsanaWebhookRequestData) -> list
                 webhook=asana_webhook_model,
                 event_data=event,
                 task_id=event["resource"]["gid"],
+                project=asana_webhook_model.project,
             )
             records.append(completed_task)
 

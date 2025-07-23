@@ -43,6 +43,7 @@ INSTALLED_APPS = [
     "django.contrib.staticfiles",
     "rest_framework",
     "django_extensions",
+    "django_celery_results",
     # apps
     "asana.apps.AsanaConfig",
 ]
@@ -86,6 +87,11 @@ DATABASES = {
         "NAME": BASE_DIR / "db.sqlite3",
     },
 }
+REDIS_HOST = os.environ["REDIS_HOST"]
+CELERY_BROKER_URL = f"redis://{REDIS_HOST}:6379/0"
+CELERY_RESULT_BACKEND = "django-db"
+CELERY_TASK_TRACK_STARTED = True
+CELERY_RESULT_EXTENDED = True
 
 
 # Password validation
