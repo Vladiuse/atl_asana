@@ -6,7 +6,7 @@ from .request_sender import RequestsSender
 
 
 class TableSender:
-    URL = "https://script.google.com/macros/s/AKfycbw0D7XfahlxDXgetBhI24hicCvL839QVBD817JEu20LIgqKB71OpCbWUc6jSyCNzhopCg/exec"
+    URL = "https://script.google.com/macros/s/AKfycbyH5NQVsa2RLglVoJcQFPvBb4pSV7Er9jDpOntU_6QJN0H1b-5UANeJHCQqAGzL4FRRLg/exec"
     AVAILABLE_URL = [
         "add_new_asana_task",
         "add_task_tech",
