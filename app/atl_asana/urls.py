@@ -4,4 +4,5 @@ from django.urls import include, path
 urlpatterns = [
     path("admin/", admin.site.urls),
     path("asana/", include("asana.urls")),
+    path("comment_notifier/", include("comment_notifier.urls")),
 ]
