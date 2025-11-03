@@ -46,7 +46,7 @@ INSTALLED_APPS = [
     "django_extensions",
     "django_celery_results",
     # apps
-    "asana.apps.AsanaConfig",
+    "vga_lands.apps.VgaLandsConfig",
     "comment_notifier.apps.CommentNotifierConfig",
 ]
 

@@ -1,0 +1,704 @@
+{
+  "data": [
+    {
+      "gid": "1167322787740059",
+      "user": {
+        "gid": "1167322788116720",
+        "name": "Михаил Петров",
+        "resource_type": "user"
+      },
+      "resource_type": "workspace_membership",
+      "workspace": {
+        "gid": "1167322787740055",
+        "name": "Atlas Agency",
+        "resource_type": "workspace"
+      }
+    },
+    {
+      "gid": "1167323732881936",
+      "user": {
+        "gid": "1167323732672877",
+        "name": "Павел Антипов",
+        "resource_type": "user"
+      },
+      "resource_type": "workspace_membership",
+      "workspace": {
+        "gid": "1167322787740055",
+        "name": "Atlas Agency",
+        "resource_type": "workspace"
+      }
+    },
+    {
+      "gid": "1167812843143541",
+      "user": {
+        "gid": "1167812785960884",
+        "name": "Александра Тимкив",
+        "resource_type": "user"
+      },
+      "resource_type": "workspace_membership",
+      "workspace": {
+        "gid": "1167322787740055",
+        "name": "Atlas Agency",
+        "resource_type": "workspace"
+      }
+    },
+    {
+      "gid": "1201513055880497",
+      "user": {
+        "gid": "1201513055817497",
+        "name": "Оля Кутцар",
+        "resource_type": "user"
+      },
+      "resource_type": "workspace_membership",
+      "workspace": {
+        "gid": "1167322787740055",
+        "name": "Atlas Agency",
+        "resource_type": "workspace"
+      }
+    },
+    {
+      "gid": "1201513376180134",
+      "user": {
+        "gid": "1201513376158094",
+        "name": "Владислав Кудряшов",
+        "resource_type": "user"
+      },
+      "resource_type": "workspace_membership",
+      "workspace": {
+        "gid": "1167322787740055",
+        "name": "Atlas Agency",
+        "resource_type": "workspace"
+      }
+    },
+    {
+      "gid": "1201514727884735",
+      "user": {
+        "gid": "1201513643189011",
+        "name": "Надежда Швецова",
+        "resource_type": "user"
+      },
+      "resource_type": "workspace_membership",
+      "workspace": {
+        "gid": "1167322787740055",
+        "name": "Atlas Agency",
+        "resource_type": "workspace"
+      }
+    },
+    {
+      "gid": "1201822121223744",
+      "user": {
+        "gid": "1201822121183915",
+        "name": "Private User",
+        "resource_type": "user"
+      },
+      "resource_type": "workspace_membership",
+      "workspace": {
+        "gid": "1167322787740055",
+        "name": "Atlas Agency",
+        "resource_type": "workspace"
+      }
+    },
+    {
+      "gid": "1202153571761370",
+      "user": {
+        "gid": "1202146508307335",
+        "name": "Алина Разыграева",
+        "resource_type": "user"
+      },
+      "resource_type": "workspace_membership",
+      "workspace": {
+        "gid": "1167322787740055",
+        "name": "Atlas Agency",
+        "resource_type": "workspace"
+      }
+    },
+    {
+      "gid": "1202509383535707",
+      "user": {
+        "gid": "1202505536457031",
+        "name": "Алиса Саламахина",
+        "resource_type": "user"
+      },
+      "resource_type": "workspace_membership",
+      "workspace": {
+        "gid": "1167322787740055",
+        "name": "Atlas Agency",
+        "resource_type": "workspace"
+      }
+    },
+    {
+      "gid": "1203240708601875",
+      "user": {
+        "gid": "1203240735822463",
+        "name": "Private User",
+        "resource_type": "user"
+      },
+      "resource_type": "workspace_membership",
+      "workspace": {
+        "gid": "1167322787740055",
+        "name": "Atlas Agency",
+        "resource_type": "workspace"
+      }
+    },
+    {
+      "gid": "1203602517962529",
+      "user": {
+        "gid": "1203405787291985",
+        "name": "Private User",
+        "resource_type": "user"
+      },
+      "resource_type": "workspace_membership",
+      "workspace": {
+        "gid": "1167322787740055",
+        "name": "Atlas Agency",
+        "resource_type": "workspace"
+      }
+    },
+    {
+      "gid": "1205250256418880",
+      "user": {
+        "gid": "1202282267099629",
+        "name": "Юлия Малышева",
+        "resource_type": "user"
+      },
+      "resource_type": "workspace_membership",
+      "workspace": {
+        "gid": "1167322787740055",
+        "name": "Atlas Agency",
+        "resource_type": "workspace"
+      }
+    },
+    {
+      "gid": "1205805452407521",
+      "user": {
+        "gid": "1205782333344351",
+        "name": "Григорий Воеводин",
+        "resource_type": "user"
+      },
+      "resource_type": "workspace_membership",
+      "workspace": {
+        "gid": "1167322787740055",
+        "name": "Atlas Agency",
+        "resource_type": "workspace"
+      }
+    },
+    {
+      "gid": "1208375517756272",
+      "user": {
+        "gid": "1208363977172197",
+        "name": "Private User",
+        "resource_type": "user"
+      },
+      "resource_type": "workspace_membership",
+      "workspace": {
+        "gid": "1167322787740055",
+        "name": "Atlas Agency",
+        "resource_type": "workspace"
+      }
+    },
+    {
+      "gid": "1208776418411375",
+      "user": {
+        "gid": "1208776418411377",
+        "name": "Журга Анна",
+        "resource_type": "user"
+      },
+      "resource_type": "workspace_membership",
+      "workspace": {
+        "gid": "1167322787740055",
+        "name": "Atlas Agency",
+        "resource_type": "workspace"
+      }
+    },
+    {
+      "gid": "1208923079862762",
+      "user": {
+        "gid": "1208923191298213",
+        "name": "Анастасия Данилова",
+        "resource_type": "user"
+      },
+      "resource_type": "workspace_membership",
+      "workspace": {
+        "gid": "1167322787740055",
+        "name": "Atlas Agency",
+        "resource_type": "workspace"
+      }
+    },
+    {
+      "gid": "1208984358770630",
+      "user": {
+        "gid": "1208984358770632",
+        "name": "Private User",
+        "resource_type": "user"
+      },
+      "resource_type": "workspace_membership",
+      "workspace": {
+        "gid": "1167322787740055",
+        "name": "Atlas Agency",
+        "resource_type": "workspace"
+      }
+    },
+    {
+      "gid": "1209024915172631",
+      "user": {
+        "gid": "1209029763064526",
+        "name": "Кирилл Круподеря",
+        "resource_type": "user"
+      },
+      "resource_type": "workspace_membership",
+      "workspace": {
+        "gid": "1167322787740055",
+        "name": "Atlas Agency",
+        "resource_type": "workspace"
+      }
+    },
+    {
+      "gid": "1209032365730932",
+      "user": {
+        "gid": "1209029834981612",
+        "name": "Мария Мехоношина",
+        "resource_type": "user"
+      },
+      "resource_type": "workspace_membership",
+      "workspace": {
+        "gid": "1167322787740055",
+        "name": "Atlas Agency",
+        "resource_type": "workspace"
+      }
+    },
+    {
+      "gid": "1209100409218183",
+      "user": {
+        "gid": "1209100409218185",
+        "name": "Виталий Середенко",
+        "resource_type": "user"
+      },
+      "resource_type": "workspace_membership",
+      "workspace": {
+        "gid": "1167322787740055",
+        "name": "Atlas Agency",
+        "resource_type": "workspace"
+      }
+    },
+    {
+      "gid": "1209183885865982",
+      "user": {
+        "gid": "1209188772626581",
+        "name": "Алиса Исаева",
+        "resource_type": "user"
+      },
+      "resource_type": "workspace_membership",
+      "workspace": {
+        "gid": "1167322787740055",
+        "name": "Atlas Agency",
+        "resource_type": "workspace"
+      }
+    },
+    {
+      "gid": "1209420811212836",
+      "user": {
+        "gid": "1209420811212838",
+        "name": "Виталий Земчихин",
+        "resource_type": "user"
+      },
+      "resource_type": "workspace_membership",
+      "workspace": {
+        "gid": "1167322787740055",
+        "name": "Atlas Agency",
+        "resource_type": "workspace"
+      }
+    },
+    {
+      "gid": "1209569716982946",
+      "user": {
+        "gid": "1209569837984683",
+        "name": "Сергей Малышев",
+        "resource_type": "user"
+      },
+      "resource_type": "workspace_membership",
+      "workspace": {
+        "gid": "1167322787740055",
+        "name": "Atlas Agency",
+        "resource_type": "workspace"
+      }
+    },
+    {
+      "gid": "1209626146482064",
+      "user": {
+        "gid": "1209626146482066",
+        "name": "Сергей Будякин",
+        "resource_type": "user"
+      },
+      "resource_type": "workspace_membership",
+      "workspace": {
+        "gid": "1167322787740055",
+        "name": "Atlas Agency",
+        "resource_type": "workspace"
+      }
+    },
+    {
+      "gid": "1209959538739087",
+      "user": {
+        "gid": "1209959538739089",
+        "name": "Даниил Макаров",
+        "resource_type": "user"
+      },
+      "resource_type": "workspace_membership",
+      "workspace": {
+        "gid": "1167322787740055",
+        "name": "Atlas Agency",
+        "resource_type": "workspace"
+      }
+    },
+    {
+      "gid": "1210079878910663",
+      "user": {
+        "gid": "1210079878910665",
+        "name": "Жанна Маметова",
+        "resource_type": "user"
+      },
+      "resource_type": "workspace_membership",
+      "workspace": {
+        "gid": "1167322787740055",
+        "name": "Atlas Agency",
+        "resource_type": "workspace"
+      }
+    },
+    {
+      "gid": "1210152540226478",
+      "user": {
+        "gid": "1210152540226480",
+        "name": "Сергей Белов",
+        "resource_type": "user"
+      },
+      "resource_type": "workspace_membership",
+      "workspace": {
+        "gid": "1167322787740055",
+        "name": "Atlas Agency",
+        "resource_type": "workspace"
+      }
+    },
+    {
+      "gid": "1210393628043137",
+      "user": {
+        "gid": "1205811800628284",
+        "name": "Владислав Козак KVA",
+        "resource_type": "user"
+      },
+      "resource_type": "workspace_membership",
+      "workspace": {
+        "gid": "1167322787740055",
+        "name": "Atlas Agency",
+        "resource_type": "workspace"
+      }
+    },
+    {
+      "gid": "1210690897140330",
+      "user": {
+        "gid": "1210690897140332",
+        "name": "Анфиса Ческидова",
+        "resource_type": "user"
+      },
+      "resource_type": "workspace_membership",
+      "workspace": {
+        "gid": "1167322787740055",
+        "name": "Atlas Agency",
+        "resource_type": "workspace"
+      }
+    },
+    {
+      "gid": "1210762022380274",
+      "user": {
+        "gid": "1210762156560428",
+        "name": "Владислав Кудряшов",
+        "resource_type": "user"
+      },
+      "resource_type": "workspace_membership",
+      "workspace": {
+        "gid": "1167322787740055",
+        "name": "Atlas Agency",
+        "resource_type": "workspace"
+      }
+    },
+    {
+      "gid": "1210809094175393",
+      "user": {
+        "gid": "1210807273547200",
+        "name": "Руслан Бахышов",
+        "resource_type": "user"
+      },
+      "resource_type": "workspace_membership",
+      "workspace": {
+        "gid": "1167322787740055",
+        "name": "Atlas Agency",
+        "resource_type": "workspace"
+      }
+    },
+    {
+      "gid": "1210887976760894",
+      "user": {
+        "gid": "1210887976760896",
+        "name": "Private User",
+        "resource_type": "user"
+      },
+      "resource_type": "workspace_membership",
+      "workspace": {
+        "gid": "1167322787740055",
+        "name": "Atlas Agency",
+        "resource_type": "workspace"
+      }
+    },
+    {
+      "gid": "1210935610004312",
+      "user": {
+        "gid": "1210935610004314",
+        "name": "Андрей Климин",
+        "resource_type": "user"
+      },
+      "resource_type": "workspace_membership",
+      "workspace": {
+        "gid": "1167322787740055",
+        "name": "Atlas Agency",
+        "resource_type": "workspace"
+      }
+    },
+    {
+      "gid": "1211358304083590",
+      "user": {
+        "gid": "1211358157594833",
+        "name": "andrejamockin@gmail.com",
+        "resource_type": "user"
+      },
+      "resource_type": "workspace_membership",
+      "workspace": {
+        "gid": "1167322787740055",
+        "name": "Atlas Agency",
+        "resource_type": "workspace"
+      }
+    },
+    {
+      "gid": "1211358304083596",
+      "user": {
+        "gid": "1211358162839366",
+        "name": "Ace_Вячеслав Бондаренко",
+        "resource_type": "user"
+      },
+      "resource_type": "workspace_membership",
+      "workspace": {
+        "gid": "1167322787740055",
+        "name": "Atlas Agency",
+        "resource_type": "workspace"
+      }
+    },
+    {
+      "gid": "1211358308440738",
+      "user": {
+        "gid": "1204734217372391",
+        "name": "Алексей Веселовзоров",
+        "resource_type": "user"
+      },
+      "resource_type": "workspace_membership",
+      "workspace": {
+        "gid": "1167322787740055",
+        "name": "Atlas Agency",
+        "resource_type": "workspace"
+      }
+    },
+    {
+      "gid": "1211358359222441",
+      "user": {
+        "gid": "1211358169208655",
+        "name": "grjo806@gmail.com",
+        "resource_type": "user"
+      },
+      "resource_type": "workspace_membership",
+      "workspace": {
+        "gid": "1167322787740055",
+        "name": "Atlas Agency",
+        "resource_type": "workspace"
+      }
+    },
+    {
+      "gid": "1211358359222447",
+      "user": {
+        "gid": "1211357607131702",
+        "name": "mugenn500@gmail.com",
+        "resource_type": "user"
+      },
+      "resource_type": "workspace_membership",
+      "workspace": {
+        "gid": "1167322787740055",
+        "name": "Atlas Agency",
+        "resource_type": "workspace"
+      }
+    },
+    {
+      "gid": "1211358441017438",
+      "user": {
+        "gid": "1211358646933164",
+        "name": "Ace_AYC_YaroslavAg",
+        "resource_type": "user"
+      },
+      "resource_type": "workspace_membership",
+      "workspace": {
+        "gid": "1167322787740055",
+        "name": "Atlas Agency",
+        "resource_type": "workspace"
+      }
+    },
+    {
+      "gid": "1211358592206220",
+      "user": {
+        "gid": "1211358592206222",
+        "name": "Ace_Андрей Борисов",
+        "resource_type": "user"
+      },
+      "resource_type": "workspace_membership",
+      "workspace": {
+        "gid": "1167322787740055",
+        "name": "Atlas Agency",
+        "resource_type": "workspace"
+      }
+    },
+    {
+      "gid": "1211358597016532",
+      "user": {
+        "gid": "1211358597016534",
+        "name": "Gabriel Bezerra dos Santos",
+        "resource_type": "user"
+      },
+      "resource_type": "workspace_membership",
+      "workspace": {
+        "gid": "1167322787740055",
+        "name": "Atlas Agency",
+        "resource_type": "workspace"
+      }
+    },
+    {
+      "gid": "1211358597016538",
+      "user": {
+        "gid": "1211358597016540",
+        "name": "Ace_Анна Феденко",
+        "resource_type": "user"
+      },
+      "resource_type": "workspace_membership",
+      "workspace": {
+        "gid": "1167322787740055",
+        "name": "Atlas Agency",
+        "resource_type": "workspace"
+      }
+    },
+    {
+      "gid": "1211358597016547",
+      "user": {
+        "gid": "1210027909526796",
+        "name": "mike.simplead@gmail.com",
+        "resource_type": "user"
+      },
+      "resource_type": "workspace_membership",
+      "workspace": {
+        "gid": "1167322787740055",
+        "name": "Atlas Agency",
+        "resource_type": "workspace"
+      }
+    },
+    {
+      "gid": "1211358597016550",
+      "user": {
+        "gid": "1211358597016552",
+        "name": "Ace Софья Найденова",
+        "resource_type": "user"
+      },
+      "resource_type": "workspace_membership",
+      "workspace": {
+        "gid": "1167322787740055",
+        "name": "Atlas Agency",
+        "resource_type": "workspace"
+      }
+    },
+    {
+      "gid": "1211543475032081",
+      "user": {
+        "gid": "1211543577795822",
+        "name": "Анастасия Данилова",
+        "resource_type": "user"
+      },
+      "resource_type": "workspace_membership",
+      "workspace": {
+        "gid": "1167322787740055",
+        "name": "Atlas Agency",
+        "resource_type": "workspace"
+      }
+    },
+    {
+      "gid": "1211557823228661",
+      "user": {
+        "gid": "1207213692227087",
+        "name": "Private User",
+        "resource_type": "user"
+      },
+      "resource_type": "workspace_membership",
+      "workspace": {
+        "gid": "1167322787740055",
+        "name": "Atlas Agency",
+        "resource_type": "workspace"
+      }
+    },
+    {
+      "gid": "1211704484452882",
+      "user": {
+        "gid": "1211693347468053",
+        "name": "Александра Тараненко",
+        "resource_type": "user"
+      },
+      "resource_type": "workspace_membership",
+      "workspace": {
+        "gid": "1167322787740055",
+        "name": "Atlas Agency",
+        "resource_type": "workspace"
+      }
+    },
+    {
+      "gid": "1211717205381706",
+      "user": {
+        "gid": "1211717205381708",
+        "name": "Anastasia",
+        "resource_type": "user"
+      },
+      "resource_type": "workspace_membership",
+      "workspace": {
+        "gid": "1167322787740055",
+        "name": "Atlas Agency",
+        "resource_type": "workspace"
+      }
+    },
+    {
+      "gid": "1211753882301561",
+      "user": {
+        "gid": "1211753882301563",
+        "name": "Эвелина Правдина",
+        "resource_type": "user"
+      },
+      "resource_type": "workspace_membership",
+      "workspace": {
+        "gid": "1167322787740055",
+        "name": "Atlas Agency",
+        "resource_type": "workspace"
+      }
+    },
+    {
+      "gid": "1211792039629961",
+      "user": {
+        "gid": "1211792039629963",
+        "name": "evp@admetatech.com",
+        "resource_type": "user"
+      },
+      "resource_type": "workspace_membership",
+      "workspace": {
+        "gid": "1167322787740055",
+        "name": "Atlas Agency",
+        "resource_type": "workspace"
+      }
+    }
+  ]
+}

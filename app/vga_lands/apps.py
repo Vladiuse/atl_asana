@@ -1,6 +1,6 @@
 from django.apps import AppConfig
 
 
-class AsanaConfig(AppConfig):
+class VgaLandsConfig(AppConfig):
     default_auto_field = "django.db.models.BigAutoField"
-    name = "asana"
+    name = "vga_lands"
