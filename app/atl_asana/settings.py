@@ -47,6 +47,7 @@ INSTALLED_APPS = [
     "django_celery_results",
     # apps
     "asana.apps.AsanaConfig",
+    "comment_notifier.apps.CommentNotifierConfig",
 ]
 
 MIDDLEWARE = [
