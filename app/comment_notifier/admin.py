@@ -4,7 +4,7 @@ from .models import AsanaProject, AsanaWebhookRequestData
 
 
 class AsanaProjectAdmin(admin.ModelAdmin):
-    list_display = ["name", "complete_section_id", "secret", "table_url"]
+    list_display = ["name", "secret"]
     list_display_links = ["name"]
 
 
