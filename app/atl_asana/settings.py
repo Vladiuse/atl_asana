@@ -48,6 +48,7 @@ INSTALLED_APPS = [
     # apps
     "vga_lands.apps.VgaLandsConfig",
     "comment_notifier.apps.CommentNotifierConfig",
+    "asana.apps.AsanaConfig",
 ]
 
 MIDDLEWARE = [
