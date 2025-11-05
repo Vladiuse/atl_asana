@@ -175,3 +175,4 @@ cython_debug/
 engCards/secrets.json
 
 trackers_data.json
+/app/_data/
