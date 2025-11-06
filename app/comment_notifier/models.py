@@ -17,3 +17,13 @@ class AsanaWebhookRequestData(models.Model):
     @property
     def events(self) -> list[dict]:
         return self.payload["events"]
+
+
+class AsanaComment(models.Model):
+    user_id = models.IntegerField()
+    task_id = models.IntegerField()
+    comment_id = models.IntegerField()
+    has_mention = models.BooleanField(null=True, default=None, blank=True)
+    is_notified = models.BooleanField(null=True, blank=True, default=None)
+    created = models.DateTimeField(auto_now_add=True)
+
