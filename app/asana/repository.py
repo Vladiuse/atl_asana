@@ -12,8 +12,11 @@ class AsanaUserRepository:
 
     def get_user(self, membership_id: int) -> AtlasUser:
         try:
-            return AtlasUser.objects.get(membership_id=membership_id)
+            user = AtlasUser.objects.get(membership_id=membership_id)
+            logging.info("Get user from DB")
+            return user
         except AtlasUser.DoesNotExist:
+            logging.info("Try load user from asana")
             return self.create_by_membership_id(membership_id=membership_id)
 
     def update_all(self) -> None:
