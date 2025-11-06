@@ -5,7 +5,7 @@ from .models import AtlasUser
 
 
 class AtlasUserAdmin(admin.ModelAdmin):
-    list_display = ["user_id", "atlas_profile_id", "email", "name", "avatar_preview", "position"]
+    list_display = ["user_id", "membership_id", "email", "name", "avatar_preview", "position"]
 
     def avatar_preview(self, obj) -> str:
         if not obj.avatar_url:

@@ -8,7 +8,7 @@ class Position(models.TextChoices):
 
 class AtlasUser(models.Model):
     user_id = models.PositiveIntegerField(unique=True)
-    atlas_profile_id = models.PositiveIntegerField(unique=True)
+    membership_id = models.PositiveIntegerField(unique=True)
     email = models.EmailField(blank=True)
     name = models.CharField(max_length=254)
     avatar_url = models.URLField(blank=True)

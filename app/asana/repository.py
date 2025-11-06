@@ -40,7 +40,7 @@ class AsanaUserRepository:
                     email=email,
                 )
 
-    def add_by_profile_id(self, profile_id: int) -> AtlasUser:
+    def add_by_membership_id(self, profile_id: int) -> AtlasUser:
         membership = self.api_client.get_workspace_membership(membership_id=profile_id)
         user_id = membership["user"]["gid"]
         user_data = self.api_client.get_user(user_id=user_id)
