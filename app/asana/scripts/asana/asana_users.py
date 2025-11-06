@@ -11,5 +11,5 @@ repository = AsanaUserRepository(api_client=asana_client)
 logging.basicConfig(level=logging.INFO)
 def run() -> None:
     # repository.update_all()
-    repository.add_by_membership_id(profile_id=1210393628043137)
+    repository.create_by_membership_id(profile_id=1210393628043137)
 

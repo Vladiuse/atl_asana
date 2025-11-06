@@ -1,5 +1,4 @@
 import logging
-from typing import Any
 
 from asana.client import AsanaApiClient
 
@@ -11,11 +10,11 @@ class AsanaUserRepository:
     def __init__(self, api_client: AsanaApiClient):
         self.api_client = api_client
 
-    def get_user(self, filters: dict[str, Any]) -> AtlasUser:
+    def get_user(self, membership_id: int) -> AtlasUser:
         try:
-            return AtlasUser.objects.get(**filters)
+            return AtlasUser.objects.get(membership_id=membership_id)
         except AtlasUser.DoesNotExist:
-            pass
+            return self.create_by_membership_id(membership_id=membership_id)
 
     def update_all(self) -> None:
         atlas_memberships = self.api_client.get_workspace_memberships_for_workspace(workspace_id=ATLAS_WORKSPACE_ID)
@@ -40,8 +39,8 @@ class AsanaUserRepository:
                     email=email,
                 )
 
-    def add_by_membership_id(self, profile_id: int) -> AtlasUser:
-        membership = self.api_client.get_workspace_membership(membership_id=profile_id)
+    def create_by_membership_id(self, membership_id: int) -> AtlasUser:
+        membership = self.api_client.get_workspace_membership(membership_id=membership_id)
         user_id = membership["user"]["gid"]
         user_data = self.api_client.get_user(user_id=user_id)
         atlas_profile_id = membership["gid"]
