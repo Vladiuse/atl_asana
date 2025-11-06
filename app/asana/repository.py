@@ -40,3 +40,21 @@ class AsanaUserRepository:
                     email=email,
                 )
 
+    def add_by_profile_id(self, profile_id: int) -> AtlasUser:
+        membership = self.api_client.get_workspace_membership(membership_id=profile_id)
+        user_id = membership["user"]["gid"]
+        user_data = self.api_client.get_user(user_id=user_id)
+        atlas_profile_id = membership["gid"]
+        name = membership["user"]["name"]
+        email = user_data.get("email") or ""
+        photo = user_data["photo"].get("image_128x128", "") if user_data["photo"] else ""
+        return AtlasUser.objects.create(
+            atlas_profile_id=atlas_profile_id,
+            name=name,
+            user_id=user_id,
+            avatar_url=photo,
+            email=email,
+        )
+
+
+

@@ -10,6 +10,6 @@ asana_client = AsanaApiClient(api_key=settings.ASANA_API_KEY)
 repository = AsanaUserRepository(api_client=asana_client)
 logging.basicConfig(level=logging.INFO)
 def run() -> None:
-    repository.update_all()
-
+    # repository.update_all()
+    repository.add_by_profile_id(profile_id=1210393628043137)
 
