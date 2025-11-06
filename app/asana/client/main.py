@@ -53,6 +53,14 @@ class AsanaApiClient:
         return response.json()["data"]
 
     @asana_error_handler
+    def get_workspace_membership(self, membership_id: int) -> dict:
+        response = requests.get(
+            f"{self.API_ENDPOINT}workspace_memberships/{membership_id}", headers=self._auth_headers,
+        )
+        response.raise_for_status()
+        return response.json()["data"]
+
+    @asana_error_handler
     def get_workspace_memberships_for_workspace(self, workspace_id: int) -> list:
         response = requests.get(
             f"{self.API_ENDPOINT}workspaces/{workspace_id}/workspace_memberships",
