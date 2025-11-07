@@ -7,6 +7,7 @@ from rest_framework.viewsets import ModelViewSet
 
 from .models import AsanaProject, AsanaWebhookRequestData
 from .serializers import AsanaWebhookRequestDataSerializer
+from .tasks import process_asana_new_comments_task
 
 
 class AsanaWebhookView(APIView):
@@ -21,12 +22,12 @@ class AsanaWebhookView(APIView):
                 "message": f"Project {project.name} has no secret key!",
             }
             return Response(data=data, status=status.HTTP_400_BAD_REQUEST)
-        AsanaWebhookRequestData.objects.create(
+        webhook = AsanaWebhookRequestData.objects.create(
             headers=dict(request.headers),
             payload=dict(request.data),
             project=project,
         )
-
+        process_asana_new_comments_task.delay(asana_webhook_id=webhook.pk)
         data = {
             "success": True,
             "method": request.method,
