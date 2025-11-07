@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from .models import AsanaProject, AsanaWebhookRequestData
+from .models import AsanaComment, AsanaProject, AsanaWebhookRequestData
 
 
 class AsanaProjectAdmin(admin.ModelAdmin):
@@ -13,5 +13,12 @@ class AsanaWebhookRequestDataAdmin(admin.ModelAdmin):
     list_display_links = ["id", "__str__"]
 
 
+class AsanaCommentAdmin(admin.ModelAdmin):
+    list_display = ("id", "user_id", "task_id", "comment_id", "has_mention", "is_notified", "created")
+    list_filter = ("has_mention", "is_notified")
+    ordering = ("-created",)
+
+
 admin.site.register(AsanaProject, AsanaProjectAdmin)
 admin.site.register(AsanaWebhookRequestData, AsanaWebhookRequestDataAdmin)
+admin.site.register(AsanaComment, AsanaCommentAdmin)
