@@ -13,7 +13,7 @@ message_sender = MessageSender(request_sender=RequestsSender())
 def process_asana_new_comments_task(asana_webhook_id: int) -> dict:
     try:
         asana_webhook = AsanaWebhookRequestData.objects.get(pk=asana_webhook_id)
-        result = ProcessAsanaNewCommentEvent().process(events_data=asana_webhook.payload)
+        result = ProcessAsanaNewCommentEvent().process(asana_webhook)
         return asdict(result)
     except Exception as error:
         message_sender.send_message(
