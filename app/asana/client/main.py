@@ -69,3 +69,21 @@ class AsanaApiClient:
         )
         response.raise_for_status()
         return response.json()["data"]
+
+    @asana_error_handler
+    def get_comment(self, comment_id: int) -> dict:
+        response = requests.get(
+            f"{self.API_ENDPOINT}stories/{comment_id}",
+            headers=self._auth_headers,
+        )
+        response.raise_for_status()
+        return response.json()["data"]
+
+    @asana_error_handler
+    def get_task(self, task_id: int) -> dict:
+        response = requests.get(
+            f"{self.API_ENDPOINT}tasks/{task_id}",
+            headers=self._auth_headers,
+        )
+        response.raise_for_status()
+        return response.json()["data"]
