@@ -27,11 +27,19 @@ class AsanaUserRepository:
         )
 
     def _create_by_membership_id(self, membership_id: int) -> AtlasUser:
+        """
+        Raises:
+             AsanaApiClientError: if cant get data from asana
+        """
         membership_data = self.api_client.get_workspace_membership(membership_id=membership_id)
         user_data = self.api_client.get_user(user_id=membership_data["user"]["gid"])
         return self._create_user_by_data(membership_data=membership_data, user_data=user_data)
 
     def _create_by_user_id(self, user_id: int) -> AtlasUser:
+        """
+        Raises:
+                 AsanaApiClientError: if cant get data from asana
+        """
         user_data = self.api_client.get_user(user_id=user_id)
         atlas_user_membership_id = None
         user_memberships = self.api_client.get_workspace_memberships_for_user(user_id=user_id)
@@ -45,18 +53,35 @@ class AsanaUserRepository:
         membership_data = self.api_client.get_workspace_membership(membership_id=atlas_user_membership_id)
         return self._create_user_by_data(membership_data=membership_data, user_data=user_data)
 
-    def get(self, membership_id: int) -> AtlasUser:
+    def get(self, *, membership_id: int | None = None, user_id: int | None = None) -> AtlasUser:
+        """
+        Raises:
+             AsanaApiClientError: if cant get data from asana
+        """
+        if membership_id is None and user_id is None:
+            raise ValueError("Either membership_id or user_id must be provided")
         try:
-            user = AtlasUser.objects.get(membership_id=membership_id)
-            logging.info("Get user from DB")
+            if membership_id is not None:
+                user = AtlasUser.objects.get(membership_id=membership_id)
+                logging.info("Get user from DB by membership_id")
+            else:
+                user = AtlasUser.objects.get(user_id=user_id)
+                logging.info("Get user from DB by user_id")
             return user
         except AtlasUser.DoesNotExist:
-            logging.info("Try load user from asana")
-            return self._create_by_membership_id(membership_id=membership_id)
+            if membership_id is not None:
+                logging.info("Try load user from Asana by membership_id")
+                return self._create_by_membership_id(membership_id=membership_id)
+            logging.info("Try load user from Asana by user_id")
+            return self._create_by_user_id(user_id=user_id)
 
     def update_all(self) -> None:
+        """
+        Raises:
+             AsanaApiClientError: if cant get data from asana
+        """
         atlas_asana_memberships = self.api_client.get_workspace_memberships_for_workspace(
-            workspace_id=ATLAS_WORKSPACE_ID
+            workspace_id=ATLAS_WORKSPACE_ID,
         )
         logging.info("Memberships in asana: %s", len(atlas_asana_memberships))
         exist_memberships_in_db = [str(i) for i in AtlasUser.objects.values_list("membership_id", flat=True)]
