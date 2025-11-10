@@ -28,3 +28,4 @@ class AsanaComment(models.Model):
     is_notified = models.BooleanField(null=True, blank=True, default=None)
     created = models.DateTimeField(auto_now_add=True)
 
+
