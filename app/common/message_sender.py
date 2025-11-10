@@ -1,3 +1,5 @@
+from enum import Enum
+
 from django.conf import settings
 from requests.exceptions import HTTPError, RequestException
 from retry import retry
@@ -5,6 +7,15 @@ from retry import retry
 from common.request_sender import RequestsSender
 
 from .exception import MessageSenderError
+
+
+class Users(Enum):
+    KVA = "kva_tech"
+    DAV = "dav"
+
+    @classmethod
+    def choices(cls) -> list[tuple[str, str]]:
+        return [(item.value, item.name) for item in cls]
 
 
 class MessageSender:
@@ -40,7 +51,7 @@ class MessageSender:
 
     def send_message(self, handler: str, message: str) -> str:
         if handler not in self.ALLOWED_HANDLERS:
-            raise TypeError(f'Incorrect handler, allowed {self.ALLOWED_HANDLERS}')
+            raise TypeError(f"Incorrect handler, allowed {self.ALLOWED_HANDLERS}")
         try:
             return self._send_message(handler=handler, message=message)
         except (HTTPError, RequestException) as error:
