@@ -4,7 +4,7 @@ from asana.client import AsanaApiClient
 
 from .constants import ATLAS_WORKSPACE_ID
 from .models import AtlasUser
-
+from common.exception import AppException
 
 class AsanaUserRepository:
     def __init__(self, api_client: AsanaApiClient):
@@ -52,6 +52,23 @@ class AsanaUserRepository:
         membership_data = self.api_client.get_workspace_membership(membership_id=membership_id)
         user_data = self.api_client.get_user(user_id=membership_data["user"]["gid"])
         return self._create_user_by_data(membership_data=membership_data, user_data=user_data)
+
+    def create_by_user_id(self, user_id: int) -> AtlasUser:
+        user_data = self.api_client.get_user(user_id=user_id)
+        atlas_user_membership_id = None
+        user_memberships = self.api_client.get_workspace_memberships_for_user(user_id=user_id)
+        logging.info("user_memberships: %s", user_memberships)
+        for membership_data in user_memberships:
+            if membership_data["workspace"]["gid"] == str(ATLAS_WORKSPACE_ID):
+                atlas_user_membership_id = membership_data["gid"]
+                break
+        if atlas_user_membership_id is None:
+            raise AppException(f"Cant find Atlas membership for user: {user_id}")
+        membership_data = self.api_client.get_workspace_membership(membership_id=atlas_user_membership_id)
+        return self._create_user_by_data(membership_data=membership_data, user_data=user_data)
+
+
+
 
 
 
