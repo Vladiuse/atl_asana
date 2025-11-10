@@ -16,6 +16,8 @@ class AtlasUser(models.Model):
         max_length=32,
         choices=Users.choices(),
         blank=True,
+        null=True,
+        default=None,
     )
     position = models.CharField(
         blank=True,
