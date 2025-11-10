@@ -97,3 +97,13 @@ class AsanaApiClient:
         response.raise_for_status()
         return response.json()["data"]
 
+    @asana_error_handler
+    def get_webhooks(self, workspace_id: int) -> list:
+        response = requests.get(
+            f"{self.API_ENDPOINT}webhooks",
+            headers=self._auth_headers,
+            params={"workspace": workspace_id},
+        )
+        response.raise_for_status()
+        return response.json()["data"]
+
