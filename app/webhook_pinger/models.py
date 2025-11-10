@@ -1,3 +1,6 @@
 from django.db import models
 
-# Create your models here.
+
+class Webhook(models.Model):
+    webhook_id = models.IntegerField(unique=True)
+    description = models.CharField(max_length=254, blank=True)
