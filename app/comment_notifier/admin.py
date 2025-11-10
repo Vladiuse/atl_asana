@@ -14,7 +14,7 @@ class AsanaWebhookRequestDataAdmin(admin.ModelAdmin):
 
 
 class AsanaCommentAdmin(admin.ModelAdmin):
-    list_display = ("id", "user_id", "task_id", "comment_id", "has_mention", "is_notified", "created")
+    list_display = ("id", "user_id", "task_id", "comment_id", "has_mention", "is_notified", "task_url", "created")
     list_filter = ("has_mention", "is_notified")
     ordering = ("-created",)
 
