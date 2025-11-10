@@ -50,6 +50,7 @@ INSTALLED_APPS = [
     "vga_lands.apps.VgaLandsConfig",
     "comment_notifier.apps.CommentNotifierConfig",
     "asana.apps.AsanaConfig",
+    "webhook_pinger.apps.WebhookPingerConfig",
 ]
 
 MIDDLEWARE = [
