@@ -53,7 +53,12 @@ class AsanaUserRepository:
         membership_data = self.api_client.get_workspace_membership(membership_id=atlas_user_membership_id)
         return self._create_user_by_data(membership_data=membership_data, user_data=user_data)
 
-    def get(self, *, membership_id: int | None = None, user_id: int | None = None) -> AtlasUser:
+    def get(
+        self,
+        *,
+        membership_id: int | None = None,
+        user_id: int | None = None,
+    ) -> AtlasUser:
         """
         Raises:
              AsanaApiClientError: if cant get data from asana
