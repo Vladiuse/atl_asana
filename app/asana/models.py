@@ -16,7 +16,6 @@ class AtlasUser(models.Model):
         max_length=32,
         choices=Users.choices(),
         blank=True,
-        unique=True,
     )
     position = models.CharField(
         blank=True,
@@ -33,7 +32,3 @@ class AtlasUser(models.Model):
     def profile_url(self) -> str:
         return get_asana_profile_url_by_id(profile_id=self.membership_id)
 
-    def clean(self) -> None:
-        super().clean()
-        if bool(self.messenger_code) != bool(self.position):
-            raise ValidationError("Оба поля messenger_code и position должны быть либо заполнены, либо пусты.")
