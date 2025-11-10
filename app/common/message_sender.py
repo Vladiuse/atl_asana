@@ -1,3 +1,4 @@
+import json
 from enum import Enum
 
 from django.conf import settings
@@ -50,8 +51,8 @@ class MessageSender:
         )
 
     def send_message(self, handler: str, message: str) -> str:
-        if handler not in self.ALLOWED_HANDLERS:
-            raise TypeError(f"Incorrect handler, allowed {self.ALLOWED_HANDLERS}")
+        # if handler not in self.ALLOWED_HANDLERS:
+        #     raise TypeError(f"Incorrect handler, allowed {self.ALLOWED_HANDLERS}")
         try:
             return self._send_message(handler=handler, message=message)
         except (HTTPError, RequestException) as error:
@@ -62,3 +63,19 @@ class MessageSender:
             else:
                 msg = f"Не удалось отправить сообщение, {error}"
             raise MessageSenderError(msg)
+
+    def send_message_to_user(self, message: str, user_tags: list[str]) -> dict:
+        data = {
+            "text": message,
+            "tags": user_tags,
+        }
+        response = self.request_sender.request(
+            url=self.URL,
+            method="POST",
+            headers=self._auth_headers,
+            json=data,
+        )
+        data = json.loads(response)
+        if len(data["users"]) != len(user_tags):
+            raise MessageSenderError("Число тегов юзеров и отправленных сообщений не совпадает")
+        return data
