@@ -1,9 +1,15 @@
-from django.contrib import admin
+from common import RequestsSender
+from common.message_sender import MessageSender, UserTag
+from django.contrib import admin, messages
+from django.db.models import QuerySet
+from django.http import HttpRequest
 from django.utils.html import format_html
 
 from asana.utils import get_asana_profile_url_by_id
 
 from .models import AtlasUser
+
+message_sender = MessageSender(request_sender=RequestsSender())
 
 
 class AtlasUserAdmin(admin.ModelAdmin):
@@ -20,6 +26,7 @@ class AtlasUserAdmin(admin.ModelAdmin):
     list_display_links = ["email", "name"]
     list_filter = ["position"]
     search_fields = ["email", "name"]
+    actions = ["send_test_sms_for_user"]
 
     @admin.display(description="Avatar")
     def avatar_preview(self, obj) -> str:
@@ -37,6 +44,22 @@ class AtlasUserAdmin(admin.ModelAdmin):
             '<a href="{}" target="_blank">Открыть</a>',
             profile_link,
         )
+
+    @admin.action(description="Отправить тестовое смс в телеграм")
+    def send_test_sms_for_user(self, request: HttpRequest, queryset: QuerySet) -> None:
+        errors_send_user = []
+        success_send_count = 0
+        for asana_user in queryset:
+            try:
+                message = f"Test message for {asana_user.user_comment_mention}"
+                message_sender.send_message_to_user(message=message, user_tags=[UserTag(asana_user.messenger_code)])
+                success_send_count += 1
+            except ValueError:
+                errors_send_user.append(asana_user)
+        for user in errors_send_user:
+            message = f'Не удалось отправить тестовое смс для {user} по тегу "{user.messenger_code}"'
+            self.message_user(request, message, level=messages.ERROR)
+        self.message_user(request, f"Успешно отправлено {success_send_count} сообщений", level=messages.SUCCESS)
 
 
 admin.site.register(AtlasUser, AtlasUserAdmin)

@@ -26,6 +26,9 @@ class AtlasUser(models.Model):
         verbose_name="Позиция",
     )
 
+    def __str__(self):
+        return self.name if self.name else self.email
+
     @property
     def user_comment_mention(self) -> str:
         return "@" + self.name
