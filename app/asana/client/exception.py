@@ -11,3 +11,6 @@ class AsanaApiClientError(AppException):
 
 class AsanaNotFoundError(AsanaApiClientError):
     """404 Not Found"""
+
+class AsanaForbiddenError(AsanaApiClientError):
+    """403 Forbidden"""

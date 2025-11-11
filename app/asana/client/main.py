@@ -1,4 +1,5 @@
 import json
+import logging
 from functools import wraps
 from http import HTTPStatus
 from typing import Any, Callable, NoReturn
@@ -6,7 +7,7 @@ from typing import Any, Callable, NoReturn
 import requests
 from requests.exceptions import HTTPError, RequestException
 
-from .exception import AsanaApiClientError, AsanaNotFoundError
+from .exception import AsanaApiClientError, AsanaNotFoundError, AsanaForbiddenError
 
 
 def asana_error_handler(func: Callable) -> Callable:
@@ -18,7 +19,6 @@ def asana_error_handler(func: Callable) -> Callable:
             return func(self, *args, **kwargs)
         except (RequestException, HTTPError, json.JSONDecodeError) as error:
             self._handle_error(handler_name=func.__name__, error=error)
-
     return wrapper
 
 
@@ -36,9 +36,12 @@ class AsanaApiClient:
         if isinstance(error, HTTPError):
             msg = f"AsanaApiClient {handler_name}: {error.response.text}"
             response = error.response
+            logging.info("Response status code: %s", response.status_code)
             if response.status_code == HTTPStatus.NOT_FOUND:
                 raise AsanaNotFoundError(msg, response=response) from error
-        elif isinstance(error, json.JSONDecodeError):
+            if response.status_code == HTTPStatus.FORBIDDEN:
+                raise AsanaForbiddenError(msg, response=response) from error
+        if isinstance(error, json.JSONDecodeError):
             msg = f"AsanaApiClient {handler_name}: Ошибка разбора JSON ответа"
             response = None
         else:
