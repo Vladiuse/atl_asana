@@ -26,6 +26,7 @@ class AsanaComment(models.Model):
     task_url = models.URLField(blank=True)
     has_mention = models.BooleanField(null=True, default=None, blank=True)
     is_notified = models.BooleanField(null=True, blank=True, default=None)
+    is_deleted = models.BooleanField(blank=True, default=False)
     created = models.DateTimeField(auto_now_add=True)
 
 
