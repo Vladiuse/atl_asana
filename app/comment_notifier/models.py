@@ -22,7 +22,7 @@ class AsanaWebhookRequestData(models.Model):
 class AsanaComment(models.Model):
     user_id = models.IntegerField()
     task_id = models.IntegerField()
-    comment_id = models.IntegerField()
+    comment_id = models.IntegerField(unique=True)
     task_url = models.URLField(blank=True)
     has_mention = models.BooleanField(null=True, default=None, blank=True)
     is_notified = models.BooleanField(null=True, blank=True, default=None)
