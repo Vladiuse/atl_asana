@@ -80,6 +80,18 @@ class AsanaApiClient:
         return response.json()["data"]
 
     @asana_error_handler
+    def get_comments_from_task(self, task_id: int, opt_fields: list[str] | None = None) -> dict:
+        if opt_fields is None:
+            opt_fields = []
+        response = requests.get(
+            f"{self.API_ENDPOINT}tasks/{task_id}/stories",
+            headers=self._auth_headers,
+            params={"opt_fields": opt_fields},
+        )
+        response.raise_for_status()
+        return response.json()["data"]
+
+    @asana_error_handler
     def get_task(self, task_id: int) -> dict:
         response = requests.get(
             f"{self.API_ENDPOINT}tasks/{task_id}",
