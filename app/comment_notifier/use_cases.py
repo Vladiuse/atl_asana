@@ -1,18 +1,34 @@
 import logging
+from datetime import timedelta
 
 from asana.client import AsanaApiClient
 from asana.client.exception import AsanaForbiddenError, AsanaNotFoundError
 from asana.constants import SOURCE_DIV_PROBLEMS_REQUESTS_COMPLETE_SECTION_ID, SOURCE_DIV_PROBLEMS_REQUESTS_PROJECT_ID
+from common import MessageSender
+from django.db.models import QuerySet
+from django.utils import timezone
 
 from .models import AsanaComment
+from .services import AsanaCommentNotifier
 
 
 class AsanaCommentNotifierUseCase:
-    def __init__(self, asana_api_client: AsanaApiClient):
+    def __init__(self, asana_api_client: AsanaApiClient, message_sender: MessageSender):
         self.asana_api_client = asana_api_client
+        self.comment_notify_service = AsanaCommentNotifier(
+            asana_api_client=asana_api_client,
+            message_sender=message_sender,
+        )
 
-    def execute(self) -> None:
-        pass
+    def _get_comments_to_notify(self) -> QuerySet[AsanaComment]:
+        cutoff = timezone.now() - timedelta(minutes=5)
+        return AsanaComment.objects.filter(is_deleted=False, is_notified=None, created__lt=cutoff)
+
+    def execute(self) -> dict:
+        comments = self._get_comments_to_notify()
+        for comment_model in comments:
+            self.comment_notify_service.process(comment_id=comment_model.comment_id)
+        return {"processed_comments": len(comments)}
 
 
 class FetchMissingProjectCommentsUseCase:
