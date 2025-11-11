@@ -7,7 +7,7 @@ from django.conf import settings
 
 from .models import AsanaWebhookRequestData
 from .services import ProcessAsanaNewCommentEvent
-from .use_cases import FetchCommentTaskUrls
+from .use_cases import FetchCommentTaskUrls, FetchMissingProjectCommentsUseCase
 
 asana_api_client = AsanaApiClient(api_key=settings.ASANA_API_KEY)
 message_sender = MessageSender(request_sender=RequestsSender())
@@ -38,3 +38,16 @@ def fetch_comment_tasks_urls_task() -> dict:
             message=f"fetch_comment_tasks_urls_task {error.__class__.__name__}: {error}",
         )
         raise error
+
+@shared_task
+def fetch_missing_project_comments_task() -> dict:
+    try:
+        use_case = FetchMissingProjectCommentsUseCase(asana_api_client=asana_api_client)
+        return use_case.execute()
+    except Exception as error:
+        message_sender.send_message(
+            handler="kva_test",
+            message=f"fetch_missing_project_comments_task {error.__class__.__name__}: {error}",
+        )
+        raise error
+
