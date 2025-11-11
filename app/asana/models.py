@@ -11,7 +11,7 @@ class AtlasUser(models.Model):
     membership_id = models.PositiveIntegerField(unique=True)
     email = models.EmailField(blank=True)
     name = models.CharField(max_length=254)
-    avatar_url = models.URLField(blank=True)
+    avatar_url = models.URLField(blank=True, max_length=254)
     messenger_code = models.CharField(
         max_length=32,
         choices=Users.choices(),
