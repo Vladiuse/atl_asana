@@ -10,13 +10,13 @@ asana_client = AsanaApiClient(api_key=settings.ASANA_API_KEY)
 
 
 @shared_task
-def ping_asana_webhook() -> None:
+def ping_asana_webhook() -> dict:
     use_case = PingWebhooksUseCase(
         asana_api_client=asana_client,
         message_sender=MessageSender(request_sender=RequestsSender()),
     )
     try:
-        use_case.execute()
+        return use_case.execute()
     except Exception as error:
         message_sender.send_message(
             handler="kva_test",
