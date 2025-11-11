@@ -114,11 +114,11 @@ class AsanaCommentMessageSender:
 class AsanaCommentNotifier:
     def __init__(
         self,
-        api_client: AsanaApiClient,
+        asana_api_client: AsanaApiClient,
         message_sender: MessageSender,
     ):
-        self.api_client = api_client
-        self.asana_users_repository = AsanaUserRepository(api_client=self.api_client)
+        self.asana_api_client = asana_api_client
+        self.asana_users_repository = AsanaUserRepository(api_client=self.asana_api_client)
         self.asana_comment_message_sender = AsanaCommentMessageSender(message_sender=message_sender)
 
     def _save_task_url(self, comment: AsanaComment, task_data: dict) -> None:
@@ -138,9 +138,9 @@ class AsanaCommentNotifier:
     def process(self, comment_id: int) -> None:
         logging.info("AsanaCommentNotifier comment_id: %s", comment_id)
         comment_model = AsanaComment.objects.get(comment_id=comment_id)
-        comment_data = self.api_client.get_comment(comment_id=comment_id)
+        comment_data = self.asana_api_client.get_comment(comment_id=comment_id)
         logging.info("Raw comment text: %s", comment_data["text"])
-        task_data = self.api_client.get_task(task_id=comment_data["target"]["gid"])
+        task_data = self.asana_api_client.get_task(task_id=comment_data["target"]["gid"])
         self._save_task_url(comment=comment_model, task_data=task_data)
         comment_mentions_profile_ids = extract_user_profile_id_from_text(text=comment_data["text"])
         if len(comment_mentions_profile_ids) == 0:
