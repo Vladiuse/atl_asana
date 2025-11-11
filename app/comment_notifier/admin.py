@@ -35,7 +35,12 @@ class AsanaCommentAdmin(admin.ModelAdmin):
     list_filter = ("has_mention", "is_notified", "is_deleted")
     ordering = ("-created",)
     search_fields = ("user_id", "task_id", "comment_id")
-    actions = ("fetch_task_urls","fetch_missing_project_comments")
+    actions = (
+        "fetch_task_urls",
+        "fetch_missing_project_comments",
+        "mark_as_not_notified",
+        "mark_as_not_processed",
+    )
 
     @admin.display(description="Task URL")
     def task_url_short(self, obj: AsanaComment) -> str:
@@ -54,3 +59,13 @@ class AsanaCommentAdmin(admin.ModelAdmin):
         _ = queryset
         result = fetch_missing_project_comments_task.delay()
         self.message_user(request, message=f"Таск запущен: {result.id}")
+
+    @admin.action(description="Пометить как не отправленные")
+    def mark_as_not_notified(self, request: HttpRequest, queryset: QuerySet) -> None:
+        queryset.update(has_mention=False, is_notified=False)
+        self.message_user(request, message=f"{queryset.count()} коментарив помечены как не отправление")
+
+    @admin.action(description="Пометить как необработанный")
+    def mark_as_not_processed(self, request: HttpRequest, queryset: QuerySet) -> None:
+        queryset.update(has_mention=None, is_notified=None, is_deleted=False)
+        self.message_user(request, message=f"{queryset.count()} комментариев помечены как необработанные")
