@@ -29,4 +29,8 @@ class AsanaComment(models.Model):
     is_deleted = models.BooleanField(blank=True, default=False)
     created = models.DateTimeField(auto_now_add=True)
 
+    def mark_as_deleted(self) -> None:
+        self.is_deleted = True
+        self.save()
+
 
