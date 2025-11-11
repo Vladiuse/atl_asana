@@ -46,6 +46,7 @@ INSTALLED_APPS = [
     "rest_framework",
     "django_extensions",
     "django_celery_results",
+    "django_celery_beat",
     # apps
     "vga_lands.apps.VgaLandsConfig",
     "comment_notifier.apps.CommentNotifierConfig",
