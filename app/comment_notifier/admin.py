@@ -1,26 +1,25 @@
-from asana.client import AsanaApiClient
-from django.conf import settings
 from django.contrib import admin
 from django.db.models import QuerySet
 from django.http import HttpRequest
 from django.utils.html import format_html
 
 from .models import AsanaComment, AsanaProject, AsanaWebhookRequestData
-from .use_cases import FetchCommentTaskUrls
-
-asana_api_client = AsanaApiClient(api_key=settings.ASANA_API_KEY)
+from .tasks import fetch_comment_tasks_urls_task
 
 
+@admin.register(AsanaProject)
 class AsanaProjectAdmin(admin.ModelAdmin):
     list_display = ["name", "secret"]
     list_display_links = ["name"]
 
 
+@admin.register(AsanaWebhookRequestData)
 class AsanaWebhookRequestDataAdmin(admin.ModelAdmin):
     list_display = ["id", "__str__", "is_target_event", "project__name", "created"]
     list_display_links = ["id", "__str__"]
 
 
+@admin.register(AsanaComment)
 class AsanaCommentAdmin(admin.ModelAdmin):
     list_display = (
         "id",
@@ -47,11 +46,5 @@ class AsanaCommentAdmin(admin.ModelAdmin):
     @admin.action(description="Создать ссылки на таски")
     def fetch_task_urls(self, request: HttpRequest, queryset: QuerySet) -> None:
         _ = queryset
-        use_case = FetchCommentTaskUrls(asana_api_client=asana_api_client)
-        result = use_case.execute()
-        self.message_user(request, message=str(result))
-
-
-admin.site.register(AsanaProject, AsanaProjectAdmin)
-admin.site.register(AsanaWebhookRequestData, AsanaWebhookRequestDataAdmin)
-admin.site.register(AsanaComment, AsanaCommentAdmin)
+        result = fetch_comment_tasks_urls_task.delay()
+        self.message_user(request, message=f"Таск запущен: {result.id}")
