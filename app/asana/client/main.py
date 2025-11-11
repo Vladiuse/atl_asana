@@ -80,7 +80,7 @@ class AsanaApiClient:
         return response.json()["data"]
 
     @asana_error_handler
-    def get_comments_from_task(self, task_id: int, opt_fields: list[str] | None = None) -> dict:
+    def get_stories_from_task(self, task_id: int, opt_fields: list[str] | None = None) -> list:
         if opt_fields is None:
             opt_fields = []
         response = requests.get(
@@ -90,6 +90,11 @@ class AsanaApiClient:
         )
         response.raise_for_status()
         return response.json()["data"]
+
+    @asana_error_handler
+    def get_comments_from_task(self, task_id: int, opt_fields: list[str] | None = None) -> list:
+        stories = self.get_stories_from_task(task_id=task_id, opt_fields=opt_fields)
+        return [story for story in stories if story["resource_subtype"] == "comment_added"]
 
     @asana_error_handler
     def get_task(self, task_id: int) -> dict:
