@@ -67,8 +67,8 @@ class AsanaCommentMessageSender:
 
         if asana_user.position == Position.FARMER:
             return self._notify_farmer
-        if asana_user.position == Position.BUYER:
-            return self._notify_baer
+        if asana_user.position in (Position.MANAGER, Position.BUYER):
+            return self._notify_baer_or_manager
         return self._notify_not_target_position
 
     def _notify_farmer(self, asana_user: AtlasUser, task_data: dict, comment_data: dict) -> dict:
@@ -77,7 +77,7 @@ class AsanaCommentMessageSender:
         message = f"Message for FARMER\nTask url: {task_url}\n\nComment:\n{pretty_comment_text}"
         return self.message_sender.send_message_to_user(user_tags=[UserTag(asana_user.messenger_code)], message=message)
 
-    def _notify_baer(self, asana_user: AtlasUser, task_data: dict, comment_data: dict) -> dict:
+    def _notify_baer_or_manager(self, asana_user: AtlasUser, task_data: dict, comment_data: dict) -> dict:
         pretty_comment_text = prettify_asana_comment_text_with_mentions(text=comment_data["text"])
         task_url = task_data["permalink_url"]
         message = f"Message for BAER\nTask url: {task_url}\n\nComment:\n{pretty_comment_text}"
