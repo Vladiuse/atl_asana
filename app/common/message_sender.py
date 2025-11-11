@@ -99,5 +99,7 @@ class MessageSender:
         )
         data = json.loads(response)
         if len(data["users"]) != len(user_tags):
-            raise MessageSenderError("Число тегов юзеров и отправленных сообщений не совпадает")
+            raise MessageSenderError(
+                f"Число тегов юзеров и отправленных сообщений не совпадает. {user_tags}, ответ {data}",
+            )
         return data
