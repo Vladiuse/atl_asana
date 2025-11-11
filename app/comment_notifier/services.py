@@ -104,12 +104,6 @@ class AsanaCommentMessageSender:
             message_send_result = notifier_func(asana_user=asana_user, task_data=task_data, comment_data=comment_data)  # type: ignore[arg-type]
             logging.info("message_send_result: %s", message_send_result)
 
-    def notify_profiles_not_found(self, profiles: list[str], task_data: dict) -> None:
-        if len(profiles) != 0:
-            task_url = task_data["permalink_url"]
-            message = f"Not found asana user for profiles: {profiles}\nTask url: {task_url}"
-            self.message_sender.send_message(handler=MessageSender.KVA_USER, message=message)
-
 
 class AsanaCommentNotifier:
     def __init__(
@@ -120,6 +114,7 @@ class AsanaCommentNotifier:
         self.asana_api_client = asana_api_client
         self.asana_users_repository = AsanaUserRepository(api_client=self.asana_api_client)
         self.asana_comment_message_sender = AsanaCommentMessageSender(message_sender=message_sender)
+        self.message_sender = message_sender
 
     def _save_task_url(self, comment: AsanaComment, task_data: dict) -> None:
         comment.task_url = task_data["permalink_url"]
@@ -134,6 +129,12 @@ class AsanaCommentNotifier:
         comment.has_mention = True
         comment.is_notified = True
         comment.save()
+
+    def _notify_profiles_not_found(self, profiles: list[str], task_data: dict) -> None:
+        if len(profiles) != 0:
+            task_url = task_data["permalink_url"]
+            message = f"Not found asana user for profiles: {profiles}\nTask url: {task_url}"
+            self.message_sender.send_message(handler=MessageSender.KVA_USER, message=message)
 
     def process(self, comment_id: int) -> None:
         logging.info("AsanaCommentNotifier comment_id: %s", comment_id)
@@ -157,7 +158,7 @@ class AsanaCommentNotifier:
                     logging.error("AsanaApiClientError: %s", error)
                     profile_url = get_asana_profile_url_by_id(profile_id=profile_id)
                     users_profile_url_not_found_in_db.append(profile_url)
-            self.asana_comment_message_sender.notify_profiles_not_found(
+            self._notify_profiles_not_found(
                 profiles=users_profile_url_not_found_in_db,
                 task_data=task_data,
             )
