@@ -10,6 +10,7 @@ from asana.repository import AsanaUserRepository
 from asana.services import prettify_asana_comment_text_with_mentions
 from asana.utils import get_asana_profile_url_by_id
 from common import MessageSender
+from common.message_sender import UserTag
 
 from .models import AsanaComment, AsanaWebhookRequestData
 from .utils import extract_user_profile_id_from_text
@@ -74,13 +75,13 @@ class AsanaCommentMessageSender:
         task_url = task_data["permalink_url"]
         pretty_comment_text = prettify_asana_comment_text_with_mentions(text=comment_data["text"])
         message = f"Message for FARMER\nTask url: {task_url}\n\nComment:\n{pretty_comment_text}"
-        return self.message_sender.send_message_to_user(user_tags=[asana_user.messenger_code], message=message)
+        return self.message_sender.send_message_to_user(user_tags=[UserTag(asana_user.messenger_code)], message=message)
 
     def _notify_baer(self, asana_user: AtlasUser, task_data: dict, comment_data: dict) -> dict:
         pretty_comment_text = prettify_asana_comment_text_with_mentions(text=comment_data["text"])
         task_url = task_data["permalink_url"]
         message = f"Message for BAER\nTask url: {task_url}\n\nComment:\n{pretty_comment_text}"
-        return self.message_sender.send_message_to_user(user_tags=[asana_user.messenger_code], message=message)
+        return self.message_sender.send_message_to_user(user_tags=[UserTag(asana_user.messenger_code)], message=message)
 
     def _notify_not_target_position(self, asana_user: AtlasUser, task_data: dict, comment_data: dict) -> None:
         pass

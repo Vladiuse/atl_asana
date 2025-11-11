@@ -10,9 +10,31 @@ from common.request_sender import RequestsSender
 from .exception import MessageSenderError
 
 
-class Users(Enum):
-    KVA = "kva_tech"
+class UserTag(Enum):
+    ADM = "adm"
+    ALISA_SALAMAHINA = "alisasalamahina"
+    VGA = "vga"
+    MGP = "mgp"
+    MSE = "mse"
+    BYA2 = "bya2"
+    APA = "apa"
+    PAA = "paa"
     DAV = "dav"
+    KKY = "kky"
+    MMI = "mmi"
+    IAE = "iae"
+    ZVA = "zva"
+    MDA = "mda"
+    TESTU = "testu"
+    BSY = "bsy"
+    DNL = "dnl"
+    KVA_TECH = "kva_tech"
+    KOV = "kov"
+    PEV = "pev"
+    RAA = "raa"
+    BRY = "bry"
+    FBAPP = "fbapp"
+    SVS = "svs"
 
     @classmethod
     def choices(cls) -> list[tuple[str, str]]:
@@ -64,10 +86,10 @@ class MessageSender:
                 msg = f"Не удалось отправить сообщение, {error}"
             raise MessageSenderError(msg)
 
-    def send_message_to_user(self, message: str, user_tags: list[str]) -> dict:
+    def send_message_to_user(self, message: str, user_tags: list[UserTag]) -> dict:
         data = {
             "text": message,
-            "tags": user_tags,
+            "tags": [user.value for user in user_tags],
         }
         response = self.request_sender.request(
             url=self.URL,

@@ -1,4 +1,4 @@
-from common.message_sender import Users
+from common.message_sender import UserTag
 from django.core.exceptions import ValidationError
 from django.db import models
 
@@ -14,7 +14,7 @@ class AtlasUser(models.Model):
     avatar_url = models.URLField(blank=True, max_length=254)
     messenger_code = models.CharField(
         max_length=32,
-        choices=Users.choices(),
+        choices=UserTag.choices(),
         blank=True,
         null=True,
         default=None,
