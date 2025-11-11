@@ -107,3 +107,23 @@ class AsanaApiClient:
         response.raise_for_status()
         return response.json()["data"]
 
+    @asana_error_handler
+    def get_project_sections(self, project_id: int) -> list:
+        response = requests.get(
+            f"{self.API_ENDPOINT}projects/{project_id}/sections",
+            headers=self._auth_headers,
+        )
+        response.raise_for_status()
+        return response.json()["data"]
+
+    @asana_error_handler
+    def get_section_tasks(self, section_id: int) -> list:
+        response = requests.get(
+            f"{self.API_ENDPOINT}sections/{section_id}/tasks",
+            headers=self._auth_headers,
+        )
+        response.raise_for_status()
+        if "next_page" in response:
+            raise AsanaApiClientError("get_section_tasks have 'next_page' param in response")
+        return response.json()["data"]
+
