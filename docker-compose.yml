@@ -21,6 +21,16 @@ services:
       - ./.env
     depends_on:
       - redis
+  celery_beat:
+    build: .
+    command: celery -A atl_domains beat -l info -S django
+    volumes:
+      - ./app:/app
+    env_file:
+      - ./.env
+    depends_on:
+      - db
+      - redis
   nginx:
     image: nginx:alpine
     ports:
