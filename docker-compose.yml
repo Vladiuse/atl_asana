@@ -23,7 +23,7 @@ services:
       - redis
   celery_beat:
     build: .
-    command: celery -A atl_domains beat -l info -S django
+    command: celery -A atl_asana beat -l info -S django
     volumes:
       - ./app:/app
     env_file:
