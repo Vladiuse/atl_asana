@@ -1,10 +1,29 @@
-from django.contrib import admin
+import logging
+
+from asana.client import AsanaApiClient
+from asana.client.exception import AsanaApiClientError
+from asana.repository import AsanaUserRepository
+from common import MessageSender, RequestsSender
+from django.conf import settings
+from django.contrib import admin, messages
 from django.db.models import QuerySet
 from django.http import HttpRequest
 from django.utils.html import format_html
 
+from comment_notifier.services import AsanaCommentNotifier
+
 from .models import AsanaComment, AsanaProject, AsanaWebhookRequestData
 from .tasks import fetch_comment_tasks_urls_task, fetch_missing_project_comments_task
+
+asana_client = AsanaApiClient(api_key=settings.ASANA_API_KEY)
+logging.basicConfig(level=logging.INFO)
+
+message_sender = MessageSender(request_sender=RequestsSender())
+repository = AsanaUserRepository(api_client=asana_client)
+notifier = AsanaCommentNotifier(
+    asana_api_client=asana_client,
+    message_sender=message_sender,
+)
 
 
 @admin.register(AsanaProject)
@@ -40,6 +59,7 @@ class AsanaCommentAdmin(admin.ModelAdmin):
         "fetch_missing_project_comments",
         "mark_as_not_notified",
         "mark_as_not_processed",
+        "process_comment_and_notify",
     )
 
     @admin.display(description="Task URL")
@@ -69,3 +89,20 @@ class AsanaCommentAdmin(admin.ModelAdmin):
     def mark_as_not_processed(self, request: HttpRequest, queryset: QuerySet) -> None:
         queryset.update(has_mention=None, is_notified=None, is_deleted=False)
         self.message_user(request, message=f"{queryset.count()} комментариев помечены как необработанные")
+
+    @admin.action(description="Обработать комментарий и оповестить")
+    def process_comment_and_notify(self, request: HttpRequest, queryset: QuerySet) -> None:
+        if queryset.exclude(is_notified=None).count() != 0:
+            self.message_user(
+                request, message="Выбранные коментарии должны быть необработаными", level=messages.WARNING,
+            )
+        success_processed_comments = 0
+        for comment in queryset:
+            try:
+                notifier.process(comment_id=comment.comment_id)
+                success_processed_comments += 1
+            except AsanaApiClientError:
+                self.message_user(
+                    request, message=f"Коментарий {comment.comment_id} не удалось обработать", level=messages.ERROR,
+                )
+        self.message_user(request, message=f"Успешно обработано коментариев: {success_processed_comments}")
