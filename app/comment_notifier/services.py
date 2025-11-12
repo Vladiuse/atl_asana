@@ -3,7 +3,7 @@ from dataclasses import dataclass
 from typing import Callable
 
 from asana.client import AsanaApiClient
-from asana.client.exception import AsanaApiClientError
+from asana.client.exception import AsanaApiClientError, AsanaForbiddenError, AsanaNotFoundError
 from asana.constants import Position
 from asana.models import AtlasUser
 from asana.repository import AsanaUserRepository
@@ -75,13 +75,17 @@ class AsanaCommentMessageSender:
         task_url = task_data["permalink_url"]
         pretty_comment_text = prettify_asana_comment_text_with_mentions(text=comment_data["text"])
         message = f"Message for FARMER\nTask url: {task_url}\n\nComment:\n{pretty_comment_text}"
-        return self.message_sender.send_message_to_user(user_tags=[UserTag(asana_user.messenger_code)], message=message)
+        return self.message_sender.send_message_to_user(
+            user_tags=[UserTag(asana_user.messenger_code)], message=message,
+        )
 
     def _notify_baer_or_manager(self, asana_user: AtlasUser, task_data: dict, comment_data: dict) -> dict:
         pretty_comment_text = prettify_asana_comment_text_with_mentions(text=comment_data["text"])
         task_url = task_data["permalink_url"]
         message = f"Message for BAER\nTask url: {task_url}\n\nComment:\n{pretty_comment_text}"
-        return self.message_sender.send_message_to_user(user_tags=[UserTag(asana_user.messenger_code)], message=message)
+        return self.message_sender.send_message_to_user(
+            user_tags=[UserTag(asana_user.messenger_code)], message=message,
+        )
 
     def _notify_not_target_position(self, asana_user: AtlasUser, task_data: dict, comment_data: dict) -> None:
         pass
@@ -139,9 +143,13 @@ class AsanaCommentNotifier:
     def process(self, comment_id: int) -> None:
         logging.info("AsanaCommentNotifier comment_id: %s", comment_id)
         comment_model = AsanaComment.objects.get(comment_id=comment_id)
-        comment_data = self.asana_api_client.get_comment(comment_id=comment_id)
+        try:
+            task_data = self.asana_api_client.get_task(task_id=comment_model.task_id)
+            comment_data = self.asana_api_client.get_comment(comment_id=comment_id)
+        except (AsanaForbiddenError, AsanaNotFoundError):
+            comment_model.mark_as_deleted()
+            return
         logging.info("Raw comment text: %s", comment_data["text"])
-        task_data = self.asana_api_client.get_task(task_id=comment_data["target"]["gid"])
         self._save_task_url(comment=comment_model, task_data=task_data)
         comment_mentions_profile_ids = extract_user_profile_id_from_text(text=comment_data["text"])
         if len(comment_mentions_profile_ids) == 0:
@@ -163,6 +171,8 @@ class AsanaCommentNotifier:
                 task_data=task_data,
             )
             self.asana_comment_message_sender.send_message_to_users(
-                mention_users=mention_users, task_data=task_data, comment_data=comment_data
+                mention_users=mention_users,
+                task_data=task_data,
+                comment_data=comment_data,
             )
             self._process_comment_with_mentions(comment=comment_model)
