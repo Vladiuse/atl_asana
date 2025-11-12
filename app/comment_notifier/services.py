@@ -1,5 +1,6 @@
 import logging
 from dataclasses import dataclass
+from time import sleep
 from typing import Callable
 
 from asana.client import AsanaApiClient
@@ -11,7 +12,6 @@ from asana.services import prettify_asana_comment_text_with_mentions
 from asana.utils import get_asana_profile_url_by_id
 from common import MessageSender
 from common.message_sender import UserTag
-from time import sleep
 
 from .models import AsanaComment, AsanaWebhookRequestData
 from .utils import extract_user_profile_id_from_text
@@ -189,12 +189,13 @@ class AsanaCommentNotifier:
 
 class FetchMissingProjectCommentsService:
     SLEEP_AFTER_FETCH_TASK = 0.2
+
     def __init__(self, asana_api_client: AsanaApiClient):
         self.asana_api_client = asana_api_client
 
     def _get_project_active_sections(
         self,
-        project_id: int,
+        project_id: str,
         ignored_sections_ids: list[int] | None = None,
     ) -> list[dict]:
         """
@@ -210,7 +211,7 @@ class FetchMissingProjectCommentsService:
                 result.append(section_data)
         return result
 
-    def execute(self, project_id: int, ignored_sections_ids: list[int] | None = None) -> dict:
+    def execute(self, project_id: str, ignored_sections_ids: list[str] | None = None) -> dict:
         """
         Raises:
              AsanaApiClientError: if cant get some data from asana
