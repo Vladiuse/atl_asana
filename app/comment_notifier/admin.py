@@ -48,13 +48,13 @@ class AsanaCommentAdmin(admin.ModelAdmin):
             return format_html('<a href="{}" target="_blank">{}</a>', obj.task_url, "Открыть")
         return "—"
 
-    @admin.action(description="Создать ссылки на таски")
+    @admin.action(description="Создать ссылки на таски (глобальный)")
     def fetch_task_urls(self, request: HttpRequest, queryset: QuerySet) -> None:
         _ = queryset
         result = fetch_comment_tasks_urls_task.delay()
         self.message_user(request, message=f"Таск запущен: {result.id}")
 
-    @admin.action(description="Найти пропущеные в проекте коментари")
+    @admin.action(description="Найти пропущеные в проекте коментари (глобальный)")
     def fetch_missing_project_comments(self, request: HttpRequest, queryset: QuerySet) -> None:
         _ = queryset
         result = fetch_missing_project_comments_task.delay()
