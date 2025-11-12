@@ -96,6 +96,7 @@ class AsanaCommentAdmin(admin.ModelAdmin):
             self.message_user(
                 request, message="Выбранные коментарии должны быть необработаными", level=messages.WARNING,
             )
+            return
         success_processed_comments = 0
         for comment in queryset:
             try:
