@@ -3,7 +3,11 @@ from datetime import timedelta
 
 from asana.client import AsanaApiClient
 from asana.client.exception import AsanaForbiddenError, AsanaNotFoundError
-from asana.constants import SOURCE_DIV_PROBLEMS_REQUESTS_COMPLETE_SECTION_ID
+from asana.constants import (
+    SOURCE_DIV_PROBLEMS_REQUESTS_COMPLETE_SECTION_ID,
+    TECH_DIV_KVA_PROJECT_COMPLETE_SECTION_ID,
+    AtlasProject,
+)
 from common import MessageSender
 from django.db.models import QuerySet
 from django.utils import timezone
@@ -32,7 +36,6 @@ class AsanaCommentNotifierUseCase:
 
 
 class FetchMissingProjectCommentsUseCase:
-
     def __init__(self, asana_api_client: AsanaApiClient):
         self.asana_api_client = asana_api_client
 
@@ -40,43 +43,20 @@ class FetchMissingProjectCommentsUseCase:
         fetch_missing_project_comments_service = FetchMissingProjectCommentsService(
             asana_api_client=self.asana_api_client,
         )
-        fetch_missing_project_comments_service.execute(project_id=SOURCE_DIV_PROBLEMS_REQUESTS_COMPLETE_SECTION_ID, ignored_sections_ids=[])
-
-    # def _get_project_active_sections(self) -> list[dict]:
-    #     result = []
-    #     sections = self.asana_api_client.get_project_sections(project_id=SOURCE_DIV_PROBLEMS_REQUESTS_PROJECT_ID)
-    #     for section_data in sections:
-    #         if section_data["gid"] not in self.DIV_PROJECT_IGNORED_SECTIONS:
-    #             result.append(section_data)
-    #     return result
-    #
-    # def execute(self) -> dict:
-    #     new_comments_count = 0
-    #     exists_comment_ids = set(AsanaComment.objects.values_list("comment_id", flat=True))
-    #     logging.info("exists_comment_ids: %s", len(exists_comment_ids))
-    #     sections = self._get_project_active_sections()
-    #     for section_data in sections:
-    #         section_tasks = self.asana_api_client.get_section_tasks(section_id=section_data["gid"])
-    #         logging.info("section: %s, tasks: %s", section_data["name"], len(section_tasks))
-    #         for task_data in section_tasks:
-    #             task_id = task_data["gid"]
-    #             logging.info("Task: %s %s", task_id, task_data["name"])
-    #             task_comments = self.asana_api_client.get_comments_from_task(task_id=task_id)
-    #             logging.info("Comments count: %s", len(task_comments))
-    #             for comment_data in task_comments:
-    #                 comment_id = int(comment_data["gid"])
-    #                 if comment_data["created_by"] is not None:
-    #                     user_id = comment_data["created_by"]["gid"]
-    #                     if comment_id not in exists_comment_ids:
-    #                         logging.info("find new comment: %s", comment_id)
-    #                         AsanaComment.objects.create(
-    #                             user_id=user_id,
-    #                             comment_id=comment_id,
-    #                             task_id=task_id,
-    #                         )
-    #                         new_comments_count += 1
-    #     logging.info("new_comments_count: %s", new_comments_count)
-    #     return {"new_comments_count": new_comments_count}
+        source_div_project_result = fetch_missing_project_comments_service.execute(
+            project_id=AtlasProject.SOURCE_DIV_PROBLEMS_REQUESTS.value,
+            ignored_sections_ids=[
+                SOURCE_DIV_PROBLEMS_REQUESTS_COMPLETE_SECTION_ID,
+            ],
+        )
+        kva_tech_project_result = fetch_missing_project_comments_service.execute(
+            project_id=AtlasProject.TECH_DIV_KVA.value,
+            ignored_sections_ids=[TECH_DIV_KVA_PROJECT_COMPLETE_SECTION_ID],
+        )
+        return {
+            "source_div_project_result": source_div_project_result,
+            "kva_tech_project_result": kva_tech_project_result,
+        }
 
 
 class FetchCommentTaskUrls:
