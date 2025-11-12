@@ -65,11 +65,13 @@ class AsanaCommentMessageSender:
         if not all([asana_user.messenger_code, asana_user.position]):
             return self._notify_cant_send_message
 
-        if asana_user.position == Position.FARMER:
-            return self._notify_farmer
-        if asana_user.position in (Position.MANAGER, Position.BUYER):
-            return self._notify_baer_or_manager
-        return self._notify_not_target_position
+        registry: dict[Position, Callable[[AtlasUser, dict, dict], dict | None]] = {
+            Position.FARMER: self._notify_farmer,
+            Position.MANAGER: self._notify_baer_or_manager,
+            Position.BUYER: self._notify_baer_or_manager,
+        }
+
+        return registry.get(asana_user.position, self._notify_not_target_position)
 
     def _notify_farmer(self, asana_user: AtlasUser, task_data: dict, comment_data: dict) -> dict:
         task_url = task_data["permalink_url"]
