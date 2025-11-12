@@ -11,6 +11,7 @@ from asana.services import prettify_asana_comment_text_with_mentions
 from asana.utils import get_asana_profile_url_by_id
 from common import MessageSender
 from common.message_sender import UserTag
+from time import sleep
 
 from .models import AsanaComment, AsanaWebhookRequestData
 from .utils import extract_user_profile_id_from_text
@@ -187,11 +188,14 @@ class AsanaCommentNotifier:
 
 
 class FetchMissingProjectCommentsService:
+    SLEEP_AFTER_FETCH_TASK = 0.2
     def __init__(self, asana_api_client: AsanaApiClient):
         self.asana_api_client = asana_api_client
 
     def _get_project_active_sections(
-        self, project_id: int, ignored_sections_ids: list[int] | None = None,
+        self,
+        project_id: int,
+        ignored_sections_ids: list[int] | None = None,
     ) -> list[dict]:
         """
         Raises:
@@ -222,12 +226,18 @@ class FetchMissingProjectCommentsService:
         sections = self._get_project_active_sections(project_id=project_id, ignored_sections_ids=ignored_sections_ids)
         logging.info("Sections to collect comments: %s", sections)
         for section_data in sections:
-            section_tasks = self.asana_api_client.get_section_tasks(section_id=section_data["gid"])
+            section_tasks = self.asana_api_client.get_section_tasks(
+                section_id=section_data["gid"],
+            )
             logging.info("section: %s, tasks: %s", section_data["name"], len(section_tasks))
             for task_data in section_tasks:
                 task_id = task_data["gid"]
                 logging.info("Task: %s %s", task_id, task_data["name"])
-                task_comments = self.asana_api_client.get_comments_from_task(task_id=task_id)
+                sleep(self.SLEEP_AFTER_FETCH_TASK)
+                task_comments = self.asana_api_client.get_comments_from_task(
+                    task_id=task_id,
+                    opt_fields=["gid", "created_by", "resource_subtype"],
+                )
                 logging.info("Comments count: %s", len(task_comments))
                 for comment_data in task_comments:
                     comment_id = int(comment_data["gid"])
@@ -242,4 +252,5 @@ class FetchMissingProjectCommentsService:
                             )
                             new_comments_count += 1
         logging.info("new_comments_count: %s", new_comments_count)
-        return {"new_comments_count": new_comments_count}
+        section_names = [section_data["name"] for section_data in sections]
+        return {"new_comments_count": new_comments_count, "sections": section_names}
