@@ -27,6 +27,7 @@ class AsanaComment(models.Model):
     has_mention = models.BooleanField(null=True, default=None, blank=True)
     is_notified = models.BooleanField(null=True, blank=True, default=None)
     is_deleted = models.BooleanField(blank=True, default=False)
+    text = models.TextField(blank=True)
     created = models.DateTimeField(auto_now_add=True)
 
     def mark_as_deleted(self) -> None:
