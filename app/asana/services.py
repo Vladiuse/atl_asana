@@ -1,3 +1,5 @@
+from django.db.models import QuerySet
+
 from .models import AtlasUser
 
 
@@ -7,8 +9,19 @@ def prettify_asana_comment_text_with_mentions(text: str) -> str:
         text = text.replace(user.profile_url, user.user_comment_mention)
     return text
 
-class AsanaCommentPrettifier:
 
+def get_user_profile_url_mention_map(asana_users: QuerySet[AtlasUser] | list[AtlasUser]) -> dict[str, str]:
+    result = {}
+    for user in asana_users:
+        result.update(
+            {
+                user.profile_url: user.user_comment_mention,
+            },
+        )
+    return result
+
+
+class AsanaCommentPrettifier:
     def __init__(self, profile_urls_mention_map: dict[str, str]):
         self.profile_urls_mention_map = profile_urls_mention_map
 
