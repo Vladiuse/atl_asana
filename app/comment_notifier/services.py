@@ -73,17 +73,15 @@ class CommentDto:
 
 
 class AsanaSourceProjectCommentMessageSender:
-    def __init__(
-        self,
-        message_sender: MessageSender,
-        # asana_comment_prettifier: AsanaCommentPrettifier,
-    ):
+    """
+    Comment notifier for "1211350261357695:Общий проект | SOURCE DIV | Запросы и Проблемы" project
+    """
+    def __init__(self,message_sender: MessageSender):
         self.message_sender = message_sender
-        # self.asana_comment_prettifier = asana_comment_prettifier
 
     def _get_notifier_func(self, asana_user: AtlasUser) -> Callable[[AtlasUser, CommentDto], dict | None]:
         if not all([asana_user.messenger_code, asana_user.position]):
-            return self._notify_cant_send_message
+            return self._notify_not_full_user_data_to_sedn_message
 
         registry: dict[Position, Callable[[AtlasUser, CommentDto], dict | None]] = {
             Position.FARMER: self._notify_farmer,
@@ -96,7 +94,7 @@ class AsanaSourceProjectCommentMessageSender:
     def _notify_farmer(self, asana_user: AtlasUser, comment_dto: CommentDto) -> dict:
         task_url = comment_dto.task_data["permalink_url"]
         task_name = comment_dto.task_data["name"]
-        message = f"""
+        message = f"""\
             {task_name}
             Task url: {task_url}
             Comment:
@@ -113,10 +111,11 @@ class AsanaSourceProjectCommentMessageSender:
         task_url = comment_dto.task_data["permalink_url"]
         message = f"""
             {task_name}
+            
             Task url: {task_url}
             Comment:
             {comment_dto.pretty_comment_text}
-            """
+        """
         message = normalize_multiline(message)
         return self.message_sender.send_message_to_user(
             user_tags=[UserTag(asana_user.messenger_code)],
@@ -126,9 +125,9 @@ class AsanaSourceProjectCommentMessageSender:
     def _notify_not_target_position(self, asana_user: AtlasUser,  comment_dto: CommentDto) -> None:
         pass
 
-    def _notify_cant_send_message(self, asana_user: AtlasUser,  comment_dto: CommentDto) -> None:
+    def _notify_not_full_user_data_to_sedn_message(self, asana_user: AtlasUser, comment_dto: CommentDto) -> None:
         task_url = comment_dto.task_data["permalink_url"]
-        message = f"""
+        message = f"""\
             ⚠️ Упомянут пользователь без должности или тэга мессенджера.
             
             Пользователь:
@@ -140,7 +139,7 @@ class AsanaSourceProjectCommentMessageSender:
         message = normalize_multiline(message)
         self.message_sender.send_log_message(message=message)
 
-    def send_message_to_users(self, comment_dto: CommentDto) -> None:
+    def notify(self, comment_dto: CommentDto) -> None:
         for asana_user in comment_dto.mention_users:
             notifier_func = self._get_notifier_func(asana_user=asana_user)
             logging.info("Notify func: %s", notifier_func.__name__)
@@ -227,7 +226,7 @@ class AsanaCommentNotifier:
             asana_comment_message_sender = AsanaSourceProjectCommentMessageSender(
                 message_sender=self.message_sender,
             )
-            asana_comment_message_sender.send_message_to_users(comment_dto=comment_dto)
+            asana_comment_message_sender.notify(comment_dto=comment_dto)
             self._process_comment_with_mentions(comment=comment_model)
 
 

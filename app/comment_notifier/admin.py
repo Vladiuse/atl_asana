@@ -22,10 +22,6 @@ logging.basicConfig(level=logging.INFO)
 
 message_sender = MessageSender(request_sender=RequestsSender())
 repository = AsanaUserRepository(api_client=asana_client)
-notifier = AsanaCommentNotifier(
-    asana_api_client=asana_client,
-    message_sender=message_sender,
-)
 
 
 @admin.register(AsanaProject)
@@ -104,6 +100,10 @@ class AsanaCommentAdmin(admin.ModelAdmin):
             )
             return
         success_processed_comments = 0
+        notifier = AsanaCommentNotifier(
+            asana_api_client=asana_client,
+            message_sender=message_sender,
+        )
         for comment in queryset:
             try:
                 notifier.process(comment_id=comment.comment_id)

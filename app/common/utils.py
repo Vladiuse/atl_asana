@@ -1,5 +1,4 @@
-import textwrap
-
-
 def normalize_multiline(text: str) -> str:
-    return textwrap.dedent(text).strip()
+    lines = text.splitlines()
+    cleaned = [line.lstrip() for line in lines]
+    return "\n".join(cleaned).strip()
