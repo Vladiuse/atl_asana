@@ -25,7 +25,7 @@ class AsanaCommentPrettifier:
     def __init__(self, profile_urls_mention_map: dict[str, str]):
         self.profile_urls_mention_map = profile_urls_mention_map
 
-    def prettify_comment(self, comment_text: str) -> str:
+    def prettify(self, comment_text: str) -> str:
         for profile_url, mention in self.profile_urls_mention_map.items():
             comment_text = comment_text.replace(profile_url, mention)
         return comment_text
