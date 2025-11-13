@@ -104,3 +104,6 @@ class MessageSender:
                 f"Число тегов юзеров и отправленных сообщений не совпадает. {user_tags}, ответ {data}",
             )
         return data
+
+    def send_log_message(self, message: str) -> str:
+        return self.send_message(handler=self.KVA_USER, message=message)

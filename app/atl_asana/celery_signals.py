@@ -16,4 +16,4 @@ def notify_in_telegram(  # noqa: PLR0913
     **kw,  # noqa: ARG001
 ) -> None:
     message = f"Task failed!\nTask id: {task_id}\nTask name: {sender.name}\nException: {exception}\nInfo: {einfo}\n"
-    message_sender.send_message(handler=MessageSender.KVA_USER, message=message)
+    message_sender.send_log_message(message=message)

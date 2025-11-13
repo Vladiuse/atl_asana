@@ -138,7 +138,7 @@ class AsanaSourceProjectCommentMessageSender:
             Task url: {task_url}
         """
         message = normalize_multiline(message)
-        self.message_sender.send_message(handler=MessageSender.KVA_USER, message=message)
+        self.message_sender.send_log_message(message=message)
 
     def send_message_to_users(self, comment_dto: CommentDto) -> None:
         for asana_user in comment_dto.mention_users:
@@ -176,7 +176,7 @@ class AsanaCommentNotifier:
         if len(profiles) != 0:
             task_url = task_data["permalink_url"]
             message = f"Not found asana user for profiles: {profiles}\nTask url: {task_url}"
-            self.message_sender.send_message(handler=MessageSender.KVA_USER, message=message)
+            self.message_sender.send_log_message(message=message)
 
     def process(self, comment_id: int) -> None:
         """
