@@ -1,15 +1,21 @@
 from common import RequestsSender
 from common.message_sender import MessageSender, UserTag
+from django.conf import settings
 from django.contrib import admin, messages
 from django.db.models import QuerySet
 from django.http import HttpRequest
 from django.utils.html import format_html
 
+from asana.client import AsanaApiClient
+from asana.client.exception import AsanaApiClientError
+from asana.repository import AsanaUserRepository
 from asana.utils import get_asana_profile_url_by_id
 
 from .models import AtlasUser
 
 message_sender = MessageSender(request_sender=RequestsSender())
+asana_api_client = AsanaApiClient(api_key=settings.ASANA_API_KEY)
+asana_user_repository = AsanaUserRepository(api_client=asana_api_client)
 
 
 class AtlasUserAdmin(admin.ModelAdmin):
@@ -26,7 +32,7 @@ class AtlasUserAdmin(admin.ModelAdmin):
     list_display_links = ["email", "name"]
     list_filter = ["position"]
     search_fields = ["email", "name"]
-    actions = ["send_test_sms_for_user"]
+    actions = ["send_test_sms_for_user", "update_asana_users"]
 
     @admin.display(description="Avatar")
     def avatar_preview(self, obj) -> str:
@@ -60,6 +66,15 @@ class AtlasUserAdmin(admin.ModelAdmin):
             message = f'Не удалось отправить тестовое смс для {user} по тегу "{user.messenger_code}"'
             self.message_user(request, message, level=messages.ERROR)
         self.message_user(request, f"Успешно отправлено {success_send_count} сообщений", level=messages.SUCCESS)
+
+    @admin.action(description="Обновить пользователей асаны")
+    def update_asana_users(self, request: HttpRequest, queryset: QuerySet) -> None:
+        _ = queryset
+        try:
+            result = asana_user_repository.update_all()
+            self.message_user(request, f"Успешно, {result}", level=messages.SUCCESS)
+        except AsanaApiClientError as error:
+            self.message_user(request, f"Не удалось обновить пользователей: {error}", level=messages.ERROR)
 
 
 admin.site.register(AtlasUser, AtlasUserAdmin)
