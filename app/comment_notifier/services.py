@@ -8,7 +8,7 @@ from asana.client.exception import AsanaApiClientError, AsanaForbiddenError, Asa
 from asana.constants import Position
 from asana.models import AtlasUser
 from asana.repository import AsanaUserRepository
-from asana.services import prettify_asana_comment_text_with_mentions
+from asana.services import AsanaCommentPrettifier, prettify_asana_comment_text_with_mentions
 from asana.utils import get_asana_profile_url_by_id
 from common import MessageSender
 from common.message_sender import UserTag
@@ -255,3 +255,21 @@ class FetchMissingProjectCommentsService:
         logging.info("new_comments_count: %s", new_comments_count)
         section_names = [section_data["name"] for section_data in sections]
         return {"new_comments_count": new_comments_count, "sections": section_names}
+
+
+class LoadAdditionalInfoForComment:
+    def __init__(self, asana_api_client: AsanaApiClient, asana_comment_prettifier: AsanaCommentPrettifier):
+        self.asana_api_client = asana_api_client
+        self.asana_comment_prettifier = asana_comment_prettifier
+
+    def load(self, comment: AsanaComment) -> None:
+        """
+        Raises:
+             AsanaApiClientError: if cant get some data from asana
+        """
+        task_data = self.asana_api_client.get_task(task_id=comment.task_id)
+        comment_data = self.asana_api_client.get_comment(comment_id=comment.comment_id)
+        pretty_comment_text = self.asana_comment_prettifier.prettify(comment_text=comment_data["text"])
+        comment.task_url = task_data["permalink_url"]
+        comment.text = pretty_comment_text
+        comment.save()
