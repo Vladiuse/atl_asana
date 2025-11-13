@@ -8,10 +8,11 @@ from asana.client.exception import AsanaApiClientError, AsanaForbiddenError, Asa
 from asana.constants import Position
 from asana.models import AtlasUser
 from asana.repository import AsanaUserRepository
-from asana.services import AsanaCommentPrettifier, prettify_asana_comment_text_with_mentions
+from asana.services import AsanaCommentPrettifier, get_user_profile_url_mention_map
 from asana.utils import get_asana_profile_url_by_id
 from common import MessageSender
 from common.message_sender import UserTag
+from common.utils import normalize_multiline
 
 from .models import AsanaComment, AsanaWebhookRequestData
 from .utils import extract_user_profile_id_from_text
@@ -59,8 +60,13 @@ class ProcessAsanaNewCommentEvent:
 
 
 class AsanaSourceProjectCommentMessageSender:
-    def __init__(self, message_sender: MessageSender):
+    def __init__(
+        self,
+        message_sender: MessageSender,
+        asana_comment_prettifier: AsanaCommentPrettifier,
+    ):
         self.message_sender = message_sender
+        self.asana_comment_prettifier = asana_comment_prettifier
 
     def _get_notifier_func(self, asana_user: AtlasUser) -> Callable[[AtlasUser, dict, dict], dict | None]:
         if not all([asana_user.messenger_code, asana_user.position]):
@@ -76,17 +82,29 @@ class AsanaSourceProjectCommentMessageSender:
 
     def _notify_farmer(self, asana_user: AtlasUser, task_data: dict, comment_data: dict) -> dict:
         task_url = task_data["permalink_url"]
-        pretty_comment_text = prettify_asana_comment_text_with_mentions(text=comment_data["text"])
-        message = f"Message for FARMER\nTask url: {task_url}\n\nComment:\n{pretty_comment_text}"
+        pretty_comment_text = self.asana_comment_prettifier.prettify(comment_text=comment_data["text"])
+        message = f"""
+            {task_data["name"]}
+            Task url: {task_url}
+            Comment:
+            {pretty_comment_text}
+            """
+        message = normalize_multiline(message)
         return self.message_sender.send_message_to_user(
             user_tags=[UserTag(asana_user.messenger_code)],
             message=message,
         )
 
     def _notify_baer_or_manager(self, asana_user: AtlasUser, task_data: dict, comment_data: dict) -> dict:
-        pretty_comment_text = prettify_asana_comment_text_with_mentions(text=comment_data["text"])
+        pretty_comment_text = self.asana_comment_prettifier.prettify(comment_text=comment_data["text"])
         task_url = task_data["permalink_url"]
-        message = f"Message for BAER\nTask url: {task_url}\n\nComment:\n{pretty_comment_text}"
+        message = f"""
+            {task_data["name"]}
+            Task url: {task_url}
+            Comment:
+            {pretty_comment_text}
+            """
+        message = normalize_multiline(message)
         return self.message_sender.send_message_to_user(
             user_tags=[UserTag(asana_user.messenger_code)],
             message=message,
@@ -98,12 +116,14 @@ class AsanaSourceProjectCommentMessageSender:
     def _notify_cant_send_message(self, asana_user: AtlasUser, task_data: dict, comment_data: dict) -> None:
         _ = comment_data
         task_url = task_data["permalink_url"]
-        message = (
-            f"Упомянут пользователь без должности или тэга мессенджера.\n"
-            f"Пользователь:\n"
-            f"{asana_user.name}\n{asana_user.email}\n"
-            f"Task url: {task_url}"
-        )
+        message = f"""
+            Упомянут пользователь без должности или тэга мессенджера.
+            Пользователь:
+            {asana_user.name}
+            {asana_user.email}
+            Task url: {task_url}
+        """
+        message = normalize_multiline(message)
         self.message_sender.send_message(handler=MessageSender.KVA_USER, message=message)
 
     def send_message_to_users(self, mention_users: list[AtlasUser], comment_data: dict, task_data: dict) -> None:
@@ -122,7 +142,6 @@ class AsanaCommentNotifier:
     ):
         self.asana_api_client = asana_api_client
         self.asana_users_repository = AsanaUserRepository(api_client=self.asana_api_client)
-        self.asana_comment_message_sender = AsanaSourceProjectCommentMessageSender(message_sender=message_sender)
         self.message_sender = message_sender
 
     def _save_task_url(self, comment: AsanaComment, task_data: dict) -> None:
@@ -157,6 +176,7 @@ class AsanaCommentNotifier:
             comment_data = self.asana_api_client.get_comment(comment_id=comment_id)
         except (AsanaForbiddenError, AsanaNotFoundError):
             comment_model.mark_as_deleted()
+            logging.info("comment_id %s deleted", comment_id)
             return
         logging.info("Raw comment text: %s", comment_data["text"])
         self._save_task_url(comment=comment_model, task_data=task_data)
@@ -179,7 +199,14 @@ class AsanaCommentNotifier:
                 profiles=users_profile_url_not_found_in_db,
                 task_data=task_data,
             )
-            self.asana_comment_message_sender.send_message_to_users(
+
+            profile_urls_mention_map = get_user_profile_url_mention_map(asana_users=AtlasUser.objects.all())
+            asana_comment_prettifier = AsanaCommentPrettifier(profile_urls_mention_map=profile_urls_mention_map)
+            asana_comment_message_sender = AsanaSourceProjectCommentMessageSender(
+                message_sender=self.message_sender,
+                asana_comment_prettifier=asana_comment_prettifier,
+            )
+            asana_comment_message_sender.send_message_to_users(
                 mention_users=mention_users,
                 task_data=task_data,
                 comment_data=comment_data,
@@ -188,6 +215,11 @@ class AsanaCommentNotifier:
 
 
 class FetchMissingProjectCommentsService:
+    """
+    Search comments in tasks in projects that not in DB. If you find - save it.
+    In projects cant be ignored sections.
+    """
+
     SLEEP_AFTER_FETCH_TASK = 0.2
 
     def __init__(self, asana_api_client: AsanaApiClient):
