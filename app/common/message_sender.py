@@ -46,7 +46,8 @@ class MessageSender:
     API_KEY = settings.DOMAIN_MESSAGE_API_KEY
     DOMAIN_HANDLER = "domain_check"
     KVA_USER = "kva_test"
-    ALLOWED_HANDLERS = [DOMAIN_HANDLER, KVA_USER]
+    FARM_GROUP = "asana_farm_comments"
+    ALLOWED_HANDLERS = [DOMAIN_HANDLER, KVA_USER, FARM_GROUP]
 
     def __init__(self, request_sender: RequestsSender):
         self.request_sender = request_sender
@@ -73,8 +74,8 @@ class MessageSender:
         )
 
     def send_message(self, handler: str, message: str) -> str:
-        # if handler not in self.ALLOWED_HANDLERS:
-        #     raise TypeError(f"Incorrect handler, allowed {self.ALLOWED_HANDLERS}")
+        if handler not in self.ALLOWED_HANDLERS:
+            raise TypeError(f"Incorrect handler, allowed {self.ALLOWED_HANDLERS}")
         try:
             return self._send_message(handler=handler, message=message)
         except (HTTPError, RequestException) as error:
