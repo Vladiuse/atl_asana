@@ -1,23 +1,25 @@
-import logging
 from datetime import timedelta
 
 from asana.client import AsanaApiClient
-from asana.client.exception import AsanaForbiddenError, AsanaNotFoundError
+from asana.client.exception import AsanaApiClientError
 from asana.constants import (
     SOURCE_DIV_PROBLEMS_REQUESTS_COMPLETE_SECTION_ID,
     TECH_DIV_KVA_PROJECT_COMPLETE_SECTION_ID,
     AtlasProject,
 )
+from asana.models import AtlasUser
+from asana.services import AsanaCommentPrettifier, get_user_profile_url_mention_map
 from common import MessageSender
-from django.db.models import QuerySet
+from django.db.models import Q, QuerySet
 from django.utils import timezone
 
 from .models import AsanaComment
-from .services import AsanaCommentNotifier, FetchMissingProjectCommentsService
+from .services import AsanaCommentNotifier, FetchMissingProjectCommentsService, LoadAdditionalInfoForComment
 
 
 class AsanaCommentNotifierUseCase:
     MINUTES_AGO = 1
+
     def __init__(self, asana_api_client: AsanaApiClient, message_sender: MessageSender):
         self.asana_api_client = asana_api_client
         self.comment_notify_service = AsanaCommentNotifier(
@@ -60,32 +62,31 @@ class FetchMissingProjectCommentsUseCase:
         }
 
 
-class FetchCommentTaskUrls:
+class FetchCommentsAdditionalInfoUseCase:
     def __init__(self, asana_api_client: AsanaApiClient):
         self.asana_api_client = asana_api_client
 
-    def execute(self) -> dict:
-        tasks_ids_without_task_urls = (
-            AsanaComment.objects.filter(task_url="", is_deleted=False).values_list("task_id", flat=True).distinct()
+    def execute(self, queryset: QuerySet[AsanaComment]) -> dict:
+        comments_to_update = queryset.filter(
+            Q(text="") | Q(task_url=""),
+            is_deleted=False,
         )
-        logging.info("comments_without_task_urls: %s", len(tasks_ids_without_task_urls))
-        updated_tasks = 0
-        deleted_tasks = 0
-        for task_id in tasks_ids_without_task_urls:
-            logging.info("Comment id: %s", task_id)
+        asana_users = AtlasUser.objects.all()
+        profile_url_mention_map = get_user_profile_url_mention_map(asana_users=asana_users)
+        asana_comment_prettifier = AsanaCommentPrettifier(profile_urls_mention_map=profile_url_mention_map)
+        additional_info_comment_loader = LoadAdditionalInfoForComment(
+            asana_api_client=self.asana_api_client,
+            asana_comment_prettifier=asana_comment_prettifier,
+        )
+        success_updated = 0
+        errors: list[str] = []
+        for comment in comments_to_update:
             try:
-                task_data = self.asana_api_client.get_task(task_id=task_id)
-                task_url = task_data["permalink_url"]
-                AsanaComment.objects.filter(task_id=task_id).update(task_url=task_url)
-                updated_tasks += 1
-            except (AsanaForbiddenError, AsanaNotFoundError) as error:
-                logging.info("Cant get task: %s", error)
-                comment_models = AsanaComment.objects.filter(task_id=task_id)
-                for comment_model in comment_models:
-                    comment_model.mark_as_deleted()
-                deleted_tasks += 1
+                additional_info_comment_loader.load(comment=comment)
+                success_updated += 1
+            except AsanaApiClientError as error:
+                errors.append(str(error))
         return {
-            "updated_comments": updated_tasks,
-            "deleted_tasks": deleted_tasks,
-            "to_load": len(tasks_ids_without_task_urls),
+            "success_updated": success_updated,
+            "errors_count": len(errors),
         }
