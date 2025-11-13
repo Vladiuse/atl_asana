@@ -117,10 +117,12 @@ class AsanaSourceProjectCommentMessageSender:
         _ = comment_data
         task_url = task_data["permalink_url"]
         message = f"""
-            Упомянут пользователь без должности или тэга мессенджера.
+            ⚠️ Упомянут пользователь без должности или тэга мессенджера.
+            
             Пользователь:
-            {asana_user.name}
-            {asana_user.email}
+            Id: {asana_user.user_id}
+            Name: {asana_user.name}
+            Email: {asana_user.email}
             Task url: {task_url}
         """
         message = normalize_multiline(message)
