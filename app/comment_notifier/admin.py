@@ -1,5 +1,5 @@
 import logging
-
+from django.utils.text import Truncator
 from asana.client import AsanaApiClient
 from asana.client.exception import AsanaApiClientError
 from asana.repository import AsanaUserRepository
@@ -49,6 +49,7 @@ class AsanaCommentAdmin(admin.ModelAdmin):
         "is_notified",
         "task_url_short",
         "is_deleted",
+        "short_text",
         "created",
     )
     list_filter = ("has_mention", "is_notified", "is_deleted")
@@ -107,3 +108,7 @@ class AsanaCommentAdmin(admin.ModelAdmin):
                     request, message=f"Коментарий {comment.comment_id} не удалось обработать", level=messages.ERROR,
                 )
         self.message_user(request, message=f"Успешно обработано коментариев: {success_processed_comments}")
+
+    @admin.display(description="Text")
+    def short_text(self, obj: AsanaComment) -> str:
+        return Truncator(obj.text).chars(200)
