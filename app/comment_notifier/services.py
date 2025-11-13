@@ -58,7 +58,7 @@ class ProcessAsanaNewCommentEvent:
         )
 
 
-class AsanaCommentMessageSender:
+class AsanaSourceProjectCommentMessageSender:
     def __init__(self, message_sender: MessageSender):
         self.message_sender = message_sender
 
@@ -122,7 +122,7 @@ class AsanaCommentNotifier:
     ):
         self.asana_api_client = asana_api_client
         self.asana_users_repository = AsanaUserRepository(api_client=self.asana_api_client)
-        self.asana_comment_message_sender = AsanaCommentMessageSender(message_sender=message_sender)
+        self.asana_comment_message_sender = AsanaSourceProjectCommentMessageSender(message_sender=message_sender)
         self.message_sender = message_sender
 
     def _save_task_url(self, comment: AsanaComment, task_data: dict) -> None:
