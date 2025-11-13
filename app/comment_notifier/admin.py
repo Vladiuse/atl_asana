@@ -1,5 +1,5 @@
 import logging
-from django.utils.text import Truncator
+
 from asana.client import AsanaApiClient
 from asana.client.exception import AsanaApiClientError
 from asana.repository import AsanaUserRepository
@@ -9,11 +9,13 @@ from django.contrib import admin, messages
 from django.db.models import QuerySet
 from django.http import HttpRequest
 from django.utils.html import format_html
+from django.utils.text import Truncator
 
 from comment_notifier.services import AsanaCommentNotifier
 
 from .models import AsanaComment, AsanaProject, AsanaWebhookRequestData
 from .tasks import fetch_comment_tasks_urls_task, fetch_missing_project_comments_task
+from .use_cases import FetchCommentsAdditionalInfoUseCase
 
 asana_client = AsanaApiClient(api_key=settings.ASANA_API_KEY)
 logging.basicConfig(level=logging.INFO)
@@ -61,6 +63,7 @@ class AsanaCommentAdmin(admin.ModelAdmin):
         "mark_as_not_notified",
         "mark_as_not_processed",
         "process_comment_and_notify",
+        "update_additional_comment_data",
     )
 
     @admin.display(description="Task URL")
@@ -95,7 +98,9 @@ class AsanaCommentAdmin(admin.ModelAdmin):
     def process_comment_and_notify(self, request: HttpRequest, queryset: QuerySet) -> None:
         if queryset.exclude(is_notified=None).count() != 0:
             self.message_user(
-                request, message="Выбранные коментарии должны быть необработаными", level=messages.WARNING,
+                request,
+                message="Выбранные коментарии должны быть необработаными",
+                level=messages.WARNING,
             )
             return
         success_processed_comments = 0
@@ -105,10 +110,20 @@ class AsanaCommentAdmin(admin.ModelAdmin):
                 success_processed_comments += 1
             except AsanaApiClientError:
                 self.message_user(
-                    request, message=f"Коментарий {comment.comment_id} не удалось обработать", level=messages.ERROR,
+                    request,
+                    message=f"Коментарий {comment.comment_id} не удалось обработать",
+                    level=messages.ERROR,
                 )
         self.message_user(request, message=f"Успешно обработано коментариев: {success_processed_comments}")
 
     @admin.display(description="Text")
     def short_text(self, obj: AsanaComment) -> str:
         return Truncator(obj.text).chars(200)
+
+    @admin.action(description="Обновить ссылку на таск коммента и текст")
+    def update_additional_comment_data(self, request: HttpRequest, queryset: QuerySet) -> None:
+        fetch_additional_comments_data_use_case = FetchCommentsAdditionalInfoUseCase(
+            asana_api_client=asana_client,
+        )
+        result = fetch_additional_comments_data_use_case.execute(queryset=queryset)
+        self.message_user(request, message=f"Результат {result}")
