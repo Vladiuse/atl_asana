@@ -17,6 +17,7 @@ from .services import AsanaCommentNotifier, FetchMissingProjectCommentsService
 
 
 class AsanaCommentNotifierUseCase:
+    MINUTES_AGO = 1
     def __init__(self, asana_api_client: AsanaApiClient, message_sender: MessageSender):
         self.asana_api_client = asana_api_client
         self.comment_notify_service = AsanaCommentNotifier(
@@ -25,7 +26,7 @@ class AsanaCommentNotifierUseCase:
         )
 
     def _get_comments_to_notify(self) -> QuerySet[AsanaComment]:
-        cutoff = timezone.now() - timedelta(minutes=5)
+        cutoff = timezone.now() - timedelta(minutes=self.MINUTES_AGO)
         return AsanaComment.objects.filter(is_deleted=False, is_notified=None, created__lt=cutoff)
 
     def execute(self) -> dict:
