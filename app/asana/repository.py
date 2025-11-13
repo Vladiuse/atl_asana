@@ -80,7 +80,7 @@ class AsanaUserRepository:
             logging.info("Try load user from Asana by user_id")
             return self._create_by_user_id(user_id=user_id)
 
-    def update_all(self) -> None:
+    def update_all(self) -> dict:
         """
         Raises:
              AsanaApiClientError: if cant get data from asana
@@ -100,3 +100,4 @@ class AsanaUserRepository:
                 self._create_user_by_data(membership_data=membership_data, user_data=user_data)
                 new_created += 1
         logging.info("New created: %s", new_created)
+        return {"new_created": new_created}
