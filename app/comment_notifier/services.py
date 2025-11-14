@@ -14,7 +14,7 @@ from common import MessageSender
 from common.message_sender import UserTag
 from common.utils import normalize_multiline
 
-from .models import AsanaComment, AsanaWebhookProject, AsanaWebhookRequestData
+from .models import AsanaComment, AsanaWebhookProject, AsanaWebhookRequestData, ProjectIgnoredSection
 from .utils import extract_user_profile_id_from_text
 
 
@@ -345,3 +345,13 @@ class LoadAdditionalInfoForWebhookProject:
         webhook_project.project_name = project_data["name"]
         webhook_project.project_url = project_data["permalink_url"]
         webhook_project.save()
+
+
+@dataclass
+class LoadAdditionalInfoForProjectIgnoredSection:
+    asana_api_client: AsanaApiClient
+
+    def load(self, project_ignored_section: ProjectIgnoredSection) -> None:
+        section_data = self.asana_api_client.get_section(project_ignored_section.section_id)
+        project_ignored_section.section_name = section_data["name"]
+        project_ignored_section.save()
