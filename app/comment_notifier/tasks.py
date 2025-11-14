@@ -5,9 +5,13 @@ from celery import shared_task
 from common import MessageSender, RequestsSender
 from django.conf import settings
 
-from .models import AsanaWebhookRequestData
+from .models import AsanaComment, AsanaWebhookRequestData
 from .services import ProcessAsanaNewCommentEvent
-from .use_cases import AsanaCommentNotifierUseCase, FetchCommentsAdditionalInfoUseCase, FetchMissingProjectCommentsUseCase
+from .use_cases import (
+    AsanaCommentNotifierUseCase,
+    FetchCommentsAdditionalInfoUseCase,
+    FetchMissingProjectCommentsUseCase,
+)
 
 asana_api_client = AsanaApiClient(api_key=settings.ASANA_API_KEY)
 message_sender = MessageSender(request_sender=RequestsSender())
@@ -40,5 +44,6 @@ def notify_new_asana_comments_tasks() -> dict:
 
 @shared_task()
 def fetch_comment_tasks_urls_task() -> dict:
+    queryset = AsanaComment.objects.all()
     use_case = FetchCommentsAdditionalInfoUseCase(asana_api_client=asana_api_client)
-    return use_case.execute()
+    return use_case.execute(queryset=queryset)
