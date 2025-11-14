@@ -14,7 +14,7 @@ from common import MessageSender
 from common.message_sender import UserTag
 from common.utils import normalize_multiline
 
-from .models import AsanaComment, AsanaWebhookRequestData
+from .models import AsanaComment, AsanaWebhookRequestData, AsanaWebhookProject
 from .utils import extract_user_profile_id_from_text
 
 
@@ -50,6 +50,7 @@ class ProcessAsanaNewCommentEvent:
                 comment_id=comment_dto.comment_id,
                 user_id=comment_dto.user_id,
                 task_id=comment_dto.task_id,
+                project=asana_webhook.project,
             )
         asana_webhook.is_target_event = bool(asana_comments_dto)
         asana_webhook.save()
@@ -279,6 +280,7 @@ class FetchMissingProjectCommentsService:
         exists_comment_ids = set(AsanaComment.objects.values_list("comment_id", flat=True))
         logging.info("exists_comment_ids: %s", len(exists_comment_ids))
         sections = self._get_project_active_sections(project_id=project_id, ignored_sections_ids=ignored_sections_ids)
+        project_model = AsanaWebhookProject.objects.get(project_id=project_id)
         logging.info("Sections to collect comments: %s", sections)
         for section_data in sections:
             section_tasks = self.asana_api_client.get_section_tasks(
@@ -304,6 +306,7 @@ class FetchMissingProjectCommentsService:
                                 user_id=user_id,
                                 comment_id=comment_id,
                                 task_id=task_id,
+                                project=project_model,
                             )
                             new_comments_count += 1
         logging.info("new_comments_count: %s", new_comments_count)

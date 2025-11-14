@@ -6,6 +6,9 @@ class AsanaWebhookProject(models.Model):
     project_id = models.CharField(max_length=50, unique=True)
     secret = models.CharField(max_length=100, blank=True)
 
+    def __str__(self):
+        return self.name
+
 
 class AsanaWebhookRequestData(models.Model):
     created = models.DateTimeField(auto_now_add=True)
@@ -13,7 +16,6 @@ class AsanaWebhookRequestData(models.Model):
     headers = models.JSONField()
     payload = models.JSONField()
     is_target_event = models.BooleanField(null=True, default=None)
-
 
     @property
     def events(self) -> list[dict]:
@@ -25,6 +27,13 @@ class AsanaComment(models.Model):
     task_id = models.IntegerField()
     comment_id = models.IntegerField(unique=True)
     task_url = models.URLField(blank=True)
+    project = models.ForeignKey(
+        to=AsanaWebhookProject,
+        null=True,
+        default=None,
+        blank=True,
+        on_delete=models.SET_NULL,
+    )
     has_mention = models.BooleanField(null=True, default=None, blank=True)
     is_notified = models.BooleanField(null=True, blank=True, default=None)
     is_deleted = models.BooleanField(blank=True, default=False)
@@ -34,5 +43,3 @@ class AsanaComment(models.Model):
     def mark_as_deleted(self) -> None:
         self.is_deleted = True
         self.save()
-
-
