@@ -249,41 +249,31 @@ class FetchMissingProjectCommentsService:
     def __init__(self, asana_api_client: AsanaApiClient):
         self.asana_api_client = asana_api_client
 
-    def _get_project_active_sections(
-        self,
-        project_id: str,
-        ignored_sections_ids: list[int] | None = None,
-    ) -> list[dict]:
+    def _get_project_active_sections(self, project: AsanaWebhookProject) -> list[dict]:
         """
         Raises:
              AsanaApiClientError: if cant get some data from asana
         """
         result = []
-        if ignored_sections_ids is None:
-            ignored_sections_ids = []
-        sections = self.asana_api_client.get_project_sections(project_id=project_id)
+        ignored_sections_ids = [ignored_section.section_id for ignored_section in  project.ignored_sections.all()]
+        sections = self.asana_api_client.get_project_sections(project_id=project.project_id)
         for section_data in sections:
             if section_data["gid"] not in ignored_sections_ids:
                 result.append(section_data)
         return result
 
-    def execute(self, project_id: str, ignored_sections_ids: list[str] | None = None) -> dict:
+    def execute(self, project: AsanaWebhookProject) -> dict:
         """
         Raises:
              AsanaApiClientError: if cant get some data from asana
         """
-        logging.info(
-            "FetchMissingProjectCommentsService: project_id: %s, ignored_sections_ids: %s",
-            project_id,
-            ignored_sections_ids,
-        )
+        logging.info("FetchMissingProjectCommentsService: project: %s",project)
         new_comments_count = 0
+        sections_to_check = self._get_project_active_sections(project=project)
+        logging.info("Sections to collect comments: %s", sections_to_check)
         exists_comment_ids = set(AsanaComment.objects.values_list("comment_id", flat=True))
         logging.info("exists_comment_ids: %s", len(exists_comment_ids))
-        sections = self._get_project_active_sections(project_id=project_id, ignored_sections_ids=ignored_sections_ids)
-        project_model = AsanaWebhookProject.objects.get(project_id=project_id)
-        logging.info("Sections to collect comments: %s", sections)
-        for section_data in sections:
+        for section_data in sections_to_check:
             section_tasks = self.asana_api_client.get_section_tasks(
                 section_id=section_data["gid"],
             )
@@ -307,11 +297,11 @@ class FetchMissingProjectCommentsService:
                                 user_id=user_id,
                                 comment_id=comment_id,
                                 task_id=task_id,
-                                project=project_model,
+                                project=project,
                             )
                             new_comments_count += 1
         logging.info("new_comments_count: %s", new_comments_count)
-        section_names = [section_data["name"] for section_data in sections]
+        section_names = [section_data["name"] for section_data in sections_to_check]
         return {"new_comments_count": new_comments_count, "sections": section_names}
 
 

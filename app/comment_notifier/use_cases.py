@@ -13,7 +13,7 @@ from common import MessageSender
 from django.db.models import Q, QuerySet
 from django.utils import timezone
 
-from .models import AsanaComment
+from .models import AsanaComment, AsanaWebhookProject
 from .services import AsanaCommentNotifier, FetchMissingProjectCommentsService, LoadAdditionalInfoForComment
 
 
@@ -43,23 +43,15 @@ class FetchMissingProjectCommentsUseCase:
         self.asana_api_client = asana_api_client
 
     def execute(self) -> dict:
-        fetch_missing_project_comments_service = FetchMissingProjectCommentsService(
-            asana_api_client=self.asana_api_client,
-        )
-        source_div_project_result = fetch_missing_project_comments_service.execute(
-            project_id=AtlasProject.SOURCE_DIV_PROBLEMS_REQUESTS.value,
-            ignored_sections_ids=[
-                SOURCE_DIV_PROBLEMS_REQUESTS_COMPLETE_SECTION_ID,
-            ],
-        )
-        kva_tech_project_result = fetch_missing_project_comments_service.execute(
-            project_id=AtlasProject.TECH_DIV_KVA.value,
-            ignored_sections_ids=[TECH_DIV_KVA_PROJECT_COMPLETE_SECTION_ID],
-        )
-        return {
-            "source_div_project_result": source_div_project_result,
-            "kva_tech_project_result": kva_tech_project_result,
-        }
+        use_case_result = {}
+        projects = AsanaWebhookProject.objects.prefetch_related("ignored_sections")
+        for project in projects:
+            fetch_missing_project_comments_service = FetchMissingProjectCommentsService(
+                asana_api_client=self.asana_api_client,
+            )
+            result = fetch_missing_project_comments_service.execute(project=project)
+            use_case_result[project.project_name] = result
+        return use_case_result
 
 
 class FetchCommentsAdditionalInfoUseCase:
