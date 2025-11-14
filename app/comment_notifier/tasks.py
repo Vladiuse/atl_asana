@@ -17,7 +17,7 @@ asana_api_client = AsanaApiClient(api_key=settings.ASANA_API_KEY)
 message_sender = MessageSender(request_sender=RequestsSender())
 
 
-@shared_task(bind=True, max_retries=2, default_retry_delay=3)
+@shared_task(bind=True, max_retries=2, default_retry_delay=15)
 def process_asana_new_comments_task(self, asana_webhook_id: int) -> dict | None:
     try:
         asana_webhook = AsanaWebhookRequestData.objects.get(pk=asana_webhook_id)
