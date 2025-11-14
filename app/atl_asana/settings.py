@@ -52,6 +52,7 @@ INSTALLED_APPS = [
     "comment_notifier.apps.CommentNotifierConfig",
     "asana.apps.AsanaConfig",
     "webhook_pinger.apps.WebhookPingerConfig",
+    "message_sender.apps.default_auto_field",
 ]
 
 MIDDLEWARE = [
