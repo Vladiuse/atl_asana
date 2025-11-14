@@ -24,6 +24,8 @@ class UserTag(Enum):
     KKY = "kky"
     KOV = "kov"
     KVA_TECH = "kva_tech"
+    MMV = "mmv"
+    MJJ = "mjj"
     MDA = "mda"
     MGP = "mgp"
     MMI = "mmi"
