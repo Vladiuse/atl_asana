@@ -174,7 +174,13 @@ class AsanaCommentNotifier:
     def _notify_profiles_not_found(self, profiles: list[str], task_data: dict) -> None:
         if len(profiles) != 0:
             task_url = task_data["permalink_url"]
-            message = f"Not found asana user for profiles: {profiles}\nTask url: {task_url}"
+            message = f"""\
+                ⚠️ Not found asana user for profiles:
+    
+                Task url: {task_url}
+                Profiles: {profiles}                
+            """
+            message = normalize_multiline(message)
             self.message_sender.send_log_message(message=message)
 
     def process(self, comment_id: int) -> None:
