@@ -10,10 +10,6 @@ class AtlasProject(Enum):
     TECH_DIV_KVA = "1210393628043121"
 
 
-SOURCE_DIV_PROBLEMS_REQUESTS_COMPLETE_SECTION_ID = "1211350376356166"
-TECH_DIV_KVA_PROJECT_COMPLETE_SECTION_ID = "1210393628043136"
-
-
 class Position(models.TextChoices):
     BUYER = "buyer", "Баер"
     FARMER = "farmer", "Фармер"
