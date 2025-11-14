@@ -5,14 +5,14 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework.viewsets import ModelViewSet
 
-from .models import AsanaProject, AsanaWebhookRequestData
+from .models import AsanaWebhookProject, AsanaWebhookRequestData
 from .serializers import AsanaWebhookRequestDataSerializer
 from .tasks import process_asana_new_comments_task
 
 
 class AsanaWebhookView(APIView):
     def post(self, request, project_name, format=None):
-        project = get_object_or_404(AsanaProject, name=project_name)
+        project = get_object_or_404(AsanaWebhookProject, name=project_name)
         header_secret = request.headers.get("X-Hook-Secret")
         if header_secret and project.secret == "":
             return self.create_webhook_response(project=project, secret=header_secret)
@@ -37,7 +37,7 @@ class AsanaWebhookView(APIView):
         response["X-Hook-Secret"] = project.secret
         return response
 
-    def create_webhook_response(self, project: AsanaProject, secret: str) -> Response:
+    def create_webhook_response(self, project: AsanaWebhookProject, secret: str) -> Response:
         project.secret = secret
         project.save()
         data = {

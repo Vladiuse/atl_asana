@@ -13,7 +13,7 @@ from django.utils.text import Truncator
 
 from comment_notifier.services import AsanaCommentNotifier
 
-from .models import AsanaComment, AsanaProject, AsanaWebhookRequestData
+from .models import AsanaComment, AsanaWebhookProject, AsanaWebhookRequestData
 from .tasks import fetch_comment_tasks_urls_task, fetch_missing_project_comments_task
 from .use_cases import FetchCommentsAdditionalInfoUseCase
 
@@ -24,7 +24,7 @@ message_sender = MessageSender(request_sender=RequestsSender())
 repository = AsanaUserRepository(api_client=asana_client)
 
 
-@admin.register(AsanaProject)
+@admin.register(AsanaWebhookProject)
 class AsanaProjectAdmin(admin.ModelAdmin):
     list_display = ["name", "secret"]
     list_display_links = ["name"]
