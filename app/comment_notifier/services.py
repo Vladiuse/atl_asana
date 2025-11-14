@@ -81,7 +81,7 @@ class AsanaSourceProjectCommentMessageSender:
 
     def _get_notifier_func(self, asana_user: AtlasUser) -> Callable[[AtlasUser, CommentDto], dict | None]:
         if not all([asana_user.messenger_code, asana_user.position]):
-            return self._notify_not_full_user_data_to_sedn_message
+            return self._notify_not_full_user_data_to_send_message
 
         registry: dict[Position, Callable[[AtlasUser, CommentDto], dict | None]] = {
             Position.FARMER: self._notify_farmer,
@@ -96,7 +96,7 @@ class AsanaSourceProjectCommentMessageSender:
         task_url = comment_dto.task_data["permalink_url"]
         task_name = comment_dto.task_data["name"]
         message = f"""
-            {task_name}
+            Task name: {task_name}
             Task url: {task_url}
             Comment:
             {comment_dto.pretty_comment_text}
@@ -111,7 +111,7 @@ class AsanaSourceProjectCommentMessageSender:
         task_name = comment_dto.task_data["name"]
         task_url = comment_dto.task_data["permalink_url"]
         message = f"""
-            {task_name}
+            Task name: {task_name}
             
             Task url: {task_url}
             Comment:
@@ -126,7 +126,7 @@ class AsanaSourceProjectCommentMessageSender:
     def _notify_not_target_position(self, asana_user: AtlasUser,  comment_dto: CommentDto) -> None:
         pass
 
-    def _notify_not_full_user_data_to_sedn_message(self, asana_user: AtlasUser, comment_dto: CommentDto) -> None:
+    def _notify_not_full_user_data_to_send_message(self, asana_user: AtlasUser, comment_dto: CommentDto) -> None:
         task_url = comment_dto.task_data["permalink_url"]
         message = f"""
             ⚠️ Упомянут пользователь без должности или тэга мессенджера.
