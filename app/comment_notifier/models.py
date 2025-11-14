@@ -3,6 +3,7 @@ from django.db import models
 
 class AsanaWebhookProject(models.Model):
     name = models.CharField(max_length=100, unique=True)
+    project_id = models.CharField(max_length=50, unique=True)
     secret = models.CharField(max_length=100, blank=True)
 
 
