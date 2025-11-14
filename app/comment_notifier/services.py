@@ -14,7 +14,7 @@ from common import MessageSender
 from common.message_sender import UserTag
 from common.utils import normalize_multiline
 
-from .models import AsanaComment, AsanaWebhookRequestData, AsanaWebhookProject
+from .models import AsanaComment, AsanaWebhookProject, AsanaWebhookRequestData
 from .utils import extract_user_profile_id_from_text
 
 
@@ -77,7 +77,8 @@ class AsanaSourceProjectCommentMessageSender:
     """
     Comment notifier for "1211350261357695:Общий проект | SOURCE DIV | Запросы и Проблемы" project
     """
-    def __init__(self,message_sender: MessageSender):
+
+    def __init__(self, message_sender: MessageSender):
         self.message_sender = message_sender
 
     def _get_notifier_func(self, asana_user: AtlasUser) -> Callable[[AtlasUser, CommentDto], dict | None]:
@@ -123,7 +124,7 @@ class AsanaSourceProjectCommentMessageSender:
             message=message,
         )
 
-    def _notify_not_target_position(self, asana_user: AtlasUser,  comment_dto: CommentDto) -> None:
+    def _notify_not_target_position(self, asana_user: AtlasUser, comment_dto: CommentDto) -> None:
         pass
 
     def _notify_not_full_user_data_to_send_message(self, asana_user: AtlasUser, comment_dto: CommentDto) -> None:
