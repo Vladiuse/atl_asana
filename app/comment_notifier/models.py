@@ -4,10 +4,12 @@ from django.db import models
 class AsanaWebhookProject(models.Model):
     name = models.CharField(max_length=100, unique=True)
     project_id = models.CharField(max_length=50, unique=True)
+    project_name = models.CharField(max_length=254, blank=True)
+    project_url = models.URLField(blank=True)
     secret = models.CharField(max_length=100, blank=True)
 
     def __str__(self):
-        return self.name
+        return self.project_name if self.project_name else self.name
 
 
 class AsanaWebhookRequestData(models.Model):
