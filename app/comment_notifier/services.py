@@ -112,7 +112,6 @@ class AsanaSourceProjectCommentMessageSender:
         task_url = comment_dto.task_data["permalink_url"]
         message = f"""
             Task name: {task_name}
-            
             Task url: {task_url}
             Comment:
             {comment_dto.pretty_comment_text}
