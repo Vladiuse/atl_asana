@@ -43,6 +43,7 @@ class AsanaCommentAdmin(admin.ModelAdmin):
         "user_id",
         "task_id",
         "comment_id",
+        "project",
         "has_mention",
         "is_notified",
         "task_url_short",
@@ -50,7 +51,7 @@ class AsanaCommentAdmin(admin.ModelAdmin):
         "short_text",
         "created",
     )
-    list_filter = ("has_mention", "is_notified", "is_deleted")
+    list_filter = ("has_mention", "is_notified", "is_deleted", "project")
     ordering = ("-created",)
     search_fields = ("user_id", "task_id", "comment_id")
     actions = (
