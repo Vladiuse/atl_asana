@@ -1,4 +1,7 @@
+from typing import TYPE_CHECKING
+
 from django.db import models
+from django.db.models import QuerySet
 
 
 class AsanaWebhookProject(models.Model):
@@ -8,12 +11,20 @@ class AsanaWebhookProject(models.Model):
     project_url = models.URLField(blank=True)
     secret = models.CharField(max_length=100, blank=True)
 
+    if TYPE_CHECKING:
+        ignored_sections: "QuerySet[ProjectIgnoredSection]"
+
     def __str__(self):
         return self.project_name if self.project_name else self.name
 
 
 class ProjectIgnoredSection(models.Model):
-    project = models.ForeignKey(to=AsanaWebhookProject, on_delete=models.CASCADE)
+    project = models.ForeignKey(
+        to=AsanaWebhookProject,
+        on_delete=models.CASCADE,
+        related_name="ignored_sections",
+        related_query_name="ignored_section",
+    )
     section_id = models.CharField(max_length=30)
     section_name = models.CharField(max_length=254, blank=True)
 
