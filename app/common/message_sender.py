@@ -45,6 +45,7 @@ class UserTag(Enum):
 
 class MessageSender:
     URL = "https://atlasmainpanel.com/api/alert/custom"
+    USERS_URL = "https://atlasmainpanel.com/api/users"
     API_KEY = settings.DOMAIN_MESSAGE_API_KEY
     DOMAIN_HANDLER = "domain_check"
     KVA_USER = "kva_test"
@@ -109,3 +110,10 @@ class MessageSender:
 
     def send_log_message(self, message: str) -> str:
         return self.send_message(handler=self.KVA_USER, message=message)
+
+    def get_users(self) -> str:
+        return self.request_sender.request(
+            url=self.USERS_URL,
+            method="GET",
+            headers=self._auth_headers,
+        )
