@@ -91,18 +91,19 @@ class AsanaSourceProjectCommentMessageSender:
 
         return registry.get(asana_user.position, self._notify_not_target_position)
 
-    def _notify_farmer(self, asana_user: AtlasUser, comment_dto: CommentDto) -> dict:
+    def _notify_farmer(self, asana_user: AtlasUser, comment_dto: CommentDto) -> str:
+        _ = asana_user
         task_url = comment_dto.task_data["permalink_url"]
         task_name = comment_dto.task_data["name"]
-        message = f"""\
+        message = f"""
             {task_name}
             Task url: {task_url}
             Comment:
             {comment_dto.pretty_comment_text}
             """
         message = normalize_multiline(message)
-        return self.message_sender.send_message_to_user(
-            user_tags=[UserTag(asana_user.messenger_code)],
+        return self.message_sender.send_message(
+            handler=MessageSender.FARM_GROUP,
             message=message,
         )
 
@@ -127,7 +128,7 @@ class AsanaSourceProjectCommentMessageSender:
 
     def _notify_not_full_user_data_to_sedn_message(self, asana_user: AtlasUser, comment_dto: CommentDto) -> None:
         task_url = comment_dto.task_data["permalink_url"]
-        message = f"""\
+        message = f"""
             ⚠️ Упомянут пользователь без должности или тэга мессенджера.
             
             Пользователь:
@@ -174,7 +175,7 @@ class AsanaCommentNotifier:
     def _notify_profiles_not_found(self, profiles: list[str], task_data: dict) -> None:
         if len(profiles) != 0:
             task_url = task_data["permalink_url"]
-            message = f"""\
+            message = f"""
                 ⚠️ Not found asana user for profiles:
     
                 Task url: {task_url}
