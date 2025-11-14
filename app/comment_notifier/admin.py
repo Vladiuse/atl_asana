@@ -4,18 +4,19 @@ from asana.client import AsanaApiClient
 from asana.client.exception import AsanaApiClientError
 from asana.repository import AsanaUserRepository
 from common import MessageSender, RequestsSender
+from django import forms
 from django.conf import settings
 from django.contrib import admin, messages
 from django.db.models import QuerySet
 from django.http import HttpRequest
 from django.utils.html import format_html
 from django.utils.text import Truncator
-from django import forms
 
 from comment_notifier.services import AsanaCommentNotifier
 
-from .models import AsanaComment, AsanaWebhookProject, AsanaWebhookRequestData
-from .services import LoadAdditionalInfoForWebhookProject
+from .forms import ProjectIgnoredSectionForm
+from .models import AsanaComment, AsanaWebhookProject, AsanaWebhookRequestData, ProjectIgnoredSection
+from .services import LoadAdditionalInfoForProjectIgnoredSection, LoadAdditionalInfoForWebhookProject
 from .tasks import fetch_comment_tasks_urls_task, fetch_missing_project_comments_task
 from .use_cases import FetchCommentsAdditionalInfoUseCase
 
@@ -69,6 +70,49 @@ class AsanaProjectAdmin(admin.ModelAdmin):
                     level=messages.ERROR,
                 )
         self.message_user(request, message="Данные обновлены")
+
+
+@admin.register(ProjectIgnoredSection)
+class ProjectIgnoredSectionAdmin(admin.ModelAdmin):
+    list_display = ["project", "section_name", "section_id"]
+    list_display_links = ["section_id", "section_name"]
+    readonly_fields = ["section_name"]
+    actions = ["update_additional_section_data"]
+    form = ProjectIgnoredSectionForm
+
+    def save_model(
+        self,
+        request: HttpRequest,
+        obj: ProjectIgnoredSection,
+        form: ProjectIgnoredSectionForm,
+        change: bool,
+    ) -> None:
+        super().save_model(request, obj, form, change)
+        service = LoadAdditionalInfoForProjectIgnoredSection(asana_api_client=asana_client)
+        try:
+            service.load(project_ignored_section=obj)
+        except AsanaApiClientError:
+            self.message_user(
+                request,
+                message=f"Не удаллось обновить данные по секции: {obj}",
+                level=messages.ERROR,
+            )
+
+    @admin.action(description="Обновить доп. данные по секциям")
+    def update_additional_section_data(self, request: HttpRequest, queryset: QuerySet) -> None:
+        service = LoadAdditionalInfoForProjectIgnoredSection(asana_api_client=asana_client)
+        success_updated = 0
+        for section in queryset:
+            try:
+                service.load(project_ignored_section=section)
+                success_updated += 1
+            except AsanaApiClientError:
+                self.message_user(
+                    request,
+                    message=f"Не удаллось обновить данные по секции: {section}",
+                    level=messages.ERROR,
+                )
+        self.message_user(request, message=f"Обновленно секций: {success_updated}")
 
 
 @admin.register(AsanaWebhookRequestData)
