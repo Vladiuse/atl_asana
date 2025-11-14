@@ -6,10 +6,9 @@ from common import MessageSender, RequestsSender
 from django.conf import settings
 
 from .models import AsanaComment, AsanaWebhookRequestData
-from .services import ProcessAsanaNewCommentEvent
+from .services import ProcessAsanaNewCommentEvent, FetchCommentsAdditionalInfo
 from .use_cases import (
     AsanaCommentNotifierUseCase,
-    FetchCommentsAdditionalInfoUseCase,
     FetchMissingProjectCommentsUseCase,
 )
 
@@ -45,5 +44,5 @@ def notify_new_asana_comments_tasks() -> dict:
 @shared_task()
 def fetch_comment_tasks_urls_task() -> dict:
     queryset = AsanaComment.objects.all()
-    use_case = FetchCommentsAdditionalInfoUseCase(asana_api_client=asana_api_client)
+    use_case = FetchCommentsAdditionalInfo(asana_api_client=asana_api_client)
     return use_case.execute(queryset=queryset)
