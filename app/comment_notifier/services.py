@@ -331,3 +331,17 @@ class LoadAdditionalInfoForComment:
         comment.task_url = task_data["permalink_url"]
         comment.text = pretty_comment_text
         comment.save()
+
+
+@dataclass
+class LoadAdditionalInfoForWebhookProject:
+    asana_api_client: AsanaApiClient
+
+    def load(self, webhook_project: AsanaWebhookProject) -> None:
+        project_data = self.asana_api_client.get_project(
+            project_id=webhook_project.project_id,
+            opt_fields=["name", "permalink_url"],
+        )
+        webhook_project.project_name = project_data["name"]
+        webhook_project.project_url = project_data["permalink_url"]
+        webhook_project.save()
