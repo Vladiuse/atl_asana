@@ -6,7 +6,7 @@ from common import MessageSender, RequestsSender
 from django.conf import settings
 
 from .models import AsanaComment, AsanaWebhookRequestData
-from .services import ProcessAsanaNewCommentEvent, FetchCommentsAdditionalInfo
+from .services import FetchCommentsAdditionalInfo, ProcessAsanaNewCommentEvent
 from .use_cases import (
     AsanaCommentNotifierUseCase,
     FetchMissingProjectCommentsUseCase,
