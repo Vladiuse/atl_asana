@@ -1,22 +1,21 @@
 import logging
 from dataclasses import dataclass
 from time import sleep
-from typing import Callable, Generator
+from typing import Generator
 
 from asana.client import AsanaApiClient
-from asana.client.exception import AsanaApiClientError, AsanaForbiddenError, AsanaNotFoundError
-from asana.constants import Position
+from asana.client.exception import AsanaApiClientError
 from asana.models import AtlasUser
-from asana.repository import AsanaUserRepository
 from asana.services import AsanaCommentPrettifier, get_user_profile_url_mention_map
-from asana.utils import get_asana_profile_url_by_id
 from common import MessageSender
-from common.message_sender import UserTag
 from common.utils import normalize_multiline
 from django.db.models import Q, QuerySet
 
+from .collectors.comment_data import CommentDataCollector
+from .collectors.dto import CommentDto
+from .collectors.exceptions import CommentDeleted
 from .models import AsanaComment, AsanaWebhookProject, AsanaWebhookRequestData, ProjectIgnoredSection
-from .utils import extract_user_profile_id_from_text
+from .senders.main import SourceProjectSender
 
 
 class ProcessAsanaNewCommentEvent:
@@ -61,95 +60,6 @@ class ProcessAsanaNewCommentEvent:
         )
 
 
-@dataclass
-class CommentDto:
-    comment_model: AsanaComment
-    comment_data: dict
-    task_data: dict
-    pretty_comment_text: str
-    mention_users: list[AtlasUser]
-
-    @property
-    def has_mention(self) -> bool:
-        return bool(self.mention_users)
-
-
-class AsanaSourceProjectCommentMessageSender:
-    """
-    Comment notifier for "1211350261357695:Общий проект | SOURCE DIV | Запросы и Проблемы" project
-    """
-
-    def __init__(self, message_sender: MessageSender):
-        self.message_sender = message_sender
-
-    def _get_notifier_func(self, asana_user: AtlasUser) -> Callable[[AtlasUser, CommentDto], dict | None]:
-        if not all([asana_user.messenger_code, asana_user.position]):
-            return self._notify_not_full_user_data_to_send_message
-
-        registry: dict[Position, Callable[[AtlasUser, CommentDto], dict | None]] = {
-            Position.FARMER: self._notify_farmer,
-            Position.MANAGER: self._notify_baer_or_manager,
-            Position.BUYER: self._notify_baer_or_manager,
-        }
-
-        return registry.get(asana_user.position, self._notify_not_target_position)
-
-    def _notify_farmer(self, asana_user: AtlasUser, comment_dto: CommentDto) -> str:
-        _ = asana_user
-        task_url = comment_dto.task_data["permalink_url"]
-        task_name = comment_dto.task_data["name"]
-        message = f"""
-            Task name: {task_name}
-            Task url: {task_url}
-            Comment:
-            {comment_dto.pretty_comment_text}
-            """
-        message = normalize_multiline(message)
-        return self.message_sender.send_message(
-            handler=MessageSender.FARM_GROUP,
-            message=message,
-        )
-
-    def _notify_baer_or_manager(self, asana_user: AtlasUser, comment_dto: CommentDto) -> dict:
-        task_name = comment_dto.task_data["name"]
-        task_url = comment_dto.task_data["permalink_url"]
-        message = f"""
-            Task name: {task_name}
-            Task url: {task_url}
-            Comment:
-            {comment_dto.pretty_comment_text}
-        """
-        message = normalize_multiline(message)
-        return self.message_sender.send_message_to_user(
-            user_tags=[UserTag(asana_user.messenger_code)],
-            message=message,
-        )
-
-    def _notify_not_target_position(self, asana_user: AtlasUser, comment_dto: CommentDto) -> None:
-        pass
-
-    def _notify_not_full_user_data_to_send_message(self, asana_user: AtlasUser, comment_dto: CommentDto) -> None:
-        task_url = comment_dto.task_data["permalink_url"]
-        message = f"""
-            ⚠️ Упомянут пользователь без должности или тэга мессенджера.
-            
-            Пользователь:
-            Id: {asana_user.user_id}
-            Name: {asana_user.name}
-            Email: {asana_user.email}
-            Task url: {task_url}
-        """
-        message = normalize_multiline(message)
-        self.message_sender.send_log_message(message=message)
-
-    def notify(self, comment_dto: CommentDto) -> None:
-        for asana_user in comment_dto.mention_users:
-            notifier_func = self._get_notifier_func(asana_user=asana_user)
-            logging.info("Notify func: %s", notifier_func.__name__)
-            message_send_result = notifier_func(asana_user=asana_user, comment_dto=comment_dto)  # type: ignore[arg-type]
-            logging.info("message_send_result: %s", message_send_result)
-
-
 class AsanaCommentNotifier:
     def __init__(
         self,
@@ -157,12 +67,7 @@ class AsanaCommentNotifier:
         message_sender: MessageSender,
     ):
         self.asana_api_client = asana_api_client
-        self.asana_users_repository = AsanaUserRepository(api_client=self.asana_api_client)
         self.message_sender = message_sender
-
-    def _save_task_url(self, comment: AsanaComment, task_data: dict) -> None:
-        comment.task_url = task_data["permalink_url"]
-        comment.save()
 
     def _process_no_mentions_comment(self, comment: AsanaComment) -> None:
         comment.has_mention = False
@@ -174,17 +79,16 @@ class AsanaCommentNotifier:
         comment.is_notified = True
         comment.save()
 
-    def _notify_profiles_not_found(self, profiles: list[str], task_data: dict) -> None:
-        if len(profiles) != 0:
-            task_url = task_data["permalink_url"]
-            message = f"""
-                ⚠️ Not found asana user for profiles:
-    
-                Task url: {task_url}
-                Profiles: {profiles}                
-            """
-            message = normalize_multiline(message)
-            self.message_sender.send_log_message(message=message)
+    def _notify_profiles_not_found(self, comment_dto: CommentDto) -> None:
+        task_url = comment_dto.task_data["permalink_url"]
+        message = f"""
+            ⚠️ Not found asana user for profiles:
+
+            Task url: {task_url}
+            Profiles: {comment_dto.profile_url_not_found_in_db}                
+        """
+        message = normalize_multiline(message)
+        self.message_sender.send_log_message(message=message)
 
     def process(self, comment_id: int) -> None:
         """
@@ -193,50 +97,21 @@ class AsanaCommentNotifier:
         """
         logging.info("AsanaCommentNotifier comment_id: %s", comment_id)
         comment_model = AsanaComment.objects.get(comment_id=comment_id)
+        comment_data_collector = CommentDataCollector(
+            asana_api_client=self.asana_api_client,
+        )
         try:
-            task_data = self.asana_api_client.get_task(task_id=comment_model.task_id)
-            comment_data = self.asana_api_client.get_comment(comment_id=comment_id)
-        except (AsanaForbiddenError, AsanaNotFoundError):
+            comment_dto = comment_data_collector.collect(comment_model=comment_model)
+        except CommentDeleted:
             comment_model.mark_as_deleted()
-            logging.info("comment_id %s deleted", comment_id)
             return
-        logging.info("Raw comment text: %s", comment_data["text"])
-        self._save_task_url(comment=comment_model, task_data=task_data)
-        comment_mentions_profile_ids = extract_user_profile_id_from_text(text=comment_data["text"])
-        if len(comment_mentions_profile_ids) == 0:
-            self._process_no_mentions_comment(comment=comment_model)
-            logging.info("Mentions not found for comment")
-        else:
-            mention_users: list[AtlasUser] = []
-            users_profile_url_not_found_in_db: list[str] = []
-            for profile_id in comment_mentions_profile_ids:
-                try:
-                    asana_user = self.asana_users_repository.get(membership_id=profile_id)
-                    mention_users.append(asana_user)
-                except AsanaApiClientError as error:
-                    logging.error("AsanaApiClientError: %s", error)
-                    profile_url = get_asana_profile_url_by_id(profile_id=profile_id)
-                    users_profile_url_not_found_in_db.append(profile_url)
-            self._notify_profiles_not_found(
-                profiles=users_profile_url_not_found_in_db,
-                task_data=task_data,
-            )
-
-            profile_urls_mention_map = get_user_profile_url_mention_map(asana_users=AtlasUser.objects.all())
-            asana_comment_prettifier = AsanaCommentPrettifier(profile_urls_mention_map=profile_urls_mention_map)
-            pretty_comment_text = asana_comment_prettifier.prettify(comment_text=comment_data["text"])
-            comment_dto = CommentDto(
-                comment_model=comment_model,
-                comment_data=comment_data,
-                task_data=task_data,
-                mention_users=mention_users,
-                pretty_comment_text=pretty_comment_text,
-            )
-            asana_comment_message_sender = AsanaSourceProjectCommentMessageSender(
-                message_sender=self.message_sender,
-            )
-            asana_comment_message_sender.notify(comment_dto=comment_dto)
-            self._process_comment_with_mentions(comment=comment_model)
+        if len(comment_dto.profile_url_not_found_in_db) > 0:
+            self._notify_profiles_not_found(comment_dto=comment_dto)
+        asana_comment_message_sender = SourceProjectSender(
+            message_sender=self.message_sender,
+        )
+        asana_comment_message_sender.notify(comment_dto=comment_dto)
+        self._process_comment_with_mentions(comment=comment_model)
 
 
 class ProjectCommentsGenerator:
@@ -336,6 +211,7 @@ class LoadAdditionalInfoForProjectIgnoredSection:
         section_data = self.asana_api_client.get_section(project_ignored_section.section_id)
         project_ignored_section.section_name = section_data["name"]
         project_ignored_section.save()
+
 
 @dataclass
 class LoadCommentsAdditionalInfo:
