@@ -1,9 +1,7 @@
 import logging
 from dataclasses import dataclass
 from time import sleep
-from typing import Callable
-
-from django.db.models import QuerySet, Q
+from typing import Callable, Generator
 
 from asana.client import AsanaApiClient
 from asana.client.exception import AsanaApiClientError, AsanaForbiddenError, AsanaNotFoundError
@@ -15,6 +13,7 @@ from asana.utils import get_asana_profile_url_by_id
 from common import MessageSender
 from common.message_sender import UserTag
 from common.utils import normalize_multiline
+from django.db.models import Q, QuerySet
 
 from .models import AsanaComment, AsanaWebhookProject, AsanaWebhookRequestData, ProjectIgnoredSection
 from .utils import extract_user_profile_id_from_text
@@ -240,7 +239,7 @@ class AsanaCommentNotifier:
             self._process_comment_with_mentions(comment=comment_model)
 
 
-class FetchMissingProjectCommentsService:
+class ProjectCommentsGenerator:
     """
     Search comments in tasks in projects that not in DB. If you find - save it.
     In projects cant be ignored sections.
@@ -257,24 +256,21 @@ class FetchMissingProjectCommentsService:
              AsanaApiClientError: if cant get some data from asana
         """
         result = []
-        ignored_sections_ids = [ignored_section.section_id for ignored_section in  project.ignored_sections.all()]
+        ignored_sections_ids = [ignored_section.section_id for ignored_section in project.ignored_sections.all()]
         sections = self.asana_api_client.get_project_sections(project_id=project.project_id)
         for section_data in sections:
             if section_data["gid"] not in ignored_sections_ids:
                 result.append(section_data)
         return result
 
-    def execute(self, project: AsanaWebhookProject) -> dict:
+    def generate(self, project: AsanaWebhookProject) -> Generator[dict, None, None]:
         """
         Raises:
              AsanaApiClientError: if cant get some data from asana
         """
-        logging.info("FetchMissingProjectCommentsService: project: %s",project)
-        new_comments_count = 0
+        logging.info("%s: project: %s", self.__class__.__name__, project)
         sections_to_check = self._get_project_active_sections(project=project)
         logging.info("Sections to collect comments: %s", sections_to_check)
-        exists_comment_ids = set(AsanaComment.objects.values_list("comment_id", flat=True))
-        logging.info("exists_comment_ids: %s", len(exists_comment_ids))
         for section_data in sections_to_check:
             section_tasks = self.asana_api_client.get_section_tasks(
                 section_id=section_data["gid"],
@@ -293,18 +289,11 @@ class FetchMissingProjectCommentsService:
                     comment_id = int(comment_data["gid"])
                     if comment_data["created_by"] is not None:
                         user_id = comment_data["created_by"]["gid"]
-                        if comment_id not in exists_comment_ids:
-                            logging.info("find new comment: %s", comment_id)
-                            AsanaComment.objects.create(
-                                user_id=user_id,
-                                comment_id=comment_id,
-                                task_id=task_id,
-                                project=project,
-                            )
-                            new_comments_count += 1
-        logging.info("new_comments_count: %s", new_comments_count)
-        section_names = [section_data["name"] for section_data in sections_to_check]
-        return {"new_comments_count": new_comments_count, "sections": section_names}
+                        yield {
+                            "user_id": user_id,
+                            "comment_id": comment_id,
+                            "task_id": task_id,
+                        }
 
 
 class LoadAdditionalInfoForComment:

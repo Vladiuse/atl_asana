@@ -1,12 +1,15 @@
+import logging
 from datetime import timedelta
 
 from asana.client import AsanaApiClient
 from common import MessageSender
+from django.db import IntegrityError
 from django.db.models import QuerySet
 from django.utils import timezone
+from message_sender.tasks import send_log_message_task
 
 from .models import AsanaComment, AsanaWebhookProject
-from .services import AsanaCommentNotifier, FetchMissingProjectCommentsService
+from .services import AsanaCommentNotifier, ProjectCommentsGenerator
 
 
 class AsanaCommentNotifierUseCase:
@@ -36,13 +39,31 @@ class FetchMissingProjectCommentsUseCase:
 
     def execute(self) -> dict:
         use_case_result = {}
+        exists_comment_ids = set(AsanaComment.objects.values_list("comment_id", flat=True))
         projects = AsanaWebhookProject.objects.prefetch_related("ignored_sections")
+        project_comments_generator = ProjectCommentsGenerator(
+            asana_api_client=self.asana_api_client,
+        )
+        errors_count = 0
         for project in projects:
-            fetch_missing_project_comments_service = FetchMissingProjectCommentsService(
-                asana_api_client=self.asana_api_client,
-            )
-            result = fetch_missing_project_comments_service.execute(project=project)
-            use_case_result[project.project_name] = result
+            project_comments_count = 0
+            for comment_data in project_comments_generator.generate(project=project):
+                if comment_data["comment_id"] not in exists_comment_ids:
+                    logging.info("find new comment: %s", comment_data["comment_id"])
+                    try:
+                        AsanaComment.objects.create(
+                            user_id=comment_data["user_id"],
+                            comment_id=comment_data["comment_id"],
+                            task_id=comment_data["task_id"],
+                            project=project,
+                        )
+                        project_comments_count += 1
+                    except IntegrityError:
+                        message = (
+                            f"⚠️ {self.__class__.__name__}\nCant save asana comment: {comment_data['comment_id']}"
+                        )
+                        send_log_message_task.delay(message=message)
+                        errors_count += 1
+            use_case_result[str(project)] = project_comments_count
+        use_case_result["errors_count"] = errors_count
         return use_case_result
-
-
