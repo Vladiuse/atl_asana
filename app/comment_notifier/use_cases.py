@@ -58,10 +58,10 @@ class FetchMissingProjectCommentsUseCase:
                             project=project,
                         )
                         project_comments_count += 1
-                    except IntegrityError:
-                        message = (
-                            f"⚠️ {self.__class__.__name__}\nCant save asana comment: {comment_data['comment_id']}"
-                        )
+                    except IntegrityError as error:
+                        message = (f"⚠️ {self.__class__.__name__}\n"
+                                   f"Cant save asana comment: {comment_data['comment_id']}\n"
+                                   f"{error}")
                         send_log_message_task.delay(message=message)
                         errors_count += 1
             use_case_result[str(project)] = project_comments_count
