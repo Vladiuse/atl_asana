@@ -1,4 +1,5 @@
 import logging
+from dataclasses import dataclass
 from datetime import timedelta
 
 from asana.client import AsanaApiClient
@@ -33,11 +34,15 @@ class AsanaCommentNotifierUseCase:
         return {"processed_comments": len(comments)}
 
 
+@dataclass
 class FetchMissingProjectCommentsUseCase:
-    def __init__(self, asana_api_client: AsanaApiClient):
-        self.asana_api_client = asana_api_client
+    asana_api_client: AsanaApiClient
 
     def execute(self) -> dict:
+        """
+        Raises:
+             AsanaApiClientError: if cant get some data from asana
+        """
         use_case_result = {}
         exists_comment_ids = set(AsanaComment.objects.values_list("comment_id", flat=True))
         projects = AsanaWebhookProject.objects.prefetch_related("ignored_sections")
@@ -59,9 +64,11 @@ class FetchMissingProjectCommentsUseCase:
                         )
                         project_comments_count += 1
                     except IntegrityError as error:
-                        message = (f"⚠️ {self.__class__.__name__}\n"
-                                   f"Cant save asana comment: {comment_data['comment_id']}\n"
-                                   f"{error}")
+                        message = (
+                            f"⚠️ {self.__class__.__name__}\n"
+                            f"Cant save asana comment: {comment_data['comment_id']}\n"
+                            f"{error}"
+                        )
                         send_log_message_task.delay(message=message)
                         errors_count += 1
             use_case_result[str(project)] = project_comments_count
