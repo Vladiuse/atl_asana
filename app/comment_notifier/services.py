@@ -337,12 +337,11 @@ class LoadAdditionalInfoForProjectIgnoredSection:
         project_ignored_section.section_name = section_data["name"]
         project_ignored_section.save()
 
+@dataclass
+class LoadCommentsAdditionalInfo:
+    asana_api_client: AsanaApiClient
 
-class FetchCommentsAdditionalInfo:
-    def __init__(self, asana_api_client: AsanaApiClient):
-        self.asana_api_client = asana_api_client
-
-    def execute(self, queryset: QuerySet[AsanaComment]) -> dict:
+    def load(self, queryset: QuerySet[AsanaComment]) -> dict:
         comments_to_update = queryset.filter(
             Q(text="") | Q(task_url=""),
             is_deleted=False,

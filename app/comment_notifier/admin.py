@@ -12,7 +12,7 @@ from django.http import HttpRequest
 from django.utils.html import format_html
 from django.utils.text import Truncator
 
-from comment_notifier.services import AsanaCommentNotifier, FetchCommentsAdditionalInfo
+from comment_notifier.services import AsanaCommentNotifier, LoadCommentsAdditionalInfo
 
 from .forms import ProjectIgnoredSectionForm
 from .models import AsanaComment, AsanaWebhookProject, AsanaWebhookRequestData, ProjectIgnoredSection
@@ -207,8 +207,8 @@ class AsanaCommentAdmin(admin.ModelAdmin):
 
     @admin.action(description="Обновить ссылку на таск коммента и текст")
     def update_additional_comment_data(self, request: HttpRequest, queryset: QuerySet) -> None:
-        fetch_additional_comments_data_use_case = FetchCommentsAdditionalInfo(
+        fetch_additional_comments_data_use_case = LoadCommentsAdditionalInfo(
             asana_api_client=asana_client,
         )
-        result = fetch_additional_comments_data_use_case.execute(queryset=queryset)
+        result = fetch_additional_comments_data_use_case.load(queryset=queryset)
         self.message_user(request, message=f"Результат {result}")
