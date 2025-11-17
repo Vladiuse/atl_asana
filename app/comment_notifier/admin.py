@@ -170,10 +170,10 @@ class AsanaCommentAdmin(admin.ModelAdmin):
         result = fetch_comment_tasks_urls_task.delay()
         self.message_user(request, message=f"Таск запущен: {result.id}")
 
-    @admin.action(description="Найти пропущеные в проекте коментари (глобальный)")
+    @admin.action(description="Найти пропущеные коментари без отправки смс (глобальный)")
     def fetch_missing_project_comments(self, request: HttpRequest, queryset: QuerySet) -> None:
         _ = queryset
-        result = fetch_missing_project_comments_task.delay()
+        result = fetch_missing_project_comments_task.delay(send_messages=False)
         self.message_user(request, message=f"Таск запущен: {result.id}")
 
     @admin.action(description="Пометить как не отправленные")
