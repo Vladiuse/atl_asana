@@ -32,6 +32,8 @@ class FetchMissingProjectCommentsUseCase:
     asana_api_client: AsanaApiClient
 
     def execute(self) -> dict:
+        from .tasks import notify_new_asana_comments_tasks
+
         """
         Raises:
              AsanaApiClientError: if cant get some data from asana
@@ -56,6 +58,7 @@ class FetchMissingProjectCommentsUseCase:
                             project=project,
                         )
                         project_comments_count += 1
+                        notify_new_asana_comments_tasks.apply_async(args=[comment_data["comment_id"]], countdown=60)
                     except IntegrityError as error:
                         message = (
                             f"⚠️ {self.__class__.__name__}\n"
