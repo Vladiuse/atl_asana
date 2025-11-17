@@ -12,7 +12,8 @@ from django.http import HttpRequest
 from django.utils.html import format_html
 from django.utils.text import Truncator
 
-from comment_notifier.services import AsanaCommentNotifier, LoadCommentsAdditionalInfo
+from comment_notifier.services import LoadCommentsAdditionalInfo
+from comment_notifier.use_cases import AsanaCommentNotifierUseCase
 
 from .forms import ProjectIgnoredSectionForm
 from .models import AsanaComment, AsanaWebhookProject, AsanaWebhookRequestData, ProjectIgnoredSection
@@ -172,7 +173,7 @@ class AsanaCommentAdmin(admin.ModelAdmin):
 
     @admin.action(description="Пометить как необработанный")
     def mark_as_not_processed(self, request: HttpRequest, queryset: QuerySet) -> None:
-        queryset.update(has_mention=None, is_notified=None, is_deleted=False)
+        queryset.update(has_mention=None, is_notified=None, is_deleted=False, task_url="", text="", send_result={})
         self.message_user(request, message=f"{queryset.count()} комментариев помечены как необработанные")
 
     @admin.action(description="Обработать комментарий и оповестить")
@@ -185,13 +186,13 @@ class AsanaCommentAdmin(admin.ModelAdmin):
             )
             return
         success_processed_comments = 0
-        notifier = AsanaCommentNotifier(
+        notifier = AsanaCommentNotifierUseCase(
             asana_api_client=asana_client,
             message_sender=message_sender,
         )
         for comment in queryset:
             try:
-                notifier.process(comment_id=comment.comment_id)
+                notifier.execute(comment_id=comment.comment_id)
                 success_processed_comments += 1
             except AsanaApiClientError:
                 self.message_user(
