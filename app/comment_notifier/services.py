@@ -104,6 +104,8 @@ class AsanaCommentNotifier:
         comment_model.has_mention = comment_dto.has_mention
         comment_model.is_notified = send_result.is_send
         comment_model.send_result = asdict(send_result)
+        comment_model.task_url = comment_dto.task_data["permalink_url"]
+        comment_model.text = comment_dto.pretty_comment_text
         comment_model.save()
 
 
