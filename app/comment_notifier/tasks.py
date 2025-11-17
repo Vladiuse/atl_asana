@@ -16,11 +16,21 @@ asana_api_client = AsanaApiClient(api_key=settings.ASANA_API_KEY)
 message_sender = MessageSender(request_sender=RequestsSender())
 
 
+@shared_task(bind=True, max_retries=2, default_retry_delay=60)
+def notify_new_asana_comments_tasks(self, comment_id: str) -> None:
+    try:
+        use_case = AsanaCommentNotifierUseCase(asana_api_client=asana_api_client, message_sender=message_sender)
+        return use_case.execute(comment_id=comment_id)
+    except Exception as error:  # noqa: BLE001
+        self.retry(exc=error)
+
 @shared_task(bind=True, max_retries=2, default_retry_delay=15)
 def process_asana_new_comments_task(self, asana_webhook_id: int) -> dict | None:
     try:
         asana_webhook = AsanaWebhookRequestData.objects.get(pk=asana_webhook_id)
         result = ProcessAsanaNewCommentEvent().process(asana_webhook)
+        for asana_new_comment_event in result.comments:
+            notify_new_asana_comments_tasks.apply_async(args=[asana_new_comment_event.comment_id], countdown=60)
         return asdict(result)
     except Exception as error:  # noqa: BLE001
         self.retry(exc=error)
@@ -34,11 +44,6 @@ def fetch_missing_project_comments_task(self) -> dict | None:
     except Exception as error:  # noqa: BLE001
         self.retry(exc=error)
 
-
-@shared_task()
-def notify_new_asana_comments_tasks() -> dict:
-    use_case = AsanaCommentNotifierUseCase(asana_api_client=asana_api_client, message_sender=message_sender)
-    return use_case.execute()
 
 
 @shared_task()
