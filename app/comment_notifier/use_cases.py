@@ -11,12 +11,10 @@ from .senders import SourceProjectSender
 from .services import AsanaCommentNotifier, ProjectCommentsGenerator
 
 
+@dataclass
 class AsanaCommentNotifierUseCase:
-    MINUTES_AGO = 1
-
-    def __init__(self, asana_api_client: AsanaApiClient, message_sender: MessageSender):
-        self.asana_api_client = asana_api_client
-        self.message_sender = message_sender
+    asana_api_client: AsanaApiClient
+    message_sender: MessageSender
 
     def execute(self, comment_id) -> None:
         comment_notifier = AsanaCommentNotifier(
