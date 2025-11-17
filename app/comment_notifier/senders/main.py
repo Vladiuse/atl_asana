@@ -24,6 +24,24 @@ class SilentSender(BaseCommentSender):
         _ = comment_dto
         return CommentSendMessageResult(is_send=False, messages=[])
 
+@register_sender(
+    name="LogSender",
+    description="Отправка дебаг сообщения",
+)
+class LogSender(BaseCommentSender):
+    def notify(self, comment_dto: CommentDto) -> CommentSendMessageResult:
+        logging.info("Sender: %s", self.__class__.__name__)
+        task_url = comment_dto.task_data["permalink_url"]
+        task_name = comment_dto.task_data["name"]
+        message = f"""
+            Task name: {task_name}
+            Task url: {task_url}
+            Comment:
+            {comment_dto.pretty_comment_text}
+            """
+        message = self._normalize_message(message)
+        result = self.message_sender.send_log_message(message=message)
+        return CommentSendMessageResult(is_send=False, messages=[result])
 
 @register_sender(
     name="PersonalSender",
