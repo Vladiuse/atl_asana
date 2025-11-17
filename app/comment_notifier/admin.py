@@ -16,7 +16,13 @@ from comment_notifier.services import LoadCommentsAdditionalInfo
 from comment_notifier.use_cases import AsanaCommentNotifierUseCase
 
 from .forms import ProjectIgnoredSectionForm
-from .models import AsanaComment, AsanaWebhookProject, AsanaWebhookRequestData, ProjectIgnoredSection
+from .models import (
+    AsanaComment,
+    AsanaWebhookProject,
+    AsanaWebhookRequestData,
+    ProjectIgnoredSection,
+    ProjectNotifySender,
+)
 from .services import LoadAdditionalInfoForProjectIgnoredSection, LoadAdditionalInfoForWebhookProject
 from .tasks import fetch_comment_tasks_urls_task, fetch_missing_project_comments_task
 
@@ -29,7 +35,7 @@ repository = AsanaUserRepository(api_client=asana_client)
 
 @admin.register(AsanaWebhookProject)
 class AsanaProjectAdmin(admin.ModelAdmin):
-    list_display = ["name", "secret", "project_name", "project_url_short"]
+    list_display = ["name", "secret", "project_name", "project_url_short", "message_sender"]
     list_display_links = ["name"]
     actions = ["update_project_data"]
 
@@ -213,3 +219,10 @@ class AsanaCommentAdmin(admin.ModelAdmin):
         )
         result = fetch_additional_comments_data_use_case.load(queryset=queryset)
         self.message_user(request, message=f"Результат {result}")
+
+
+@admin.register(ProjectNotifySender)
+class ProjectNotifySenderAdmin(admin.ModelAdmin):
+    list_display = ["name", "description"]
+    list_display_links = ["name"]
+    readonly_fields = ["name", "description"]

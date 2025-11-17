@@ -4,12 +4,26 @@ from django.db import models
 from django.db.models import QuerySet
 
 
+class ProjectNotifySender(models.Model):
+    name = models.CharField(max_length=100, unique=True)
+    description = models.CharField(max_length=254)
+
+    def __str__(self):
+        return self.name
+
+
 class AsanaWebhookProject(models.Model):
     name = models.CharField(max_length=100, unique=True)
     project_id = models.CharField(max_length=50, unique=True)
     project_name = models.CharField(max_length=254, blank=True)
     project_url = models.URLField(blank=True)
     secret = models.CharField(max_length=100, blank=True)
+    message_sender = models.ForeignKey(
+        to=ProjectNotifySender,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+    )
 
     if TYPE_CHECKING:
         ignored_sections: "QuerySet[ProjectIgnoredSection]"
