@@ -1,5 +1,5 @@
 import logging
-from dataclasses import dataclass
+from dataclasses import asdict, dataclass
 from time import sleep
 from typing import Generator
 
@@ -16,6 +16,7 @@ from .collectors.dto import CommentDto
 from .collectors.exceptions import CommentDeleted
 from .models import AsanaComment, AsanaWebhookProject, AsanaWebhookRequestData, ProjectIgnoredSection
 from .senders import BaseCommentSender
+from .senders.dto import CommentSendMessageResult
 
 
 class ProcessAsanaNewCommentEvent:
@@ -71,16 +72,6 @@ class AsanaCommentNotifier:
         self.message_sender = message_sender
         self.comment_notifier = comment_notifier
 
-    def _process_no_mentions_comment(self, comment: AsanaComment) -> None:
-        comment.has_mention = False
-        comment.is_notified = False
-        comment.save()
-
-    def _process_comment_with_mentions(self, comment: AsanaComment) -> None:
-        comment.has_mention = True
-        comment.is_notified = True
-        comment.save()
-
     def _notify_profiles_not_found(self, comment_dto: CommentDto) -> None:
         task_url = comment_dto.task_data["permalink_url"]
         message = f"""
@@ -109,8 +100,11 @@ class AsanaCommentNotifier:
             return
         if len(comment_dto.profile_url_not_found_in_db) > 0:
             self._notify_profiles_not_found(comment_dto=comment_dto)
-        self.comment_notifier.notify(comment_dto=comment_dto)
-        self._process_comment_with_mentions(comment=comment_model)
+        send_result: CommentSendMessageResult = self.comment_notifier.notify(comment_dto=comment_dto)
+        comment_model.has_mention = comment_dto.has_mention
+        comment_model.is_notified = send_result.is_send
+        comment_model.send_result = asdict(send_result)
+        comment_model.save()
 
 
 class ProjectCommentsGenerator:
