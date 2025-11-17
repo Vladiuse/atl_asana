@@ -6,8 +6,9 @@ from common import MessageSender
 from django.db import IntegrityError
 from message_sender.tasks import send_log_message_task
 
-from .models import AsanaComment, AsanaWebhookProject
-from .senders import SourceProjectSender
+from .exceptions import NoSenderClassInProject
+from .models import AsanaComment, AsanaWebhookProject, ProjectNotifySender
+from .senders.registry import SENDERS_REGISTRY
 from .services import AsanaCommentNotifier, ProjectCommentsGenerator
 
 
@@ -17,12 +18,22 @@ class AsanaCommentNotifierUseCase:
     message_sender: MessageSender
 
     def execute(self, comment_id) -> None:
+        logging.info("AsanaCommentNotifier comment_id: %s", comment_id)
+        comment_model = AsanaComment.objects.get(comment_id=comment_id)
+        project: AsanaWebhookProject = comment_model.project
+        if project.message_sender is None:
+            from message_sender.tasks import send_log_message_task
+
+            message = f"🛑 {self.__class__.__name__}\nSet {ProjectNotifySender.__name__} for project: {project}"
+            send_log_message_task.delay(message=message)
+            raise NoSenderClassInProject(message)
+        project_message_sender = SENDERS_REGISTRY[project.message_sender.name].sender
         comment_notifier = AsanaCommentNotifier(
             asana_api_client=self.asana_api_client,
             message_sender=self.message_sender,
-            comment_notifier=SourceProjectSender(message_sender=self.message_sender),
+            comment_notifier=project_message_sender(message_sender=self.message_sender),
         )
-        comment_notifier.process(comment_id=comment_id)
+        comment_notifier.process(comment_model=comment_model)
 
 
 @dataclass

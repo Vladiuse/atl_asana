@@ -91,13 +91,11 @@ class AsanaCommentNotifier:
         message = normalize_multiline(message)
         self.message_sender.send_log_message(message=message)
 
-    def process(self, comment_id: int) -> None:
+    def process(self, comment_model: AsanaComment) -> None:
         """
         Raises:
              AsanaApiClientError: if cant get some data from asana
         """
-        logging.info("AsanaCommentNotifier comment_id: %s", comment_id)
-        comment_model = AsanaComment.objects.get(comment_id=comment_id)
         comment_data_collector = CommentDataCollector(
             asana_api_client=self.asana_api_client,
         )
