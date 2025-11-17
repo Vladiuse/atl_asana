@@ -15,7 +15,7 @@ from .collectors.comment_data import CommentDataCollector
 from .collectors.dto import CommentDto
 from .collectors.exceptions import CommentDeleted
 from .models import AsanaComment, AsanaWebhookProject, AsanaWebhookRequestData, ProjectIgnoredSection
-from .senders.main import SourceProjectSender
+from .senders import BaseCommentSender
 
 
 class ProcessAsanaNewCommentEvent:
@@ -65,9 +65,11 @@ class AsanaCommentNotifier:
         self,
         asana_api_client: AsanaApiClient,
         message_sender: MessageSender,
+        comment_notifier: BaseCommentSender,
     ):
         self.asana_api_client = asana_api_client
         self.message_sender = message_sender
+        self.comment_notifier = comment_notifier
 
     def _process_no_mentions_comment(self, comment: AsanaComment) -> None:
         comment.has_mention = False
@@ -107,10 +109,7 @@ class AsanaCommentNotifier:
             return
         if len(comment_dto.profile_url_not_found_in_db) > 0:
             self._notify_profiles_not_found(comment_dto=comment_dto)
-        asana_comment_message_sender = SourceProjectSender(
-            message_sender=self.message_sender,
-        )
-        asana_comment_message_sender.notify(comment_dto=comment_dto)
+        self.comment_notifier.notify(comment_dto=comment_dto)
         self._process_comment_with_mentions(comment=comment_model)
 
 

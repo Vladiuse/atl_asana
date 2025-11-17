@@ -5,10 +5,10 @@ from asana.constants import Position
 from asana.models import AtlasUser
 from common import MessageSender
 from common.message_sender import UserTag
-from common.utils import normalize_multiline
 
 from ..collectors.dto import CommentDto
 from .abstract import BaseCommentSender
+from .dto import CommentSendMessageResult
 
 
 class SourceProjectSender(BaseCommentSender):
@@ -38,7 +38,7 @@ class SourceProjectSender(BaseCommentSender):
             Comment:
             {comment_dto.pretty_comment_text}
             """
-        message = normalize_multiline(message)
+        message = self._normalize_message(message)
         return self.message_sender.send_message(
             handler=MessageSender.FARM_GROUP,
             message=message,
@@ -53,7 +53,7 @@ class SourceProjectSender(BaseCommentSender):
             Comment:
             {comment_dto.pretty_comment_text}
         """
-        message = normalize_multiline(message)
+        message = self._normalize_message(message)
         return self.message_sender.send_message_to_user(
             user_tags=[UserTag(asana_user.messenger_code)],
             message=message,
@@ -62,7 +62,7 @@ class SourceProjectSender(BaseCommentSender):
     def _notify_not_target_position(self, asana_user: AtlasUser, comment_dto: CommentDto) -> None:
         pass
 
-    def _notify_not_full_user_data_to_send_message(self, asana_user: AtlasUser, comment_dto: CommentDto) -> None:
+    def _notify_not_full_user_data_to_send_message(self, asana_user: AtlasUser, comment_dto: CommentDto) -> dict:
         task_url = comment_dto.task_data["permalink_url"]
         message = f"""
             ⚠️ Упомянут пользователь без должности или тэга мессенджера.
@@ -73,12 +73,18 @@ class SourceProjectSender(BaseCommentSender):
             Email: {asana_user.email}
             Task url: {task_url}
         """
-        message = normalize_multiline(message)
-        self.message_sender.send_log_message(message=message)
+        message = self._normalize_message(message)
+        return self.message_sender.send_log_message(message=message)
 
-    def notify(self, comment_dto: CommentDto) -> None:
+    def notify(self, comment_dto: CommentDto) -> CommentSendMessageResult:
+        send_messages = []
         for asana_user in comment_dto.mention_users:
             notifier_func = self._get_notifier_func(asana_user=asana_user)
             logging.info("Notify func: %s", notifier_func.__name__)
             message_send_result = notifier_func(asana_user=asana_user, comment_dto=comment_dto)  # type: ignore[arg-type]
             logging.info("message_send_result: %s", message_send_result)
+            send_messages.append(message_send_result)
+        return CommentSendMessageResult(
+            is_send=comment_dto.has_mention,
+            messages=send_messages,
+        )
