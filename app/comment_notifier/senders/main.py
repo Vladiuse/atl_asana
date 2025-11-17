@@ -9,16 +9,17 @@ from common.message_sender import UserTag
 from ..collectors.dto import CommentDto
 from .abstract import BaseCommentSender
 from .dto import CommentSendMessageResult
+from .exceptions import CantNotify
 
 
 class SourceProjectSender(BaseCommentSender):
     """
-    Comment notifier for "1211350261357695:Общий проект | SOURCE DIV | Запросы и Проблемы" project
+    Send personal message for Buyer or manager, if farmer position - send sms to farmers chat.
     """
 
     def _get_notifier_func(self, asana_user: AtlasUser) -> Callable[[AtlasUser, CommentDto], dict | None]:
         if not all([asana_user.messenger_code, asana_user.position]):
-            return self._notify_not_full_user_data_to_send_message
+            raise CantNotify(f"User not have position on message code, user {asana_user.user_id}")
 
         registry: dict[Position, Callable[[AtlasUser, CommentDto], dict | None]] = {
             Position.FARMER: self._notify_farmer,
@@ -62,28 +63,17 @@ class SourceProjectSender(BaseCommentSender):
     def _notify_not_target_position(self, asana_user: AtlasUser, comment_dto: CommentDto) -> None:
         pass
 
-    def _notify_not_full_user_data_to_send_message(self, asana_user: AtlasUser, comment_dto: CommentDto) -> dict:
-        task_url = comment_dto.task_data["permalink_url"]
-        message = f"""
-            ⚠️ Упомянут пользователь без должности или тэга мессенджера.
-            
-            Пользователь:
-            Id: {asana_user.user_id}
-            Name: {asana_user.name}
-            Email: {asana_user.email}
-            Task url: {task_url}
-        """
-        message = self._normalize_message(message)
-        return self.message_sender.send_log_message(message=message)
-
     def notify(self, comment_dto: CommentDto) -> CommentSendMessageResult:
         send_messages = []
         for asana_user in comment_dto.mention_users:
-            notifier_func = self._get_notifier_func(asana_user=asana_user)
-            logging.info("Notify func: %s", notifier_func.__name__)
-            message_send_result = notifier_func(asana_user=asana_user, comment_dto=comment_dto)  # type: ignore[arg-type]
-            logging.info("message_send_result: %s", message_send_result)
-            send_messages.append(message_send_result)
+            try:
+                notifier_func = self._get_notifier_func(asana_user=asana_user)
+                logging.info("Notify func: %s", notifier_func.__name__)
+                message_send_result = notifier_func(asana_user=asana_user, comment_dto=comment_dto)  # type: ignore[arg-type]
+                logging.info("message_send_result: %s", message_send_result)
+                send_messages.append(message_send_result)
+            except CantNotify as error:
+                self._send_log_cant_notify(comment_dto=comment_dto, reason=str(error))
         return CommentSendMessageResult(
             is_send=comment_dto.has_mention,
             messages=send_messages,
