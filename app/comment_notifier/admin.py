@@ -147,6 +147,7 @@ class AsanaCommentAdmin(admin.ModelAdmin):
     search_fields = ("user_id", "task_id", "comment_id")
     actions = (
         "fetch_task_urls",
+        "mark_comments_as_sent",
         "fetch_missing_project_comments",
         "mark_as_not_notified",
         "mark_as_not_processed",
@@ -169,6 +170,11 @@ class AsanaCommentAdmin(admin.ModelAdmin):
         _ = queryset
         result = fetch_comment_tasks_urls_task.delay()
         self.message_user(request, message=f"Таск запущен: {result.id}")
+
+    @admin.action(description="Поменить коментарии как отправленые")
+    def mark_comments_as_sent(self, request: HttpRequest, queryset: QuerySet) -> None:
+        queryset.update(is_notified=False)
+        self.message_user(request, message=f"{queryset.count()} помечены как отправленные")
 
     @admin.action(description="Найти пропущеные коментари без отправки смс (глобальный)")
     def fetch_missing_project_comments(self, request: HttpRequest, queryset: QuerySet) -> None:
