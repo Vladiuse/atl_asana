@@ -16,7 +16,7 @@ asana_api_client = AsanaApiClient(api_key=settings.ASANA_API_KEY)
 message_sender = MessageSender(request_sender=RequestsSender())
 
 
-@shared_task(bind=True, max_retries=2, default_retry_delay=60)
+@shared_task(bind=True, max_retries=2, default_retry_delay=60 * 5)
 def notify_new_asana_comments_tasks(self, comment_id: str) -> None:
     try:
         use_case = AsanaCommentNotifierUseCase(asana_api_client=asana_api_client, message_sender=message_sender)
@@ -36,7 +36,7 @@ def process_asana_new_comments_task(self, asana_webhook_id: int) -> dict | None:
         self.retry(exc=error)
 
 
-@shared_task(bind=True, max_retries=2, default_retry_delay=60)
+@shared_task(bind=True, max_retries=1, default_retry_delay=60 * 3)
 def fetch_missing_project_comments_task(self) -> dict | None:
     try:
         use_case = FetchMissingProjectCommentsUseCase(asana_api_client=asana_api_client)
