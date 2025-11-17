@@ -34,6 +34,7 @@ class LogSender(BaseCommentSender):
         task_url = comment_dto.task_data["permalink_url"]
         task_name = comment_dto.task_data["name"]
         message = f"""
+            ℹ️ Log message 
             Task name: {task_name}
             Task url: {task_url}
             Comment:
