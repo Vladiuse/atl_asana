@@ -67,7 +67,7 @@ class AtlasUserAdmin(admin.ModelAdmin):
             self.message_user(request, message, level=messages.ERROR)
         self.message_user(request, f"Успешно отправлено {success_send_count} сообщений", level=messages.SUCCESS)
 
-    @admin.action(description="Обновить пользователей асаны")
+    @admin.action(description="Обновить пользователей асаны (глобальный)")
     def update_asana_users(self, request: HttpRequest, queryset: QuerySet) -> None:
         _ = queryset
         try:
