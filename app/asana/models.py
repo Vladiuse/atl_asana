@@ -1,5 +1,4 @@
 from common.message_sender import UserTag
-from django.core.exceptions import ValidationError
 from django.db import models
 
 from .constants import Position
@@ -36,4 +35,3 @@ class AtlasUser(models.Model):
     @property
     def profile_url(self) -> str:
         return get_asana_profile_url_by_id(profile_id=self.membership_id)
-
