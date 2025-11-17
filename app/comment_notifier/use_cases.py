@@ -57,7 +57,7 @@ class FetchMissingProjectCommentsUseCase:
         for project in projects:
             project_comments_count = 0
             for comment_data in project_comments_generator.generate(project=project):
-                if comment_data["comment_id"] not in exists_comment_ids:
+                if str(comment_data["comment_id"]) not in exists_comment_ids:
                     logging.info("find new comment: %s", comment_data["comment_id"])
                     try:
                         AsanaComment.objects.create(
@@ -72,9 +72,10 @@ class FetchMissingProjectCommentsUseCase:
                                 args=[comment_data["comment_id"]], countdown=60,
                             )
                     except IntegrityError as error:
+                        logging.warning("IntegrityError save comment: %s", comment_data)
                         message = (
                             f"⚠️ {self.__class__.__name__}\n"
-                            f"Cant save asana comment: {comment_data['comment_id']}\n"
+                            f"Cant save asana comment: {comment_data}\n"
                             f"{error}"
                         )
                         send_log_message_task.delay(message=message)
