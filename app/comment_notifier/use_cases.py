@@ -1,15 +1,13 @@
 import logging
 from dataclasses import dataclass
-from datetime import timedelta
 
 from asana.client import AsanaApiClient
 from common import MessageSender
 from django.db import IntegrityError
-from django.db.models import QuerySet
-from django.utils import timezone
 from message_sender.tasks import send_log_message_task
 
 from .models import AsanaComment, AsanaWebhookProject
+from .senders import SourceProjectSender
 from .services import AsanaCommentNotifier, ProjectCommentsGenerator
 
 
@@ -18,20 +16,15 @@ class AsanaCommentNotifierUseCase:
 
     def __init__(self, asana_api_client: AsanaApiClient, message_sender: MessageSender):
         self.asana_api_client = asana_api_client
-        self.comment_notify_service = AsanaCommentNotifier(
-            asana_api_client=asana_api_client,
-            message_sender=message_sender,
+        self.message_sender = message_sender
+
+    def execute(self, comment_id) -> None:
+        comment_notifier = AsanaCommentNotifier(
+            asana_api_client=self.asana_api_client,
+            message_sender=self.message_sender,
+            comment_notifier=SourceProjectSender(message_sender=self.message_sender),
         )
-
-    def _get_comments_to_notify(self) -> QuerySet[AsanaComment]:
-        cutoff = timezone.now() - timedelta(minutes=self.MINUTES_AGO)
-        return AsanaComment.objects.filter(is_deleted=False, is_notified=None, created__lt=cutoff)
-
-    def execute(self) -> dict:
-        comments = self._get_comments_to_notify()
-        for comment_model in comments:
-            self.comment_notify_service.process(comment_id=comment_model.comment_id)
-        return {"processed_comments": len(comments)}
+        comment_notifier.process(comment_id=comment_id)
 
 
 @dataclass
