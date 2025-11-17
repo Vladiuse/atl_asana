@@ -275,8 +275,10 @@ class SenderRegistrySynchronizer:
                     description=sender_info.description,
                 )
                 new_created += 1
-        return {
+        result = {
             "deleted": deleted,
             "new_created": new_created,
             "updated": updated,
         }
+        logging.info("Result: %s", result)
+        return result
