@@ -226,3 +226,9 @@ class ProjectNotifySenderAdmin(admin.ModelAdmin):
     list_display = ["name", "description"]
     list_display_links = ["name"]
     readonly_fields = ["name", "description"]
+
+    def has_add_permission(self, request: HttpRequest, obj: ProjectNotifySender | None = None) -> bool:  # noqa: ARG002
+        return False
+
+    def has_delete_permission(self, request: HttpRequest, obj: ProjectNotifySender | None = None) -> bool:  # noqa: ARG002
+        return False

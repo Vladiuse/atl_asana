@@ -9,14 +9,22 @@ from asana.models import AtlasUser
 from asana.services import AsanaCommentPrettifier, get_user_profile_url_mention_map
 from common import MessageSender
 from common.utils import normalize_multiline
+from django.db import transaction
 from django.db.models import Q, QuerySet
 
 from .collectors.comment_data import CommentDataCollector
 from .collectors.dto import CommentDto
 from .collectors.exceptions import CommentDeleted
-from .models import AsanaComment, AsanaWebhookProject, AsanaWebhookRequestData, ProjectIgnoredSection
+from .models import (
+    AsanaComment,
+    AsanaWebhookProject,
+    AsanaWebhookRequestData,
+    ProjectIgnoredSection,
+    ProjectNotifySender,
+)
 from .senders import BaseCommentSender
 from .senders.dto import CommentSendMessageResult
+from .senders.registry import SENDERS_REGISTRY
 
 
 class ProcessAsanaNewCommentEvent:
@@ -243,4 +251,34 @@ class LoadCommentsAdditionalInfo:
         return {
             "success_updated": success_updated,
             "errors_count": len(errors),
+        }
+
+
+class SenderRegistrySynchronizer:
+    @transaction.atomic
+    def synchronize(self) -> dict[str, int]:
+        sender_names_db = ProjectNotifySender.objects.values_list("name", flat=True)
+        sender_names_register = list(SENDERS_REGISTRY)
+        to_delete = set(sender_names_db) - set(sender_names_register)
+        ProjectNotifySender.objects.filter(name__in=to_delete).delete()
+        logging.info("Senders to delete: %s", to_delete)
+        deleted = len(to_delete)
+        new_created = 0
+        updated = 0
+        for sender_name, sender_info in SENDERS_REGISTRY.items():
+            try:
+                sender = ProjectNotifySender.objects.get(name=sender_name)
+                sender.description = sender_info.description
+                sender.save()
+                updated += 1
+            except ProjectNotifySender.DoesNotExist:
+                ProjectNotifySender.objects.create(
+                    name=sender_info.name,
+                    description=sender_info.description,
+                )
+                new_created += 1
+        return {
+            "deleted": deleted,
+            "new_created": new_created,
+            "updated": updated,
         }
