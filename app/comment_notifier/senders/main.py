@@ -6,12 +6,60 @@ from asana.models import AtlasUser
 from common import MessageSender
 from common.message_sender import UserTag
 
-from ..collectors.dto import CommentDto
+from comment_notifier.collectors.dto import CommentDto
+
 from .abstract import BaseCommentSender
 from .dto import CommentSendMessageResult
 from .exceptions import CantNotify
+from .registry import register_sender
 
 
+@register_sender(
+    name="SilentSender",
+    description="Не отправляет сообщения",
+)
+class SilentSender(BaseCommentSender):
+    def notify(self, comment_dto: CommentDto) -> CommentSendMessageResult:
+        _ = comment_dto
+        return CommentSendMessageResult(is_send=False, messages=[])
+
+
+@register_sender(
+    name="PersonalSender",
+    description="Отправка сообщения в личку упомянутого пользователя",
+)
+class PersonalSender(BaseCommentSender):
+    def notify(self, comment_dto: CommentDto) -> CommentSendMessageResult:
+        send_messages = []
+        for asana_user in comment_dto.mention_users:
+            if asana_user.messenger_code is None:
+                reason = f"User {asana_user.user_id} not have message tag to send message"
+                self._send_log_cant_notify(comment_dto=comment_dto, reason=reason)
+            else:
+                task_url = comment_dto.task_data["permalink_url"]
+                task_name = comment_dto.task_data["name"]
+                message = f"""
+                    Task name: {task_name}
+                    Task url: {task_url}
+                    Comment:
+                    {comment_dto.pretty_comment_text}
+                    """
+                message = self._normalize_message(message)
+                send_result = self.message_sender.send_message_to_user(
+                    user_tags=[UserTag(asana_user.messenger_code)],
+                    message=message,
+                )
+                send_messages.append(send_result)
+        return CommentSendMessageResult(
+            is_send=bool(send_messages),
+            messages=send_messages,
+        )
+
+
+@register_sender(
+    name="SourceProjectSender",
+    description="Баерам, менеджерам сообщение в личку, фармерам - в группу фарма, остальные позиции игнорируються",
+)
 class SourceProjectSender(BaseCommentSender):
     """
     Send personal message for Buyer or manager, if farmer position - send sms to farmers chat.
