@@ -62,9 +62,9 @@ class AsanaWebhookRequestData(models.Model):
 
 
 class AsanaComment(models.Model):
-    user_id = models.IntegerField()
-    task_id = models.IntegerField()
-    comment_id = models.IntegerField(unique=True)
+    user_id = models.CharField()
+    task_id = models.CharField()
+    comment_id = models.CharField(unique=True)
     task_url = models.URLField(blank=True)
     project = models.ForeignKey(
         to=AsanaWebhookProject,

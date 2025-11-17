@@ -6,8 +6,8 @@ from .utils import get_asana_profile_url_by_id
 
 
 class AtlasUser(models.Model):
-    user_id = models.PositiveIntegerField(unique=True)
-    membership_id = models.PositiveIntegerField(unique=True)
+    user_id = models.CharField(unique=True)
+    membership_id = models.CharField(unique=True)
     email = models.EmailField(blank=True)
     name = models.CharField(max_length=254)
     avatar_url = models.URLField(blank=True, max_length=254)
