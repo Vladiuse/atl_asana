@@ -20,6 +20,7 @@ from .registry import register_sender
 )
 class SilentSender(BaseCommentSender):
     def notify(self, comment_dto: CommentDto) -> CommentSendMessageResult:
+        logging.info("Sender: %s", self.__class__.__name__)
         _ = comment_dto
         return CommentSendMessageResult(is_send=False, messages=[])
 
@@ -30,6 +31,7 @@ class SilentSender(BaseCommentSender):
 )
 class PersonalSender(BaseCommentSender):
     def notify(self, comment_dto: CommentDto) -> CommentSendMessageResult:
+        logging.info("Sender: %s", self.__class__.__name__)
         send_messages = []
         for asana_user in comment_dto.mention_users:
             if asana_user.messenger_code is None:
@@ -112,6 +114,7 @@ class SourceProjectSender(BaseCommentSender):
         pass
 
     def notify(self, comment_dto: CommentDto) -> CommentSendMessageResult:
+        logging.info("Sender: %s", self.__class__.__name__)
         send_messages = []
         for asana_user in comment_dto.mention_users:
             try:
