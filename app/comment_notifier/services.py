@@ -109,7 +109,7 @@ class AsanaCommentNotifier:
 
 class ProjectCommentsGenerator:
     """
-    Search comments in tasks in projects that not in DB. If you find - save it.
+    Search comments in tasks and return it.
     In projects cant be ignored sections.
     """
 
