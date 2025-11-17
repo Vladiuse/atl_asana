@@ -63,7 +63,7 @@ class AsanaComment(models.Model):
     is_notified = models.BooleanField(null=True, blank=True, default=None)
     is_deleted = models.BooleanField(blank=True, default=False)
     text = models.TextField(blank=True)
-    send_result = models.JSONField(blank=True, default={})
+    send_result = models.JSONField(blank=True, default=dict)
     created = models.DateTimeField(auto_now_add=True)
 
     def mark_as_deleted(self) -> None:
