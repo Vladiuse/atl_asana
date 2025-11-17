@@ -37,10 +37,10 @@ def process_asana_new_comments_task(self, asana_webhook_id: int) -> dict | None:
 
 
 @shared_task(bind=True, max_retries=1, default_retry_delay=60 * 3)
-def fetch_missing_project_comments_task(self) -> dict | None:
+def fetch_missing_project_comments_task(self, send_messages: bool = True) -> dict | None:
     try:
         use_case = FetchMissingProjectCommentsUseCase(asana_api_client=asana_api_client)
-        return use_case.execute()
+        return use_case.execute(send_messages=send_messages)
     except Exception as error:  # noqa: BLE001
         self.retry(exc=error)
 
