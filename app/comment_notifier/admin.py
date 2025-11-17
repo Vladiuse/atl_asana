@@ -160,6 +160,10 @@ class AsanaCommentAdmin(admin.ModelAdmin):
             return format_html('<a href="{}" target="_blank">{}</a>', obj.task_url, "Открыть")
         return "—"
 
+    @admin.display(description="Text")
+    def short_text(self, obj: AsanaComment) -> str:
+        return Truncator(obj.text).chars(200)
+
     @admin.action(description="Создать ссылки на таски (глобальный)")
     def fetch_task_urls(self, request: HttpRequest, queryset: QuerySet) -> None:
         _ = queryset
@@ -174,7 +178,7 @@ class AsanaCommentAdmin(admin.ModelAdmin):
 
     @admin.action(description="Пометить как не отправленные")
     def mark_as_not_notified(self, request: HttpRequest, queryset: QuerySet) -> None:
-        queryset.update(has_mention=False, is_notified=False)
+        queryset.update(has_mention=None, is_notified=None)
         self.message_user(request, message=f"{queryset.count()} коментарив помечены как не отправление")
 
     @admin.action(description="Пометить как необработанный")
@@ -207,10 +211,6 @@ class AsanaCommentAdmin(admin.ModelAdmin):
                     level=messages.ERROR,
                 )
         self.message_user(request, message=f"Успешно обработано коментариев: {success_processed_comments}")
-
-    @admin.display(description="Text")
-    def short_text(self, obj: AsanaComment) -> str:
-        return Truncator(obj.text).chars(200)
 
     @admin.action(description="Обновить ссылку на таск коммента и текст")
     def update_additional_comment_data(self, request: HttpRequest, queryset: QuerySet) -> None:
