@@ -125,6 +125,7 @@ class ProjectIgnoredSectionAdmin(admin.ModelAdmin):
 class AsanaWebhookRequestDataAdmin(admin.ModelAdmin):
     list_display = ["id", "__str__", "is_target_event", "project__name", "created"]
     list_display_links = ["id", "__str__"]
+    list_filter = ["is_target_event", "project__name",]
 
 
 @admin.register(AsanaComment)
