@@ -5,4 +5,5 @@ urlpatterns = [
     path("admin/", admin.site.urls),
     path("vga_lands/", include("vga_lands.urls")),
     path("comment_notifier/", include("comment_notifier.urls")),
+    path("creative_quality/", include("creative_quality.urls")),
 ]
