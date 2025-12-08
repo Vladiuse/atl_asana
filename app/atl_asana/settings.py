@@ -53,6 +53,7 @@ INSTALLED_APPS = [
     "asana.apps.AsanaConfig",
     "webhook_pinger.apps.WebhookPingerConfig",
     "message_sender.apps.MessageSenderConfig",
+    "creative_quality.apps.CreativeQualityConfig",
 ]
 
 MIDDLEWARE = [
