@@ -49,7 +49,7 @@ class AsanaWebhook(models.Model):
     resource_name = models.CharField(max_length=254, blank=True)
     secret = models.CharField(max_length=100, blank=True)
     description = models.TextField(blank=True)
-    handlers = models.ManyToManyField("WebhookHandler", related_name="webhooks")
+    handlers = models.ManyToManyField(to="WebhookHandler", related_name="webhooks")
     created = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
@@ -61,6 +61,7 @@ class AsanaWebhookRequestData(models.Model):
     headers = models.JSONField()
     payload = models.JSONField()
     is_target_event = models.BooleanField(null=True, default=None)
+    additional_data = models.JSONField(blank=True, default=dict)
     created = models.DateTimeField(auto_now_add=True)
 
     @property
