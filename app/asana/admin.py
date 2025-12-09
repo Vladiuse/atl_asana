@@ -11,13 +11,14 @@ from asana.client.exception import AsanaApiClientError
 from asana.repository import AsanaUserRepository
 from asana.utils import get_asana_profile_url_by_id
 
-from .models import AtlasUser
+from .models import AsanaWebhook, AsanaWebhookRequestData, AtlasUser, WebhookHandler
 
 message_sender = MessageSender(request_sender=RequestsSender())
 asana_api_client = AsanaApiClient(api_key=settings.ASANA_API_KEY)
 asana_user_repository = AsanaUserRepository(api_client=asana_api_client)
 
 
+@admin.register(AtlasUser)
 class AtlasUserAdmin(admin.ModelAdmin):
     list_display = [
         "user_id",
@@ -77,4 +78,50 @@ class AtlasUserAdmin(admin.ModelAdmin):
             self.message_user(request, f"Не удалось обновить пользователей: {error}", level=messages.ERROR)
 
 
-admin.site.register(AtlasUser, AtlasUserAdmin)
+@admin.register(WebhookHandler)
+class WebhookHandlerAdmin(admin.ModelAdmin):
+    list_display = ("id", "name", "description", "created")
+    ordering = ("-created",)
+    readonly_fields = ("name", "description")
+
+    def has_add_permission(self, request: HttpRequest, obj: WebhookHandler | None = None) -> bool:  # noqa: ARG002
+        return False
+
+    def has_delete_permission(self, request: HttpRequest, obj: WebhookHandler | None = None) -> bool:  # noqa: ARG002
+        return False
+
+
+@admin.register(AsanaWebhook)
+class AsanaWebhookAdmin(admin.ModelAdmin):
+    list_display = (
+        "id",
+        "name",
+        "resource_type",
+        "resource_id",
+        "resource_name",
+        "handlers_list",
+        "created",
+    )
+    list_filter = ("resource_type",)
+    ordering = ("-created",)
+
+    def get_queryset(self, request) -> QuerySet[AsanaWebhook]:
+        qs = super().get_queryset(request)
+        return qs.prefetch_related("handlers")
+
+    @admin.display(description="handlers")
+    def handlers_list(self, obj) -> str:
+        return ", ".join(obj.handlers.values_list("name", flat=True))
+
+
+@admin.register(AsanaWebhookRequestData)
+class AsanaWebhookRequestDataAdmin(admin.ModelAdmin):
+    list_display = (
+        "id",
+        "webhook",
+        "is_target_event",
+        "created",
+    )
+    list_filter = ("is_target_event", "webhook")
+    readonly_fields = ("headers", "payload", "additional_data", "created")
+    ordering = ("-created",)
