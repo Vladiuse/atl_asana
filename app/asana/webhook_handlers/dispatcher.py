@@ -8,7 +8,7 @@ from asana.webhook_handlers.registry import WEBHOOK_HANDLER_REGISTRY, WebhookHan
 
 
 class WebhookDispatcher:
-    def dispatch(self, webhook_data: AsanaWebhookRequestData) -> None:
+    def dispatch(self, webhook_data: AsanaWebhookRequestData) -> dict:
         webhook = webhook_data.webhook
         handler_results: dict[str, dict] = {}
         errors: dict[str, str] = {}
@@ -19,7 +19,7 @@ class WebhookDispatcher:
                     raise AppException(f"Cant find webhook handler with name '{handler.name}'")
                 handler_class = handler_info.webhook_handler_class
                 handler_result: WebhookHandlerResult = handler_class().handle(webhook_data=webhook_data)
-                handler_results[handler_info.name] = asdict(handler_result)
+                handler_results[handler.name] = asdict(handler_result)
             except Exception as exc:  # noqa: BLE001
                 errors[handler.name] = str(exc)
         if not handler_results:
@@ -28,9 +28,11 @@ class WebhookDispatcher:
             status = ProcessingStatus.PARTIAL
         else:
             status = ProcessingStatus.SUCCESS
-        webhook_data.additional_data = {
+        result = {
             "errors": errors,
             "handler_results": handler_results,
         }
+        webhook_data.additional_data = result
         webhook_data.status = status
         webhook_data.save(update_fields=["additional_data", "status"])
+        return result
