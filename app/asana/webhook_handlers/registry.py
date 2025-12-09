@@ -8,7 +8,7 @@ from .abstract import BaseWebhookHandler
 class WebhookHandlerInfo:
     name: str
     description: str
-    sender: type[BaseWebhookHandler]
+    webhook_handler_class: type[BaseWebhookHandler]
 
 
 WEBHOOK_HANDLER_REGISTRY: dict[str, WebhookHandlerInfo] = {}
@@ -23,7 +23,7 @@ def register_webhook_handler(
         sender_info = WebhookHandlerInfo(
             name=name,
             description=description,
-            sender=cls,
+            webhook_handler_class=cls,
         )
         WEBHOOK_HANDLER_REGISTRY[name] = sender_info
         return cls

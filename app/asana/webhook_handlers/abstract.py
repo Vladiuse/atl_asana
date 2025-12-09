@@ -13,5 +13,5 @@ class WebhookHandlerResult:
 
 class BaseWebhookHandler(ABC):
     @abstractmethod
-    def handle(self, webhook_data: AsanaWebhookRequestData) -> None:
+    def handle(self, webhook_data: AsanaWebhookRequestData) -> WebhookHandlerResult:
         pass
