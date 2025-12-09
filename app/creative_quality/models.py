@@ -11,6 +11,7 @@ class AsanaWebhookProject(models.Model):
     def __str__(self):
         return self.project_name if self.project_name else self.name
 
+
 class ProjectTargetSection(models.Model):
     project = models.ForeignKey(to=AsanaWebhookProject, on_delete=models.CASCADE, unique=True)
     section_id = models.CharField(max_length=20, unique=True)
@@ -33,7 +34,7 @@ class Task(models.Model):
     project = models.ForeignKey(to=AsanaWebhookProject, on_delete=models.CASCADE, unique=True)
     task_id = models.CharField(max_length=20, unique=True)
     task_name = models.CharField(max_length=254, blank=True)
-    is_complete  = models.BooleanField(default=False)
+    is_complete = models.BooleanField(default=False)
     assignee_id = models.CharField(max_length=20, blank=True)
     bayer_code = models.CharField(max_length=20, blank=True)
     created = models.DateTimeField(auto_now_add=True)
