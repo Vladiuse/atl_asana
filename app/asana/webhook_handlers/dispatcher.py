@@ -1,4 +1,4 @@
-from dataclasses import asdict
+from dataclasses import asdict, dataclass, field
 
 from common.exception import AppException
 
@@ -6,12 +6,19 @@ from asana.models import AsanaWebhookRequestData, ProcessingStatus
 from asana.webhook_handlers.abstract import WebhookHandlerResult
 from asana.webhook_handlers.registry import WEBHOOK_HANDLER_REGISTRY, WebhookHandlerInfo
 
+handlerName = str
+
+
+@dataclass
+class WebhookDispatcherResult:
+    handler_results: dict[handlerName, WebhookHandlerResult] = field(default_factory=dict)
+    errors: dict[handlerName, str] = field(default_factory=dict)
+
 
 class WebhookDispatcher:
-    def dispatch(self, webhook_data: AsanaWebhookRequestData) -> dict:
+    def dispatch(self, webhook_data: AsanaWebhookRequestData) -> WebhookDispatcherResult:
+        result = WebhookDispatcherResult()
         webhook = webhook_data.webhook
-        handler_results: dict[str, dict] = {}
-        errors: dict[str, str] = {}
         for handler in webhook.handlers.all():
             handler_info: WebhookHandlerInfo = WEBHOOK_HANDLER_REGISTRY.get(handler.name)
             try:
@@ -19,20 +26,16 @@ class WebhookDispatcher:
                     raise AppException(f"Cant find webhook handler with name '{handler.name}'")
                 handler_class = handler_info.webhook_handler_class
                 handler_result: WebhookHandlerResult = handler_class().handle(webhook_data=webhook_data)
-                handler_results[handler.name] = asdict(handler_result)
+                result.handler_results[handler.name] = handler_result
             except Exception as exc:  # noqa: BLE001
-                errors[handler.name] = str(exc)
-        if not handler_results:
+                result.errors[handler.name] = str(exc)
+        if not result.handler_results:
             status = ProcessingStatus.FAILED
-        elif errors:
+        elif result.errors:
             status = ProcessingStatus.PARTIAL
         else:
             status = ProcessingStatus.SUCCESS
-        result = {
-            "errors": errors,
-            "handler_results": handler_results,
-        }
-        webhook_data.additional_data = result
+        webhook_data.additional_data = asdict(result)
         webhook_data.status = status
         webhook_data.save(update_fields=["additional_data", "status"])
         return result

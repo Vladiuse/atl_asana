@@ -1,3 +1,5 @@
+from dataclasses import asdict
+
 from celery import shared_task
 
 from asana.webhook_handlers import WebhookDispatcher
@@ -10,6 +12,7 @@ def process_asana_webhook_task(self, asana_webhook_data_id: int) -> dict | None:
     try:
         webhook_data = AsanaWebhookRequestData(pk=asana_webhook_data_id)
         dispatcher = WebhookDispatcher()
-        return dispatcher.dispatch(webhook_data=webhook_data)
+        dispatcher_result = dispatcher.dispatch(webhook_data=webhook_data)
+        return asdict(dispatcher_result)
     except Exception as error:  # noqa: BLE001
         self.retry(exc=error)
