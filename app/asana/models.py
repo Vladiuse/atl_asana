@@ -61,6 +61,7 @@ class ProcessingStatus(models.TextChoices):
     SUCCESS = "success", "Успешно"
     PARTIAL = "partial", "Частично"
     FAILED = "failed", "Ошибка"
+    NO_HANDLERS = "no_handlers", "Нет слушателей"
 
 
 

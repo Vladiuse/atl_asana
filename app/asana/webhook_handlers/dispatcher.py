@@ -19,7 +19,12 @@ class WebhookDispatcher:
     def dispatch(self, webhook_data: AsanaWebhookRequestData) -> WebhookDispatcherResult:
         result = WebhookDispatcherResult()
         webhook = webhook_data.webhook
-        for handler in webhook.handlers.all():
+        handlers = webhook.handlers.all()
+        if len(handlers) == 0:
+            webhook_data.status = ProcessingStatus.NO_HANDLERS
+            webhook_data.save(update_fields=["status"])
+            return result
+        for handler in handlers:
             handler_info: WebhookHandlerInfo = WEBHOOK_HANDLER_REGISTRY.get(handler.name)
             try:
                 if not handler_info:
@@ -27,6 +32,7 @@ class WebhookDispatcher:
                 handler_class = handler_info.webhook_handler_class
                 handler_result: WebhookHandlerResult = handler_class().handle(webhook_data=webhook_data)
                 result.handler_results[handler.name] = handler_result
+            # need for isolate handlers if it raises error
             except Exception as exc:  # noqa: BLE001
                 result.errors[handler.name] = str(exc)
         if not result.handler_results:
@@ -39,3 +45,7 @@ class WebhookDispatcher:
         webhook_data.status = status
         webhook_data.save(update_fields=["additional_data", "status"])
         return result
+
+    # for tests only
+    def _get_registry_dict(self) -> dict:
+        return WEBHOOK_HANDLER_REGISTRY
