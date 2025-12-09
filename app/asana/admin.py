@@ -119,9 +119,9 @@ class AsanaWebhookRequestDataAdmin(admin.ModelAdmin):
     list_display = (
         "id",
         "webhook",
-        "is_target_event",
+        "status",
         "created",
     )
-    list_filter = ("is_target_event", "webhook")
+    list_filter = ("webhook", "status",)
     readonly_fields = ("headers", "payload", "additional_data", "created")
     ordering = ("-created",)

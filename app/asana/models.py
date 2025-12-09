@@ -56,11 +56,19 @@ class AsanaWebhook(models.Model):
         return f"{self.resource_type}:{self.resource_name}" if self.resource_name else self.name
 
 
+class ProcessingStatus(models.TextChoices):
+    PENDING = "pending", "Ожидает"
+    SUCCESS = "success", "Успешно"
+    PARTIAL = "partial", "Частично"
+    FAILED = "failed", "Ошибка"
+
+
+
 class AsanaWebhookRequestData(models.Model):
     webhook = models.ForeignKey(to=AsanaWebhook, on_delete=models.CASCADE)
+    status = models.CharField(max_length=30, choices=ProcessingStatus.choices, default=ProcessingStatus.PENDING)
     headers = models.JSONField()
     payload = models.JSONField()
-    is_target_event = models.BooleanField(null=True, default=None)
     additional_data = models.JSONField(blank=True, default=dict)
     created = models.DateTimeField(auto_now_add=True)
 
