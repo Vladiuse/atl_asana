@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Task, Creative
+from .models import Task, Creative, CreativeProjectSection
 
 
 @admin.register(Task)
@@ -15,4 +15,12 @@ class CreativeAdmin(admin.ModelAdmin):
     list_display = ("task", "is_rated", "hook", "hold", "crt", "need_rated_at", "created")
     list_filter = ("is_rated", "need_rated_at",)
     search_fields = ("task__task_id", "task__task_name")
+    ordering = ("-created",)
+
+
+@admin.register(CreativeProjectSection)
+class CreativeProjectSectionAdmin(admin.ModelAdmin):
+    list_display = ("section_id", "section_name", "project_name", "created")
+    search_fields = ("section_id", "section_name", "project_name")
+    list_filter = ("project_name",)
     ordering = ("-created",)

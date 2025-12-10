@@ -1,18 +1,20 @@
 from dataclasses import dataclass
 
 from asana.client import AsanaApiClient
-
+from .models import CreativeProjectSection
 
 
 @dataclass
 class LoadAdditionalInfoForProjectIgnoredSection:
     asana_api_client: AsanaApiClient
 
-    def load(self, project_ignored_section: ProjectIgnoredSection) -> None:
+    def load(self, creative_project_section: CreativeProjectSection) -> None:
         """
         Raises:
              AsanaApiClientError: if cant get some data from asana
         """
-        section_data = self.asana_api_client.get_section(project_ignored_section.section_id)
-        project_ignored_section.section_name = section_data["name"]
-        project_ignored_section.save()
+        section_data = self.asana_api_client.get_section(creative_project_section.section_id)
+        project_names = [project["name"] for project in section_data["projects"]]
+        creative_project_section.section_name = section_data["name"]
+        creative_project_section.project_name = ", ".join(project_names)
+        creative_project_section.save()
