@@ -1,17 +1,18 @@
 from dataclasses import dataclass
 
 from asana.client import AsanaApiClient
-from .models import AsanaWebhookProject
+
+
 
 @dataclass
-class LoadAdditionalInfoForWebhookProject:
+class LoadAdditionalInfoForProjectIgnoredSection:
     asana_api_client: AsanaApiClient
 
-    def load(self, webhook_project: AsanaWebhookProject) -> None:
-        project_data = self.asana_api_client.get_project(
-            project_id=webhook_project.project_id,
-            opt_fields=["name", "permalink_url"],
-        )
-        webhook_project.project_name = project_data["name"]
-        webhook_project.project_url = project_data["permalink_url"]
-        webhook_project.save()
+    def load(self, project_ignored_section: ProjectIgnoredSection) -> None:
+        """
+        Raises:
+             AsanaApiClientError: if cant get some data from asana
+        """
+        section_data = self.asana_api_client.get_section(project_ignored_section.section_id)
+        project_ignored_section.section_name = section_data["name"]
+        project_ignored_section.save()

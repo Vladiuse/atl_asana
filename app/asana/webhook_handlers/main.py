@@ -16,7 +16,7 @@ class TestOneHandler(BaseWebhookHandler):
 
 @register_webhook_handler(
     name="AddCreativeTaskForEstimation",
-    description="Таск с креативом для оценки",
+    description="Таск с креативом добавлен в колонку для оценки креатива",
 )
 class CreativeTaskForEstimation(BaseWebhookHandler):
 

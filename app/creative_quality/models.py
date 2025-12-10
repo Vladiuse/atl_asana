@@ -25,3 +25,19 @@ class Creative(models.Model):
     crt = models.PositiveIntegerField(null=True, default=None, blank=True)
     need_rated_at = models.DateTimeField()
     created = models.DateTimeField(auto_now_add=True)
+
+
+class CreativeProjectSection(models.Model):
+    project = models.ForeignKey(
+        on_delete=models.CASCADE,
+        related_name="creative_sections",
+        related_query_name="creative_section",
+    )
+    section_id = models.CharField(max_length=30)
+    section_name = models.CharField(max_length=254, blank=True)
+
+    class Meta:
+        unique_together = ["project", "section_id"]
+
+    def __str__(self):
+        return self.section_name if self.section_name else f"{self.project}:{self.section_id}"
