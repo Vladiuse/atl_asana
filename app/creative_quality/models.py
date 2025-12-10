@@ -1,4 +1,5 @@
-from django.db import models
+from django.db import models, transaction
+
 
 class TaskStatus(models.TextChoices):
     PENDING = "pending", "Ожидает"
@@ -16,6 +17,13 @@ class Task(models.Model):
     bayer_code = models.CharField(max_length=20, blank=True)
     created = models.DateTimeField(auto_now_add=True)
 
+    def mark_deleted(self):
+        with transaction.atomic():
+            self.status = TaskStatus.DELETED
+            self.save()
+            if hasattr(self, "creative"):
+                self.creative.cancel_estimation()
+
 class CreativeStatus(models.TextChoices):
     WAITING = "waiting", "Ожидает оценки"
     RATED = "rated", "Оценено"
@@ -29,8 +37,13 @@ class Creative(models.Model):
     hook = models.PositiveIntegerField(null=True, default=None, blank=True)
     hold = models.PositiveIntegerField(null=True, default=None, blank=True)
     crt = models.PositiveIntegerField(null=True, default=None, blank=True)
-    need_rated_at = models.DateTimeField()
+    need_rated_at = models.DateTimeField(null=True)
     created = models.DateTimeField(auto_now_add=True)
+
+    def cancel_estimation(self):
+        self.status = CreativeStatus.CANCELED
+        self.need_rated_at = None
+        self.save()
 
 
 class CreativeProjectSection(models.Model):
