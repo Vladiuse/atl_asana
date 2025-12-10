@@ -4,7 +4,8 @@ from unittest.mock import MagicMock, patch
 from django.test import Client, TestCase
 from django.urls import reverse
 
-from asana.models import AsanaResourceType, AsanaWebhook, AsanaWebhookRequestData
+from asana.models import AsanaWebhook, AsanaWebhookRequestData
+from asana.constants import AsanaResourceType
 
 
 @patch("asana.views.process_asana_webhook_task.delay", return_value=None)

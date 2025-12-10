@@ -2,7 +2,8 @@ from unittest.mock import patch
 
 from django.test import TestCase
 
-from asana.models import AsanaResourceType, AsanaWebhook, AsanaWebhookRequestData, ProcessingStatus, WebhookHandler
+from asana.models import AsanaWebhook, AsanaWebhookRequestData, ProcessingStatus, WebhookHandler
+from ...constants import AsanaResourceType
 
 from ..abstract import BaseWebhookHandler, WebhookHandlerResult
 from ..dispatcher import WebhookDispatcher, WebhookDispatcherResult

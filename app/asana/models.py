@@ -1,7 +1,7 @@
 from common.message_sender import UserTag
 from django.db import models
 
-from .constants import Position
+from .constants import Position, AsanaResourceType
 from .utils import get_asana_profile_url_by_id
 
 
@@ -21,7 +21,7 @@ class AtlasUser(models.Model):
     position = models.CharField(
         blank=True,
         max_length=32,
-        choices=Position.choices,
+        choices=Position,
         verbose_name="Позиция",
     )
 
@@ -37,15 +37,10 @@ class AtlasUser(models.Model):
         return get_asana_profile_url_by_id(profile_id=self.membership_id)
 
 
-class AsanaResourceType(models.TextChoices):
-    PROJECT = "project", "Проект"
-    SECTION = "section", "Секция"
-
-
 class AsanaWebhook(models.Model):
     name = models.CharField(max_length=100, unique=True)
     resource_id = models.CharField(max_length=50)
-    resource_type = models.CharField(max_length=50, choices=AsanaResourceType.choices)
+    resource_type = models.CharField(max_length=50, choices=AsanaResourceType)
     resource_name = models.CharField(max_length=254, blank=True)
     secret = models.CharField(max_length=100, blank=True)
     description = models.TextField(blank=True)
@@ -67,7 +62,7 @@ class ProcessingStatus(models.TextChoices):
 
 class AsanaWebhookRequestData(models.Model):
     webhook = models.ForeignKey(to=AsanaWebhook, on_delete=models.CASCADE)
-    status = models.CharField(max_length=30, choices=ProcessingStatus.choices, default=ProcessingStatus.PENDING)
+    status = models.CharField(max_length=30, choices=ProcessingStatus, default=ProcessingStatus.PENDING)
     headers = models.JSONField()
     payload = models.JSONField()
     additional_data = models.JSONField(blank=True, default=dict)
