@@ -1,6 +1,18 @@
-from django.contrib import admin
-from .models import Task, Creative, CreativeProjectSection
+import logging
 
+from django.conf import settings
+from django.contrib import admin, messages
+from django.db.models import QuerySet
+from django.http import HttpRequest
+from django import forms
+
+from asana.client import AsanaApiClient
+from asana.client.exception import AsanaApiClientError
+from .models import Task, Creative, CreativeProjectSection
+from .services import LoadAdditionalInfoForCreativeProjectSection
+
+asana_client = AsanaApiClient(api_key=settings.ASANA_API_KEY)
+logging.basicConfig(level=logging.INFO)
 
 @admin.register(Task)
 class TaskAdmin(admin.ModelAdmin):
@@ -24,3 +36,38 @@ class CreativeProjectSectionAdmin(admin.ModelAdmin):
     search_fields = ("section_id", "section_name", "project_name")
     list_filter = ("project_name",)
     ordering = ("-created",)
+
+
+    def save_model(
+            self,
+            request: HttpRequest,
+            obj: CreativeProjectSection,
+            form: forms.ModelForm,
+            change: bool,
+    ) -> None:
+        super().save_model(request, obj, form, change)
+        service = LoadAdditionalInfoForCreativeProjectSection(asana_api_client=asana_client)
+        try:
+            service.load(creative_project_section=obj)
+        except AsanaApiClientError:
+            self.message_user(
+                request,
+                message=f"Не удаллось обновить данные по секции: {obj}",
+                level=messages.ERROR,
+            )
+
+    @admin.action(description="Обновить доп. данные по секциям")
+    def update_additional_section_data(self, request: HttpRequest, queryset: QuerySet) -> None:
+        service = LoadAdditionalInfoForCreativeProjectSection(asana_api_client=asana_client)
+        success_updated = 0
+        for section in queryset:
+            try:
+                service.load(creative_project_section=section)
+                success_updated += 1
+            except AsanaApiClientError:
+                self.message_user(
+                    request,
+                    message=f"Не удаллось обновить данные по секции: {section}",
+                    level=messages.ERROR,
+                )
+        self.message_user(request, message=f"Обновленно секций: {success_updated}")
