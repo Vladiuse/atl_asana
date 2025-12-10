@@ -1,14 +1,14 @@
 import logging
 
+from asana.client import AsanaApiClient
+from asana.client.exception import AsanaApiClientError
+from django import forms
 from django.conf import settings
 from django.contrib import admin, messages
 from django.db.models import QuerySet
 from django.http import HttpRequest
-from django import forms
 
-from asana.client import AsanaApiClient
-from asana.client.exception import AsanaApiClientError
-from .models import Task, Creative, CreativeProjectSection
+from .models import Creative, CreativeProjectSection, Task
 from .services import LoadAdditionalInfoForCreativeProjectSection
 
 asana_client = AsanaApiClient(api_key=settings.ASANA_API_KEY)
@@ -17,7 +17,7 @@ logging.basicConfig(level=logging.INFO)
 @admin.register(Task)
 class TaskAdmin(admin.ModelAdmin):
     list_display = ("task_id", "task_name", "status", "is_complete", "assignee_id", "bayer_code", "created")
-    list_filter = ("status", "is_complete",)
+    list_filter = ("status", "is_complete")
     search_fields = ("task_id", "task_name", "assignee_id", "bayer_code")
     ordering = ("-created",)
 
