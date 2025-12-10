@@ -3,6 +3,8 @@ from pathlib import Path
 
 from asana.constance_settings import CONSTANCE_CONFIG as ASANA_CONSTANCE_CONFIG
 from asana.constance_settings import CONSTANCE_CONFIG_FIELDSETS as ASANA_FIELDSETS
+from creative_quality.constance_settings import CONSTANCE_CONFIG as CREATIVE_ESTIMATE_CONSTANCE_CONFIG
+from creative_quality.constance_settings import CONSTANCE_CONFIG_FIELDSETS as CREATIVE_ESTIMATE_FIELDSETS
 from dotenv import load_dotenv
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -191,6 +193,7 @@ CONSTANCE_CONFIG = {
         bool,
     ),
     **ASANA_CONSTANCE_CONFIG,
+    **CREATIVE_ESTIMATE_CONSTANCE_CONFIG,
 
 }
 
@@ -201,4 +204,5 @@ CONSTANCE_CONFIG_FIELDSETS = {
         "DEFAULT_COUNTRY",
     ),
     **ASANA_FIELDSETS,
+    **CREATIVE_ESTIMATE_FIELDSETS,
 }
