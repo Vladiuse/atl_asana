@@ -19,6 +19,7 @@ class UserTag(Enum):
     ACE_FAG = "ace_fag"
     ACE_SGG = "ace_sgg"
     ADM = "adm"
+    AVK = "avk"
     ALISA_SALAMAHINA = "alisasalamahina"
     APA = "apa"
     BRY = "bry"
