@@ -42,7 +42,7 @@ class ProcessAsanaNewCommentEvent:
     def _event_to_comment_dto(self, events_data: dict) -> list[AsanaNewCommentEvent]:
         result = []
         for event in events_data["events"]:
-            if event["resource"]["resource_subtype"] == "comment_added" and event["resource"]["user"] is not None:
+            if event["resource"]["resource_subtype"] == "comment_added" and event["user"] is not None:
                 event_dto = ProcessAsanaNewCommentEvent.AsanaNewCommentEvent(
                     comment_id=event["resource"]["gid"],
                     user_id=event["user"]["gid"],
