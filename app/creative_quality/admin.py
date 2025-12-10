@@ -36,6 +36,7 @@ class CreativeProjectSectionAdmin(admin.ModelAdmin):
     search_fields = ("section_id", "section_name", "project_name")
     list_filter = ("project_name",)
     ordering = ("-created",)
+    readonly_fields = ("section_name", "project_name")
 
 
     def save_model(

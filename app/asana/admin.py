@@ -99,6 +99,7 @@ class AsanaWebhookAdmin(admin.ModelAdmin):
         "resource_type",
         "resource_id",
         "resource_name",
+        "secret",
         "handlers_list",
         "created",
     )
