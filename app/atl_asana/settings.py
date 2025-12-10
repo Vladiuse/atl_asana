@@ -1,6 +1,8 @@
 import os
 from pathlib import Path
 
+from asana.constance_settings import CONSTANCE_CONFIG as ASANA_CONSTANCE_CONFIG
+from asana.constance_settings import CONSTANCE_CONFIG_FIELDSETS as ASANA_FIELDSETS
 from dotenv import load_dotenv
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -47,6 +49,7 @@ INSTALLED_APPS = [
     "django_extensions",
     "django_celery_results",
     "django_celery_beat",
+    'constance',
     # apps
     "vga_lands.apps.VgaLandsConfig",
     "comment_notifier.apps.CommentNotifierConfig",
@@ -161,3 +164,41 @@ STATICFILES_DIRS = [
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
+
+
+CONSTANCE_BACKEND = 'constance.backends.database.DatabaseBackend'
+
+CONSTANCE_ADDITIONAL_FIELDS = {
+    "country_select": (
+        "django.forms.ChoiceField",
+        {
+            "widget": "django.forms.Select",
+            "choices": (("CA", "CANADA"), ("US", "USA")),
+        },
+    ),
+}
+
+
+CONSTANCE_CONFIG = {
+    "DEFAULT_COUNTRY": (
+        "US",
+        "Страна по умолчанию",
+        "country_select",
+    ),
+    "ENABLE_SMS_SENDING": (
+        True,
+        "Включить отправку СМС",
+        bool,
+    ),
+    **ASANA_CONSTANCE_CONFIG,
+
+}
+
+
+CONSTANCE_CONFIG_FIELDSETS = {
+    "Examples": (
+        "ENABLE_SMS_SENDING",
+        "DEFAULT_COUNTRY",
+    ),
+    **ASANA_FIELDSETS,
+}
