@@ -16,10 +16,16 @@ class Task(models.Model):
     bayer_code = models.CharField(max_length=20, blank=True)
     created = models.DateTimeField(auto_now_add=True)
 
+class CreativeStatus(models.TextChoices):
+    WAITING = "waiting", "Ожидает оценки"
+    RATED = "rated", "Оценено"
+    CANCELED = "canceled", "Оценка отменена"
+    EXPIRED = "expired", "Просрочено"
+
 
 class Creative(models.Model):
     task = models.OneToOneField(Task, on_delete=models.CASCADE, related_name="creative")
-    is_rated = models.BooleanField(default=False)
+    status = models.CharField(max_length=50, choices=CreativeStatus, default=CreativeStatus.WAITING)
     hook = models.PositiveIntegerField(null=True, default=None, blank=True)
     hold = models.PositiveIntegerField(null=True, default=None, blank=True)
     crt = models.PositiveIntegerField(null=True, default=None, blank=True)
