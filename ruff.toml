@@ -25,14 +25,9 @@ select = [
     "BLE",
 ]
 ignore = [
-    "COM819",
     "ANN101",
     "ANN102",
     "ANN204",
-    "ANN001",
-    "ANN002",
-    "ANN003",
-
 ]
 
 [lint.extend-per-file-ignores]
