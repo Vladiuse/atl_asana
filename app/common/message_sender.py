@@ -49,6 +49,7 @@ class UserTag(Enum):
     SVV = "svv"
     TESTU = "testu"
     VGA = "vga"
+    VVA = "vva"
     ZVA = "zva"
 
     @classmethod
