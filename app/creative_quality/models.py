@@ -1,5 +1,6 @@
 from asana.models import AtlasUser
 from django.db import models, transaction
+from django.urls import reverse
 
 
 class TaskStatus(models.TextChoices):
@@ -62,6 +63,15 @@ class Creative(models.Model):
 
     def is_can_be_updated(self) -> bool:
         return True
+
+    def get_estimate_url(self, domain: str | None = None) -> str:
+        url = reverse(
+            "creative_quality:update-creative",
+            kwargs={"creative_id": self.pk, "task_id": self.task.task_id},
+        )
+        if domain:
+            return f"https://{domain}{url}"
+        return url
 
 
 class CreativeProjectSection(models.Model):
