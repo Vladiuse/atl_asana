@@ -1,4 +1,5 @@
 from django.db import models, transaction
+from asana.models import AtlasUser
 
 
 class TaskStatus(models.TextChoices):
@@ -16,6 +17,16 @@ class Task(models.Model):
     bayer_code = models.CharField(max_length=20, blank=True)
     url = models.CharField(max_length=254, blank=True)
     created = models.DateTimeField(auto_now_add=True)
+
+    def get_assignee_display(self) -> str:
+        value = self.assignee_id
+        try:
+            name =  AtlasUser.objects.get(user_id=self.assignee_id).name
+            if name:
+                value = name
+        except AtlasUser.DoesNotExist:
+            pass
+        return value
 
     def mark_deleted(self) -> None:
         with transaction.atomic():

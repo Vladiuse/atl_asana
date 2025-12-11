@@ -23,8 +23,6 @@ class LoadAdditionalInfoForCreativeProjectSection:
         creative_project_section.save()
 
 
-
-
 @dataclass
 class UpdateTaskInfoService:
     asana_api_client: AsanaApiClient

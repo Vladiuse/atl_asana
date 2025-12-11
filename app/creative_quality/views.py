@@ -11,7 +11,7 @@ class CreativeUpdateView(View):
     template_name = "creative_quality/creative/update.html"
 
     def get(self, request: HttpRequest, creative_id: int, task_id: str) -> HttpResponse:
-        creative = get_object_or_404(Creative, pk=creative_id, task__id=task_id)
+        creative = get_object_or_404(Creative, pk=creative_id, task__task_id=task_id)
         form = CreativeForm(instance=creative)
         return render(request, self.template_name, {"form": form, "creative": creative})
 

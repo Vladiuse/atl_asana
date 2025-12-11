@@ -5,7 +5,7 @@
 <style>
     form{
         margin-top: 50px;
-        width: 500px;
+        width: 600px;
     }
 </style>
 <div class="d-flex justify-content-center">
@@ -18,11 +18,15 @@
         </tr>
         <tr>
             <th scope="row">Исполнитель</th>
-            <td>{{ creative.task.assignee_id }}</td>
+            <td>{{ creative.task.get_assignee_display }}</td>
         </tr>
         <tr>
             <th scope="row">Баер</th>
             <td>{{ creative.task.bayer_code }}</td>
+        </tr>
+        <tr>
+            <th scope="row">Url</th>
+            <td><a href="{{ creative.task.url }}" target="_blank">открыть</a></td>
         </tr>
     </tbody>
 </table>
