@@ -2,99 +2,97 @@
 {% load static %}
 
 {%block content%}
-<style>
-    form{
-        margin-top: 50px;
-        width: 600px;
-    }
-</style>
-<div class="d-flex justify-content-center">
-<form method="post" novalidate>
-    <table class="table table-bordered w-full mx-auto">
-    <tbody>
-        <tr>
-            <th scope="row">Task</th>
-            <td>{{ creative.task.task_name }}</td>
-        </tr>
-        <tr>
-            <th scope="row">Исполнитель</th>
-            <td>{{ creative.task.get_assignee_display }}</td>
-        </tr>
-        <tr>
-            <th scope="row">Баер</th>
-            <td>{{ creative.task.bayer_code }}</td>
-        </tr>
-        <tr>
-            <th scope="row">Url</th>
-            <td><a href="{{ creative.task.url }}" target="_blank">открыть</a></td>
-        </tr>
-    </tbody>
-</table>
-    {% csrf_token %}
+<div class="d-flex justify-content-center" style="padding-top: 40px;">
+    <div style="width: 600px;">
+        <table class="table table-bordered w-full mx-auto">
+            <tbody>
+                <tr>
+                    <th scope="row">Task</th>
+                    <td>{{ creative.task.task_name }}</td>
+                </tr>
+                <tr>
+                    <th scope="row">Исполнитель</th>
+                    <td>{{ creative.task.get_assignee_display }}</td>
+                </tr>
+                <tr>
+                    <th scope="row">Баер</th>
+                    <td>{{ creative.task.bayer_code }}</td>
+                </tr>
+                <tr>
+                    <th scope="row">Url</th>
+                    <td><a href="{{ creative.task.url }}" target="_blank">открыть</a></td>
+                </tr>
+            </tbody>
+        </table>
+        <form id="creative-form" method="post" novalidate >
 
-    <!-- non-field errors -->
-    {% if form.non_field_errors %}
-    <div class="alert alert-danger">
-        {{ form.non_field_errors }}
+            {% csrf_token %}
+
+            <!-- non-field errors -->
+            {% if form.non_field_errors %}
+            <div class="alert alert-danger">
+                {{ form.non_field_errors }}
+            </div>
+            {% endif %}
+
+            <!-- hook -->
+            <div class="mb-3">
+                <label for="{{ form.hook.id_for_label }}" class="form-label">
+                    {{ form.hook.label }}
+                </label>
+
+                <input type="text" name="{{ form.hook.html_name }}" id="{{ form.hook.id_for_label }}"
+                    value="{{ form.hook.value|default:'' }}" class="form-control">
+
+
+                {% if form.hook.help_text %}
+                <div class="form-text">{{ form.hook.help_text }}</div>
+                {% endif %}
+
+                {% for error in form.hook.errors %}
+                <div class="text-danger small">{{ error }}</div>
+                {% endfor %}
+            </div>
+
+            <!-- hold -->
+            <div class="mb-3">
+                <label for="{{ form.hold.id_for_label }}" class="form-label">
+                    {{ form.hold.label }}
+                </label>
+
+                <input type="text" name="{{ form.hold.html_name }}" id="{{ form.hold.id_for_label }}"
+                    value="{{ form.hold.value|default:'' }}" class="form-control">
+
+                {% if form.hold.help_text %}
+                <div class="form-text">{{ form.hold.help_text }}</div>
+                {% endif %}
+
+                {% for error in form.hold.errors %}
+                <div class="text-danger small">{{ error }}</div>
+                {% endfor %}
+            </div>
+
+            <!-- crt -->
+            <div class="mb-3">
+                <label for="{{ form.crt.id_for_label }}" class="form-label">
+                    {{ form.crt.label }}
+                </label>
+
+                <input type="text" name="{{ form.crt.html_name }}" id="{{ form.crt.id_for_label }}"
+                    value="{{ form.crt.value|default:'' }}" class="form-control">
+
+                {% if form.crt.help_text %}
+                <div class="form-text">{{ form.crt.help_text }}</div>
+                {% endif %}
+
+                {% for error in form.crt.errors %}
+                <div class="text-danger small">{{ error }}</div>
+                {% endfor %}
+            </div>
+
+            <button type="submit" class="btn btn-primary">Сохранить</button>
+        </form>
     </div>
-    {% endif %}
-
-    <!-- hook -->
-    <div class="mb-3">
-        <label for="{{ form.hook.id_for_label }}" class="form-label">
-            {{ form.hook.label }}
-        </label>
-
-        <input type="text" name="{{ form.hook.html_name }}" id="{{ form.hook.id_for_label }}"
-            value="{{ form.hook.value|default:'' }}" class="form-control">
-
-
-        {% if form.hook.help_text %}
-        <div class="form-text">{{ form.hook.help_text }}</div>
-        {% endif %}
-
-        {% for error in form.hook.errors %}
-        <div class="text-danger small">{{ error }}</div>
-        {% endfor %}
-    </div>
-
-    <!-- hold -->
-    <div class="mb-3">
-        <label for="{{ form.hold.id_for_label }}" class="form-label">
-            {{ form.hold.label }}
-        </label>
-
-        <input type="text" name="{{ form.hold.html_name }}" id="{{ form.hold.id_for_label }}"
-            value="{{ form.hold.value|default:'' }}" class="form-control">
-
-        {% if form.hold.help_text %}
-        <div class="form-text">{{ form.hold.help_text }}</div>
-        {% endif %}
-
-        {% for error in form.hold.errors %}
-        <div class="text-danger small">{{ error }}</div>
-        {% endfor %}
-    </div>
-
-    <!-- crt -->
-    <div class="mb-3">
-        <label for="{{ form.crt.id_for_label }}" class="form-label">
-            {{ form.crt.label }}
-        </label>
-
-        <input type="text" name="{{ form.crt.html_name }}" id="{{ form.crt.id_for_label }}"
-            value="{{ form.crt.value|default:'' }}" class="form-control">
-
-        {% if form.crt.help_text %}
-        <div class="form-text">{{ form.crt.help_text }}</div>
-        {% endif %}
-
-        {% for error in form.crt.errors %}
-        <div class="text-danger small">{{ error }}</div>
-        {% endfor %}
-    </div>
-
-    <button type="submit" class="btn btn-primary">Сохранить</button>
-</form>
 </div>
+
 {%endblock%}
