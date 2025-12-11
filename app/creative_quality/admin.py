@@ -24,7 +24,7 @@ class TaskAdmin(admin.ModelAdmin):
 
 @admin.register(Creative)
 class CreativeAdmin(admin.ModelAdmin):
-    list_display = ("task", "status", "hook", "hold", "crt", "need_rated_at", "created")
+    list_display = ("id", "task", "status", "hook", "hold", "crt", "need_rated_at", "created")
     list_filter = ("status",)
     search_fields = ("task__task_id", "task__task_name")
     ordering = ("-created",)
