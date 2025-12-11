@@ -7,7 +7,7 @@
         <table class="table table-bordered w-full mx-auto">
             <tbody>
                 <tr>
-                    <th scope="row">Task</th>
+                    <th scope="row">Таск</th>
                     <td>{{ creative.task.task_name }}</td>
                 </tr>
                 <tr>
@@ -19,10 +19,19 @@
                     <td>{{ creative.task.bayer_code }}</td>
                 </tr>
                 <tr>
-                    <th scope="row">Url</th>
+                    <th scope="row">Ссылка</th>
                     <td><a href="{{ creative.task.url }}" target="_blank">открыть</a></td>
                 </tr>
-                {%if creative.status == creative_statuses.RATED%}
+                <tr>
+                    <th scope="row">Таск завершен</th>
+                    <td>
+                        {% if creative.task.is_completed %}
+                        <span style="color: green;">✔</span>
+                        {% else %}
+                        <span style="color: #ccc;">✖</span>
+                        {% endif %}
+                    </td>
+                </tr>
                 <tr>
                     <th scope="row">Hook</th>
                     <td>{{ creative.hook }}</td>
@@ -39,7 +48,10 @@
                     <th scope="row">Статус</th>
                     <td>{{ creative.get_status_display }}</td>
                 </tr>
-                {%endif%}
+                <tr>
+                    <th scope="row">Коментарий</th>
+                    <td>{{ creative.comment|default:"-" }}</td>
+                </tr>
             </tbody>
         </table>
         {%if creative.is_can_be_updated%}
