@@ -16,8 +16,8 @@ logging.basicConfig(level=logging.INFO)
 
 @admin.register(Task)
 class TaskAdmin(admin.ModelAdmin):
-    list_display = ("task_id", "task_name", "status", "is_complete", "assignee_id", "bayer_code", "created")
-    list_filter = ("status", "is_complete")
+    list_display = ("task_id", "task_name", "status", "assignee_id", "bayer_code", "created")
+    list_filter = ("status",)
     search_fields = ("task_id", "task_name", "assignee_id", "bayer_code")
     ordering = ("-created",)
 
