@@ -42,20 +42,13 @@
                 {%endif%}
             </tbody>
         </table>
-
+        {%if creative.is_can_be_updated%}
         <a class="btn btn-primary"
             href="{% url 'creative_quality:update-creative' creative_id=creative.pk task_id=creative.task.task_id %}">
             Обновить
         </a>
-
+        {%endif%}
     </div>
 </div>
-<script>
-    var form = document.getElementById("creative-form")
-    var updateButton = document.getElementById("update-button")
-    updateButton.addEventListener("click", function () {
-        form.style.display = "block"
-        updateButton.style.display = "none"
-    })
-</script>
+
 {%endblock%}
