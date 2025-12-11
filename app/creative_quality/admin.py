@@ -10,7 +10,7 @@ from django.http import HttpRequest
 from django.utils.html import format_html
 
 from .models import Creative, CreativeProjectSection, Task
-from .services import LoadAdditionalInfoForCreativeProjectSection
+from .services import CreativeProjectSectionService
 
 asana_client = AsanaApiClient(api_key=settings.ASANA_API_KEY)
 logging.basicConfig(level=logging.INFO)
@@ -54,7 +54,7 @@ class CreativeProjectSectionAdmin(admin.ModelAdmin):
         change: bool,
     ) -> None:
         super().save_model(request, obj, form, change)
-        service = LoadAdditionalInfoForCreativeProjectSection(asana_api_client=asana_client)
+        service = CreativeProjectSectionService(asana_api_client=asana_client)
         try:
             service.load(creative_project_section=obj)
         except AsanaApiClientError:
@@ -66,7 +66,7 @@ class CreativeProjectSectionAdmin(admin.ModelAdmin):
 
     @admin.action(description="Обновить доп. данные по секциям")
     def update_additional_section_data(self, request: HttpRequest, queryset: QuerySet) -> None:
-        service = LoadAdditionalInfoForCreativeProjectSection(asana_api_client=asana_client)
+        service = CreativeProjectSectionService(asana_api_client=asana_client)
         success_updated = 0
         for section in queryset:
             try:

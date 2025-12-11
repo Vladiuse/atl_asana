@@ -9,10 +9,10 @@ from .models import Creative, CreativeProjectSection, CreativeStatus, Task, Task
 
 
 @dataclass
-class LoadAdditionalInfoForCreativeProjectSection:
+class CreativeProjectSectionService:
     asana_api_client: AsanaApiClient
 
-    def load(self, creative_project_section: CreativeProjectSection) -> None:
+    def update_additional_info(self, creative_project_section: CreativeProjectSection) -> None:
         """
         Raises:
              AsanaApiClientError: if cant get some data from asana
