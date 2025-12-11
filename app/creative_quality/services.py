@@ -31,7 +31,7 @@ class CreateCreativeService:
     class TaskData:
         assignee_id: str
         name: str
-        baer_code: str
+        bayer_code: str
 
     asana_api_client: AsanaApiClient
 
@@ -42,25 +42,25 @@ class CreateCreativeService:
         """
         assignee_id = task_data.get("assignee", {}).get("gid", "")
         task_name = task_data["name"]
-        baer_code = ""
+        bayer_code = ""
         for field in task_data.get("custom_fields", []):
             if field["name"] == config.DESIGN_TASK_BAER_CUSTOM_FIELD_NAME:
-                baer_code = field["text_value"]
+                bayer_code = field.get("text_value", "")
                 break
         return self.TaskData(
             assignee_id=assignee_id,
             name=task_name,
-            baer_code=baer_code,
+            bayer_code=bayer_code,
         )
 
 
     def create(self, creative_task: Task) -> None:
         try:
-            task_data = self.asana_api_client.get_task(task_id=creative_task.task_id)
+            task_data = self.asana_api_client.  get_task(task_id=creative_task.task_id)
             task_dto = self._get_task_dto(task_data=task_data)
             with transaction.atomic():
                 creative_task.assignee_id = task_dto.assignee_id
-                creative_task.bayer_code = task_dto.baer_code
+                creative_task.bayer_code = task_dto.bayer_code
                 creative_task.task_name = task_dto.name
                 creative_task.status = TaskStatus.CREATED
                 creative_task.save()
