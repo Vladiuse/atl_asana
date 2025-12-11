@@ -15,12 +15,14 @@ from .services import LoadAdditionalInfoForCreativeProjectSection
 asana_client = AsanaApiClient(api_key=settings.ASANA_API_KEY)
 logging.basicConfig(level=logging.INFO)
 
+
 @admin.register(Task)
 class TaskAdmin(admin.ModelAdmin):
     list_display = ("task_id", "task_name", "status", "assignee_id", "bayer_code", "created", "url_display")
     list_filter = ("status",)
     search_fields = ("task_id", "task_name", "assignee_id", "bayer_code")
     ordering = ("-created",)
+
     @admin.display(description="url")
     def url_display(self, obj: Task) -> str:
         if obj.url:
@@ -30,7 +32,7 @@ class TaskAdmin(admin.ModelAdmin):
 
 @admin.register(Creative)
 class CreativeAdmin(admin.ModelAdmin):
-    list_display = ("id", "task", "status", "hook", "hold", "crt","comment", "need_rated_at", "created")
+    list_display = ("id", "task", "status", "hook", "hold", "crt", "comment", "need_rated_at", "created")
     list_filter = ("status",)
     search_fields = ("task__task_id", "task__task_name")
     ordering = ("-created",)
@@ -44,13 +46,12 @@ class CreativeProjectSectionAdmin(admin.ModelAdmin):
     ordering = ("-created",)
     readonly_fields = ("section_name", "project_name")
 
-
     def save_model(
-            self,
-            request: HttpRequest,
-            obj: CreativeProjectSection,
-            form: forms.ModelForm,
-            change: bool,
+        self,
+        request: HttpRequest,
+        obj: CreativeProjectSection,
+        form: forms.ModelForm,
+        change: bool,
     ) -> None:
         super().save_model(request, obj, form, change)
         service = LoadAdditionalInfoForCreativeProjectSection(asana_api_client=asana_client)

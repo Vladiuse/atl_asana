@@ -21,7 +21,6 @@ def ping_asana_webhook(self) -> dict | None:
         self.retry(exc=error)
 
 
-
 @shared_task(bind=True, max_retries=2, default_retry_delay=5)
 def test_task(self) -> None:
     try:

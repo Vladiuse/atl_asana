@@ -19,6 +19,7 @@ def asana_error_handler(func: Callable) -> Callable:
             return func(self, *args, **kwargs)
         except (RequestException, HTTPError, json.JSONDecodeError) as error:
             self._handle_error(handler_name=func.__name__, error=error)
+
     return wrapper
 
 
@@ -58,7 +59,8 @@ class AsanaApiClient:
     @asana_error_handler
     def get_workspace_membership(self, membership_id: int) -> dict:
         response = requests.get(
-            f"{self.API_ENDPOINT}workspace_memberships/{membership_id}", headers=self._auth_headers,
+            f"{self.API_ENDPOINT}workspace_memberships/{membership_id}",
+            headers=self._auth_headers,
         )
         response.raise_for_status()
         return response.json()["data"]
@@ -165,7 +167,7 @@ class AsanaApiClient:
         return response.json()["data"]
 
     @asana_error_handler
-    def get_project(self, project_id: int,  opt_fields: list[str] | None = None) -> dict:
+    def get_project(self, project_id: int, opt_fields: list[str] | None = None) -> dict:
         if opt_fields is None:
             opt_fields = []
         response = requests.get(

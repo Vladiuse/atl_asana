@@ -10,6 +10,7 @@ class AsanaConfig(AppConfig):
 
     def ready(self) -> None:
         from asana import webhook_handlers
+
         package = webhook_handlers
 
         for _, module_name, _ in pkgutil.iter_modules(package.__path__):

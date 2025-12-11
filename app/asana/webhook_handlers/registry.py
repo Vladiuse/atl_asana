@@ -15,7 +15,8 @@ WEBHOOK_HANDLER_REGISTRY: dict[str, WebhookHandlerInfo] = {}
 
 
 def register_webhook_handler(
-    name: str, description: str,
+    name: str,
+    description: str,
 ) -> Callable[[type[BaseWebhookHandler]], type[BaseWebhookHandler]]:
     def wrap(cls: type[BaseWebhookHandler]) -> type[BaseWebhookHandler]:
         if name in WEBHOOK_HANDLER_REGISTRY:

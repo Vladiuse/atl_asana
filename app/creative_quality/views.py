@@ -34,6 +34,7 @@ class CreativeUpdateView(View):
 
         return render(request, self.template_name, {"form": form, "creative": creative})
 
+
 class CreativeDetailView(View):
     template_name = "creative_quality/creative/detail.html"
 

@@ -9,8 +9,10 @@ class AsanaApiClientError(AppException):
         super().__init__(message)
         self.response = response
 
+
 class AsanaNotFoundError(AsanaApiClientError):
     """404 Not Found"""
+
 
 class AsanaForbiddenError(AsanaApiClientError):
     """403 Forbidden"""

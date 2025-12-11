@@ -5,7 +5,6 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("asana", "0011_alter_atlasuser_membership_id_and_more"),
     ]
@@ -130,8 +129,6 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name="asanawebhook",
             name="handlers",
-            field=models.ManyToManyField(
-                related_name="webhooks", to="asana.webhookhandler"
-            ),
+            field=models.ManyToManyField(related_name="webhooks", to="asana.webhookhandler"),
         ),
     ]

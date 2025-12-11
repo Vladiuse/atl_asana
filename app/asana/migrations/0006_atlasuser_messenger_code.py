@@ -4,7 +4,6 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("asana", "0005_rename_atlas_profile_id_atlasuser_membership_id"),
     ]
@@ -13,8 +12,6 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name="atlasuser",
             name="messenger_code",
-            field=models.CharField(
-                blank=True, choices=[("kva_tech", "KVA"), ("dav", "DAV")], max_length=32
-            ),
+            field=models.CharField(blank=True, choices=[("kva_tech", "KVA"), ("dav", "DAV")], max_length=32),
         ),
     ]

@@ -4,7 +4,6 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("creative_quality", "0004_remove_creative_is_rated_creative_status"),
     ]

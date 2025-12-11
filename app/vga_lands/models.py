@@ -15,10 +15,10 @@ class AsanaWebhookRequestData(models.Model):
     payload = models.JSONField()
     is_target_event = models.BooleanField(null=True, default=None)
 
-
     @property
     def events(self) -> list[dict]:
         return self.payload["events"]
+
 
 class CompletedTask(models.Model):
     created = models.DateTimeField(auto_now_add=True)

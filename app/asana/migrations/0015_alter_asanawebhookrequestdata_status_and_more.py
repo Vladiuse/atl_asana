@@ -4,7 +4,6 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("asana", "0014_remove_asanawebhookrequestdata_is_target_event"),
     ]

@@ -5,7 +5,6 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("comment_notifier", "0008_asanawebhookproject_project_id"),
     ]

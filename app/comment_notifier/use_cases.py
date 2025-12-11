@@ -54,7 +54,7 @@ class FetchMissingProjectCommentsUseCase:
             asana_api_client=self.asana_api_client,
         )
         errors_count = 0
-        missing_comments_found:list[str] = []
+        missing_comments_found: list[str] = []
         for project in projects:
             project_comments_count = 0
             for comment_data in project_comments_generator.generate(project=project):
@@ -70,15 +70,14 @@ class FetchMissingProjectCommentsUseCase:
                         project_comments_count += 1
                         if send_messages:
                             notify_new_asana_comments_tasks.apply_async(
-                                args=[comment_data["comment_id"]], countdown=60,
+                                args=[comment_data["comment_id"]],
+                                countdown=60,
                             )
                             missing_comments_found.append(comment_data["comment_id"])
                     except IntegrityError as error:
                         logging.warning("IntegrityError save comment: %s", comment_data)
                         message = (
-                            f"⚠️ {self.__class__.__name__}\n"
-                            f"Cant save asana comment: {comment_data}\n"
-                            f"{error}"
+                            f"⚠️ {self.__class__.__name__}\n" f"Cant save asana comment: {comment_data}\n" f"{error}"
                         )
                         send_log_message_task.delay(message=message)
                         errors_count += 1

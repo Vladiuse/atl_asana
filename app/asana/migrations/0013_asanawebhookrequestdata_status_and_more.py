@@ -4,7 +4,6 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("asana", "0012_asanawebhook_webhookhandler_and_more"),
     ]
@@ -27,8 +26,6 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name="asanawebhook",
             name="handlers",
-            field=models.ManyToManyField(
-                blank=True, related_name="webhooks", to="asana.webhookhandler"
-            ),
+            field=models.ManyToManyField(blank=True, related_name="webhooks", to="asana.webhookhandler"),
         ),
     ]

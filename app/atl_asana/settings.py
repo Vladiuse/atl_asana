@@ -53,7 +53,7 @@ INSTALLED_APPS = [
     "django_extensions",
     "django_celery_results",
     "django_celery_beat",
-    'constance',
+    "constance",
     # apps
     "vga_lands.apps.VgaLandsConfig",
     "comment_notifier.apps.CommentNotifierConfig",
@@ -170,7 +170,7 @@ STATICFILES_DIRS = [
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 
-CONSTANCE_BACKEND = 'constance.backends.database.DatabaseBackend'
+CONSTANCE_BACKEND = "constance.backends.database.DatabaseBackend"
 
 CONSTANCE_ADDITIONAL_FIELDS = {
     "country_select": (
@@ -196,7 +196,6 @@ CONSTANCE_CONFIG = {
     ),
     **ASANA_CONSTANCE_CONFIG,
     **CREATIVE_ESTIMATE_CONSTANCE_CONFIG,
-
 }
 
 

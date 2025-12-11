@@ -74,10 +74,8 @@ class UpdateTaskInfoService:
         return creative_task
 
 
-@dataclass
 class CreateCreativeService:
-
-    def __init__(self,asan_api_client: AsanaApiClient):
+    def __init__(self, asan_api_client: AsanaApiClient):
         self.asan_api_client = asan_api_client
         self.update_service = UpdateTaskInfoService(asana_api_client=asan_api_client)
 
@@ -86,3 +84,9 @@ class CreateCreativeService:
         if creative_task.status == TaskStatus.CREATED:
             need_rated_at = creative_task.created + timedelta(days=config.NEED_RATED_AT)
             Creative.objects.create(task=creative_task, need_rated_at=need_rated_at)
+
+
+@dataclass
+class EstimateCreativeService:
+    asana_api_client: AsanaApiClient
+    x = "1"

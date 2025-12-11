@@ -19,7 +19,6 @@ class TestOneHandler(BaseWebhookHandler):
     description="Таск с креативом добавлен в колонку для оценки креатива",
 )
 class CreativeTaskForEstimation(BaseWebhookHandler):
-
     def get_target_sections_ids(self) -> set[str]:
         return set(CreativeProjectSection.objects.values_list("section_id", flat=True))
 
@@ -40,9 +39,10 @@ class CreativeTaskForEstimation(BaseWebhookHandler):
                         is_created = True
         return WebhookHandlerResult(is_success=True, is_target_event=is_created)
 
-
     def _is_target_event(self, event_data: dict) -> bool:
         # is task moved to section
-        return (event_data.get("action") == "added"
+        return (
+            event_data.get("action") == "added"
             and event_data.get("resource", {}).get("resource_type") == "task"
-            and event_data.get("parent", {}).get("resource_type") == "section")
+            and event_data.get("parent", {}).get("resource_type") == "section"
+        )

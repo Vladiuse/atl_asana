@@ -21,7 +21,7 @@ class Task(models.Model):
     def get_assignee_display(self) -> str:
         value = self.assignee_id
         try:
-            name =  AtlasUser.objects.get(user_id=self.assignee_id).name
+            name = AtlasUser.objects.get(user_id=self.assignee_id).name
             if name:
                 value = name
         except AtlasUser.DoesNotExist:
@@ -34,6 +34,7 @@ class Task(models.Model):
             self.save()
             if hasattr(self, "creative"):
                 self.creative.cancel_estimation()
+
 
 class CreativeStatus(models.TextChoices):
     WAITING = "waiting", "Ожидает"

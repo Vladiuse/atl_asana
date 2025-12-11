@@ -59,7 +59,6 @@ class ProcessingStatus(models.TextChoices):
     NO_HANDLERS = "no_handlers", "Нет слушателей"
 
 
-
 class AsanaWebhookRequestData(models.Model):
     webhook = models.ForeignKey(to=AsanaWebhook, on_delete=models.CASCADE)
     status = models.CharField(max_length=30, choices=ProcessingStatus, default=ProcessingStatus.PENDING)

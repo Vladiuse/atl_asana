@@ -4,7 +4,6 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("asana", "0015_alter_asanawebhookrequestdata_status_and_more"),
     ]
