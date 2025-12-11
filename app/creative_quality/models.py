@@ -11,6 +11,7 @@ class TaskStatus(models.TextChoices):
 
 class Task(models.Model):
     task_id = models.CharField(max_length=20, unique=True)
+    is_completed = models.BooleanField(default=False)
     task_name = models.CharField(max_length=254, blank=True)
     status = models.CharField(max_length=30, choices=TaskStatus, default=TaskStatus.PENDING)
     assignee_id = models.CharField(max_length=20, blank=True)
