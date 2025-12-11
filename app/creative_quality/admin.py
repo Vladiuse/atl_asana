@@ -7,6 +7,7 @@ from django.conf import settings
 from django.contrib import admin, messages
 from django.db.models import QuerySet
 from django.http import HttpRequest
+from django.utils.html import format_html
 
 from .models import Creative, CreativeProjectSection, Task
 from .services import LoadAdditionalInfoForCreativeProjectSection
@@ -16,10 +17,15 @@ logging.basicConfig(level=logging.INFO)
 
 @admin.register(Task)
 class TaskAdmin(admin.ModelAdmin):
-    list_display = ("task_id", "task_name", "status", "assignee_id", "bayer_code", "created")
+    list_display = ("task_id", "task_name", "status", "assignee_id", "bayer_code", "created", "url_display")
     list_filter = ("status",)
     search_fields = ("task_id", "task_name", "assignee_id", "bayer_code")
     ordering = ("-created",)
+    @admin.display(description="url")
+    def url_display(self, obj: Task) -> str:
+        if obj.url:
+            return format_html('<a href="{}" target="_blank">url</a>', obj.url)
+        return "-"
 
 
 @admin.register(Creative)
