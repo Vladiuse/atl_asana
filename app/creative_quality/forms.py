@@ -16,6 +16,11 @@ class CreativeForm(forms.ModelForm):
         label="CRT",
         help_text="Укажите значение CTR",
     )
+    comment = forms.CharField(
+        required=False,
+        label="Комментарий",
+        help_text="Можно оставить пустым",
+    )
 
     class Meta:
         model = Creative

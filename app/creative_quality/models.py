@@ -46,6 +46,7 @@ class CreativeStatus(models.TextChoices):
 class Creative(models.Model):
     task = models.OneToOneField(Task, on_delete=models.CASCADE, related_name="creative")
     status = models.CharField(max_length=50, choices=CreativeStatus, default=CreativeStatus.WAITING)
+    comment = models.TextField(blank=True)
     hook = models.PositiveIntegerField(null=True, default=None, blank=True)
     hold = models.PositiveIntegerField(null=True, default=None, blank=True)
     crt = models.PositiveIntegerField(null=True, default=None, blank=True)
