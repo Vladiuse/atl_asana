@@ -109,6 +109,23 @@ class AsanaApiClient:
         return response.json()["data"]
 
     @asana_error_handler
+    def update_task(self, task_id: int, data: dict, opt_fields: list[str] | None = None) -> dict:
+        if opt_fields is None:
+            opt_fields = []
+        data = {"data": data}
+        response = requests.put(
+            f"{self.API_ENDPOINT}tasks/{task_id}",
+            headers=self._auth_headers,
+            json=data,
+            params={"opt_fields": opt_fields},
+        )
+        response.raise_for_status()
+        return response.json()["data"]
+
+    def mark_task_completed(self, task_id: int) -> dict:
+        return self.update_task(task_id=task_id, data={"completed": True}, opt_fields=["completed", "name"])
+
+    @asana_error_handler
     def get_workspace_memberships_for_user(self, user_id: int) -> list:
         response = requests.get(
             f"{self.API_ENDPOINT}users/{user_id}/workspace_memberships",
