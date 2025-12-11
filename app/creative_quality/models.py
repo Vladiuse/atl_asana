@@ -11,7 +11,6 @@ class TaskStatus(models.TextChoices):
 class Task(models.Model):
     task_id = models.CharField(max_length=20, unique=True)
     task_name = models.CharField(max_length=254, blank=True)
-    is_complete = models.BooleanField(default=False)
     status = models.CharField(max_length=30, choices=TaskStatus, default=TaskStatus.PENDING)
     assignee_id = models.CharField(max_length=20, blank=True)
     bayer_code = models.CharField(max_length=20, blank=True)
@@ -25,7 +24,8 @@ class Task(models.Model):
                 self.creative.cancel_estimation()
 
 class CreativeStatus(models.TextChoices):
-    WAITING = "waiting", "Ожидает оценки"
+    WAITING = "waiting", "Ожидает"
+    NEED_REVIEW = "need_review", "Нужна оценка"
     RATED = "rated", "Оценено"
     CANCELED = "canceled", "Оценка отменена"
     EXPIRED = "expired", "Просрочено"
