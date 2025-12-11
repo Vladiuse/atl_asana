@@ -1,5 +1,5 @@
-from django.db import models, transaction
 from asana.models import AtlasUser
+from django.db import models, transaction
 
 
 class TaskStatus(models.TextChoices):
@@ -56,6 +56,9 @@ class Creative(models.Model):
         self.status = CreativeStatus.CANCELED
         self.need_rated_at = None
         self.save()
+
+    def is_can_be_updated(self) -> bool:
+        return True
 
 
 class CreativeProjectSection(models.Model):
