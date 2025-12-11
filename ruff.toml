@@ -31,11 +31,6 @@ ignore = [
 ]
 
 [lint.extend-per-file-ignores]
-"*/views.py" = [
-    "ARG002",  # args
-    "ANN201",  # return type in views
-]
-
 "*/serializers.py" = [
     "ARG002",  # args
     #"ANN201",  # return type in serializers
