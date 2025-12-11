@@ -5,7 +5,7 @@ from asana.client import AsanaApiClient
 from asana.client.exception import AsanaApiClientError, AsanaForbiddenError, AsanaNotFoundError
 from constance import config
 
-from .models import Creative, CreativeProjectSection, Task, TaskStatus
+from .models import Creative, CreativeProjectSection, CreativeStatus, Task, TaskStatus
 
 
 @dataclass
@@ -73,6 +73,18 @@ class UpdateTaskInfoService:
             creative_task.save()
         return creative_task
 
+    def mark_completed(self, task: Task) -> None:
+        """
+        Raises:
+             AsanaApiClientError
+        """
+        try:
+            self.asana_api_client.mark_task_completed(task_id=task.task_id)
+            task.is_completed = True
+            task.save(update_fields=["is_completed"])
+        except (AsanaNotFoundError, AsanaForbiddenError):
+            task.mark_deleted()
+
 
 class CreateCreativeService:
     def __init__(self, asan_api_client: AsanaApiClient):
@@ -86,7 +98,34 @@ class CreateCreativeService:
             Creative.objects.create(task=creative_task, need_rated_at=need_rated_at)
 
 
-@dataclass
+@dataclass(frozen=True)
+class CreativeEstimationData:
+    comment: str
+    hook: int
+    hold: int
+    crt: int
+    need_complete_task: bool
+
+
 class EstimateCreativeService:
-    asana_api_client: AsanaApiClient
-    x = "1"
+    def __init__(self, asan_api_client: AsanaApiClient):
+        self.asan_api_client = asan_api_client
+        self.update_service = UpdateTaskInfoService(asana_api_client=asan_api_client)
+
+    def estimate(self, creative: Creative, estimate_data: CreativeEstimationData) -> None:
+        creative.hook = estimate_data.hook
+        creative.hold = estimate_data.hold
+        creative.crt = estimate_data.crt
+        creative.comment = estimate_data.comment
+        creative.status = CreativeStatus.RATED
+        creative.save()
+        if estimate_data.need_complete_task is True:
+            try:
+                self.update_service.mark_completed(task=creative.task)
+            except AsanaApiClientError:
+                from .tasks import mark_asana_task_completed_task
+
+                mark_asana_task_completed_task.apply_async(
+                    kwargs={"task_pk": creative.task.pk},
+                    countdown=3600,
+                )
