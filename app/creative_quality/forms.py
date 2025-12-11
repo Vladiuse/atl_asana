@@ -12,7 +12,7 @@ class CreativeForm(forms.ModelForm):
         label="Hold",
         help_text="Укажите значение hold",
     )
-    crt = forms.IntegerField(
+    ctr = forms.IntegerField(
         label="CRT",
         help_text="Укажите значение CTR",
     )
@@ -24,4 +24,4 @@ class CreativeForm(forms.ModelForm):
 
     class Meta:
         model = Creative
-        fields = ["hook", "hold", "crt"]
+        fields = ["hook", "hold", "ctr"]

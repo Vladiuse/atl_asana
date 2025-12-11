@@ -2,6 +2,18 @@
 {% load static %}
 
 {%block content%}
+<style>
+    .spinner-grow {
+        width: 15px;
+        height: 15px;
+    }
+
+    button[type=submit] {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+    }
+</style>
 <div class="d-flex justify-content-center" style="padding-top: 40px;">
     <div style="width: 600px;">
         <table class="table table-bordered w-full mx-auto">
@@ -72,20 +84,20 @@
                 {% endfor %}
             </div>
 
-            <!-- crt -->
+            <!-- ctr -->
             <div class="mb-3">
-                <label for="{{ form.crt.id_for_label }}" class="form-label">
-                    {{ form.crt.label }}:
+                <label for="{{ form.ctr.id_for_label }}" class="form-label">
+                    {{ form.ctr.label }}:
                 </label>
 
-                <input type="text" name="{{ form.crt.html_name }}" id="{{ form.crt.id_for_label }}"
-                    value="{{ form.crt.value|default:'' }}" class="form-control">
+                <input type="text" name="{{ form.ctr.html_name }}" id="{{ form.ctr.id_for_label }}"
+                    value="{{ form.ctr.value|default:'' }}" class="form-control">
 
-                {% if form.crt.help_text %}
-                <div class="form-text">{{ form.crt.help_text }}</div>
+                {% if form.ctr.help_text %}
+                <div class="form-text">{{ form.ctr.help_text }}</div>
                 {% endif %}
 
-                {% for error in form.crt.errors %}
+                {% for error in form.ctr.errors %}
                 <div class="text-danger small">{{ error }}</div>
                 {% endfor %}
             </div>
@@ -95,8 +107,8 @@
                     {{ form.comment.label }}:
                 </label>
 
-                <textarea type="text" name="{{ form.comment.html_name }}" id="{{ form.crt.id_for_label }}"
-                    value="{{ form.crt.value|default:'' }}" class="form-control"></textarea>
+                <textarea type="text" name="{{ form.comment.html_name }}" id="{{ form.comment.id_for_label }}"
+                    value="{{ form.comment.value|default:'' }}" class="form-control"></textarea>
 
                 {% if form.comment.help_text %}
                 <div class="form-text">{{ form.comment.help_text }}</div>
@@ -107,9 +119,22 @@
                 {% endfor %}
             </div>
 
-            <button type="submit" class="btn btn-primary">Сохранить</button>
+            <button type="submit" class="btn btn-primary">
+                Сохранить
+                <div class="spinner-grow text-light" role="status" style="display: none;">
+                    <span class="visually-hidden">Loading...</span>
+                </div>
+            </button>
         </form>
     </div>
 </div>
-
+<script>
+    var form = document.getElementById("creative-form")
+    form.addEventListener("submit", function (e) {
+        e.preventDefault()
+        form.querySelector("button[type=submit]").disabled = true;
+        form.querySelector("button[type=submit]").querySelector(".spinner-grow").style.display = "block"
+        form.submit()
+    })
+</script>
 {%endblock%}
