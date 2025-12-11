@@ -41,7 +41,8 @@ class UpdateTaskInfoService:
         Raises:
              AsanaApiClientError
         """
-        assignee_id = task_data.get("assignee", {}).get("gid", "")
+
+        assignee_id = "" if task_data["assignee"] is None else task_data.get("assignee", {}).get("gid", "")
         task_name = task_data["name"]
         url = task_data["permalink_url"]
         bayer_code = ""
@@ -87,9 +88,9 @@ class UpdateTaskInfoService:
 
 
 class CreateCreativeService:
-    def __init__(self, asan_api_client: AsanaApiClient):
-        self.asan_api_client = asan_api_client
-        self.update_service = UpdateTaskInfoService(asana_api_client=asan_api_client)
+    def __init__(self, asana_api_client: AsanaApiClient):
+        self.asana_api_client = asana_api_client
+        self.update_service = UpdateTaskInfoService(asana_api_client=asana_api_client)
 
     def create(self, creative_task: Task) -> None:
         creative_task = self.update_service.update(creative_task=creative_task)
