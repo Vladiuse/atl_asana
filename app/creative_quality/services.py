@@ -104,7 +104,7 @@ class CreativeEstimationData:
     comment: str
     hook: int
     hold: int
-    crt: int
+    ctr: int
     need_complete_task: bool
 
 
@@ -116,7 +116,7 @@ class EstimateCreativeService:
     def estimate(self, creative: Creative, estimate_data: CreativeEstimationData) -> None:
         creative.hook = estimate_data.hook
         creative.hold = estimate_data.hold
-        creative.crt = estimate_data.crt
+        creative.crt = estimate_data.ctr
         creative.comment = estimate_data.comment
         creative.status = CreativeStatus.RATED
         creative.save()

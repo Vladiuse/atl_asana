@@ -1,3 +1,6 @@
+from asana.client import AsanaApiClient
+from common import MessageSender, RequestsSender
+from django.conf import settings
 from django.http import HttpRequest, HttpResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.views import View
@@ -5,6 +8,10 @@ from django.views import View
 from creative_quality.models import Creative, CreativeStatus
 
 from .forms import CreativeForm
+from .services import CreativeEstimationData, EstimateCreativeService
+
+asana_api_client = AsanaApiClient(api_key=settings.ASANA_API_KEY)
+message_sender = MessageSender(request_sender=RequestsSender())
 
 
 class CreativeUpdateView(View):
@@ -25,11 +32,16 @@ class CreativeUpdateView(View):
     def post(self, request: HttpRequest, creative_id: int, task_id: str) -> HttpResponse:
         creative = get_object_or_404(Creative, pk=creative_id, task__task_id=task_id)
         form = CreativeForm(request.POST, instance=creative)
-
         if form.is_valid():
-            creative_obj = form.save(commit=False)
-            creative_obj.status = CreativeStatus.RATED
-            creative_obj.save()
+            estimate_data = CreativeEstimationData(
+                hook=form.cleaned_data["hook"],
+                hold=form.cleaned_data["hook"],
+                ctr=form.cleaned_data["ctr"],
+                comment=form.cleaned_data["comment"],
+                need_complete_task=True,
+            )
+            estimate_service = EstimateCreativeService(asan_api_client=asana_api_client)
+            estimate_service.estimate(creative=creative, estimate_data=estimate_data)
             return redirect("creative_quality:creative_detail", creative_id=creative.pk, task_id=creative.task.task_id)
 
         return render(request, self.template_name, {"form": form, "creative": creative})
