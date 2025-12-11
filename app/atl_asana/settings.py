@@ -23,11 +23,13 @@ ASANA_API_KEY = os.environ["ASANA_API_KEY"]
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = os.environ.get("DJANGO_DEBUG", "false").lower() == "true"
 
+
+DOMAIN = "atl-asana.vim-store.ru"
 ALLOWED_HOSTS = [
     "127.0.0.1",
     "83.222.20.96",
     "37.1.208.252",
-    "atl-asana.vim-store.ru",
+    DOMAIN,
 ]
 
 CSRF_TRUSTED_ORIGINS = [
