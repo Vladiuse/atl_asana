@@ -14,6 +14,7 @@ class Task(models.Model):
     status = models.CharField(max_length=30, choices=TaskStatus, default=TaskStatus.PENDING)
     assignee_id = models.CharField(max_length=20, blank=True)
     bayer_code = models.CharField(max_length=20, blank=True)
+    url = models.CharField(max_length=254, blank=True)
     created = models.DateTimeField(auto_now_add=True)
 
     def mark_deleted(self) -> None:

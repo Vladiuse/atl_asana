@@ -32,6 +32,7 @@ class CreateCreativeService:
         assignee_id: str
         name: str
         bayer_code: str
+        url: str
 
     asana_api_client: AsanaApiClient
 
@@ -42,6 +43,7 @@ class CreateCreativeService:
         """
         assignee_id = task_data.get("assignee", {}).get("gid", "")
         task_name = task_data["name"]
+        url = task_data["permalink_url"]
         bayer_code = ""
         for field in task_data.get("custom_fields", []):
             if field["name"] == config.DESIGN_TASK_BAER_CUSTOM_FIELD_NAME:
@@ -51,6 +53,7 @@ class CreateCreativeService:
             assignee_id=assignee_id,
             name=task_name,
             bayer_code=bayer_code,
+            url=url,
         )
 
 
@@ -62,6 +65,7 @@ class CreateCreativeService:
                 creative_task.assignee_id = task_dto.assignee_id
                 creative_task.bayer_code = task_dto.bayer_code
                 creative_task.task_name = task_dto.name
+                creative_task.url = task_dto.url
                 creative_task.status = TaskStatus.CREATED
                 creative_task.save()
                 need_rated_at = timezone.now() + timedelta(days=config.NEED_RATED_AT)
