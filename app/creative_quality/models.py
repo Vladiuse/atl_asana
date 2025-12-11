@@ -17,7 +17,7 @@ class Task(models.Model):
     bayer_code = models.CharField(max_length=20, blank=True)
     created = models.DateTimeField(auto_now_add=True)
 
-    def mark_deleted(self):
+    def mark_deleted(self) -> None:
         with transaction.atomic():
             self.status = TaskStatus.DELETED
             self.save()
@@ -40,7 +40,7 @@ class Creative(models.Model):
     need_rated_at = models.DateTimeField(null=True)
     created = models.DateTimeField(auto_now_add=True)
 
-    def cancel_estimation(self):
+    def cancel_estimation(self) -> None:
         self.status = CreativeStatus.CANCELED
         self.need_rated_at = None
         self.save()
