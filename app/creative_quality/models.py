@@ -1,6 +1,7 @@
 from asana.models import AtlasUser
 from django.db import models, transaction
 from django.urls import reverse
+from django.utils import timezone
 
 
 class TaskStatus(models.TextChoices):
@@ -109,6 +110,7 @@ class Creative(models.Model):
 
     def mark_need_estimate(self, save: bool = True) -> None:
         self.status = CreativeStatus.NEED_REVIEW
+        self.next_reminder_at = timezone.now()
         if save:
             self.save()
 
