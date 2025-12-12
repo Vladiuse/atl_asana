@@ -3,7 +3,12 @@ from datetime import timedelta
 
 from asana.client import AsanaApiClient
 from asana.client.exception import AsanaApiClientError, AsanaForbiddenError, AsanaNotFoundError
+from common import MessageRenderer
+from common.exception import MessageSenderError
+from common.message_sender import MessageSender, UserTag
 from constance import config
+from django.conf import settings
+from django.utils import timezone
 
 from .models import Creative, CreativeProjectSection, CreativeStatus, Task, TaskStatus
 
@@ -108,7 +113,7 @@ class CreativeEstimationData:
     need_complete_task: bool
 
 
-class EstimateCreativeService:
+class CreativeService:
     def __init__(self, asan_api_client: AsanaApiClient):
         self.asan_api_client = asan_api_client
         self.update_service = UpdateTaskInfoService(asana_api_client=asan_api_client)
@@ -118,8 +123,8 @@ class EstimateCreativeService:
         creative.hold = estimate_data.hold
         creative.crt = estimate_data.ctr
         creative.comment = estimate_data.comment
-        creative.status = CreativeStatus.RATED
-        creative.save()
+        creative.mark_rated()
+        # make asana task complete
         if estimate_data.need_complete_task is True:
             try:
                 self.update_service.mark_completed(task=creative.task)
@@ -130,3 +135,44 @@ class EstimateCreativeService:
                     kwargs={"task_pk": creative.task.pk},
                     countdown=3600,
                 )
+
+
+class SendEstimationMessageService:
+    message = """
+    Нужно оценить креатив:<br>
+    Task: {{task_url}}<br>
+    Estimate Link: {{estimate_url}}<br>
+    """
+
+    def __init__(self, message_sender: MessageSender, message_renderer: MessageRenderer) -> None:
+        self.message_sender = message_sender
+        self.message_renderer = message_renderer
+
+    def send_reminder(self, creative: Creative) -> None:
+        try:
+            bayer_code = creative.task.bayer_code
+            if bayer_code == "":
+                raise ValueError(f"Empty baer code in creative: {creative}")
+            user_tag = UserTag(bayer_code)
+            context = {
+                "task_url": creative.task.url,
+                "estimate_url": self._get_estimation_url(creative=creative),
+            }
+            message = self.message_renderer.render(template=self.message, context=context)
+            self.message_sender.send_message_to_user(message=message, user_tags=[user_tag])
+            creative.reminder_success_count += 1
+            if creative.reminder_success_count >= config.SEND_REMINDER_TRY_COUNT:
+                creative.mark_reminder_limit_reached(save=False)
+            else:
+                creative.next_reminder_at = timezone.now() + timedelta(hours=config.NEXT_SUCCESS_REMINDER_DELTA)
+        except (ValueError, MessageSenderError) as error:
+            creative.reminder_failure_count += 1
+            if creative.reminder_success_count >= config.SEND_REMINDER_TRY_COUNT:
+                creative.mark_reminder_limit_reached(save=False)
+            else:
+                creative.next_reminder_at = timezone.now() + timedelta(hours=config.FAILURE_RETRY_INTERVAL)
+            creative.reminder_fail_reason = str(error)
+        creative.save()
+
+    def _get_estimation_url(self, creative: Creative) -> str:
+        return creative.get_estimate_url(domain=settings.DOMAIN)
