@@ -104,6 +104,12 @@ class CreativeManager(models.Manager):
             need_rated_at__lte=timezone.now(),
         )
 
+    def need_send_estimate_message(self) -> QuerySet["Creative"]:
+        return self.get_queryset().filter(
+            status=CreativeStatus.NEED_ESTIMATE,
+            next_reminder_at__lte=timezone.now(),
+        )
+
 
 class CreativeStatus(models.TextChoices):
     WAITING = "waiting", "Ожидает"

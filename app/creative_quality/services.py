@@ -32,7 +32,7 @@ class CreativeProjectSectionService:
 class UpdateTaskInfoService:
     asana_api_client: AsanaApiClient
 
-    @dataclass
+    @dataclass(frozen=True)
     class TaskData:
         assignee_id: str
         name: str
@@ -134,11 +134,11 @@ class CreativeService:
 class SendEstimationMessageService:
     message = """
     Нужно оценить креатив:<br>
-    Task: {{task_url}}<br>
+    Task: {{task_id}}<br>
     Estimate Link: {{estimate_url}}<br>
     """
 
-    def __init__(self, message_sender: MessageSender, message_renderer: MessageRenderer) -> None:
+    def __init__(self, message_sender: MessageSender, message_renderer: MessageRenderer):
         self.message_sender = message_sender
         self.message_renderer = message_renderer
 
@@ -149,7 +149,7 @@ class SendEstimationMessageService:
                 raise ValueError(f"Empty baer code in creative: {creative}")
             user_tag = UserTag(bayer_code)
             context = {
-                "task_url": creative.task.url,
+                "task_id": creative.task.task_id,
                 "estimate_url": self._get_estimation_url(creative=creative),
             }
             message = self.message_renderer.render(template=self.message, context=context)
