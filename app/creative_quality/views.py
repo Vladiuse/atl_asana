@@ -8,7 +8,7 @@ from django.views import View
 from creative_quality.models import Creative, CreativeStatus
 
 from .forms import CreativeForm
-from .services import CreativeEstimationData, EstimateCreativeService
+from .services import CreativeEstimationData, CreativeService
 
 asana_api_client = AsanaApiClient(api_key=settings.ASANA_API_KEY)
 message_sender = MessageSender(request_sender=RequestsSender())
@@ -40,7 +40,7 @@ class CreativeUpdateView(View):
                 comment=form.cleaned_data["comment"],
                 need_complete_task=True,
             )
-            estimate_service = EstimateCreativeService(asan_api_client=asana_api_client)
+            estimate_service = CreativeService(asan_api_client=asana_api_client)
             estimate_service.estimate(creative=creative, estimate_data=estimate_data)
             return redirect("creative_quality:creative_detail", creative_id=creative.pk, task_id=creative.task.task_id)
 
