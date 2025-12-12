@@ -11,14 +11,53 @@ class TaskStatus(models.TextChoices):
 
 
 class Task(models.Model):
-    task_id = models.CharField(max_length=20, unique=True)
-    is_completed = models.BooleanField(default=False)
-    task_name = models.CharField(max_length=254, blank=True)
-    status = models.CharField(max_length=30, choices=TaskStatus, default=TaskStatus.PENDING)
-    assignee_id = models.CharField(max_length=20, blank=True)
-    bayer_code = models.CharField(max_length=20, blank=True)
-    url = models.CharField(max_length=254, blank=True)
-    created = models.DateTimeField(auto_now_add=True)
+    REQUIRED_FOR_ESTIMATION = ["assignee_id", "bayer_code"]
+
+    task_id = models.CharField(
+        max_length=20,
+        unique=True,
+    )
+    is_completed = models.BooleanField(
+        default=False,
+    )
+    task_name = models.CharField(
+        max_length=254,
+        blank=True,
+    )
+    status = models.CharField(
+        max_length=30,
+        choices=TaskStatus,
+        default=TaskStatus.PENDING,
+    )
+    assignee_id = models.CharField(
+        max_length=20,
+        blank=True,
+        verbose_name="Исполнитель",
+    )
+    bayer_code = models.CharField(
+        max_length=20,
+        blank=True,
+        verbose_name="Код баера",
+    )
+    url = models.CharField(
+        max_length=254,
+        blank=True,
+    )
+    created = models.DateTimeField(
+        auto_now_add=True,
+    )
+
+    def missing_required_fields(self) -> list[str]:
+        missing = []
+        for field_name in self.REQUIRED_FOR_ESTIMATION:
+            field = Task._meta.get_field(field_name)
+            value = getattr(self, field_name)
+            if not value:
+                missing.append(field.verbose_name)
+        return missing
+
+    def has_required_fields(self) -> bool:
+        return not self.missing_required_fields()
 
     def get_assignee_display(self) -> str:
         value = self.assignee_id
