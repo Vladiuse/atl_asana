@@ -75,8 +75,7 @@ class UpdateTaskInfoService:
         except (AsanaNotFoundError, AsanaForbiddenError):
             creative_task.mark_deleted()
         except AsanaApiClientError:
-            creative_task.status = TaskStatus.ERROR_LOAD_INFO
-            creative_task.save()
+            creative_task.mark_error_load_info()
         return creative_task
 
     def mark_completed(self, task: Task) -> None:
@@ -106,11 +105,12 @@ class CreativeService:
         self.asan_api_client = asan_api_client
         self.update_service = UpdateTaskInfoService(asana_api_client=asan_api_client)
 
-    def create_creative(self, creative_task: Task) -> None:
+    def create_creative(self, creative_task: Task) -> Creative | None:
         creative_task = self.update_service.update(creative_task=creative_task)
         if creative_task.status == TaskStatus.CREATED:
             need_rated_at = creative_task.created + timedelta(days=config.NEED_RATED_AT)
-            Creative.objects.create(task=creative_task, need_rated_at=need_rated_at)
+            return Creative.objects.create(task=creative_task, need_rated_at=need_rated_at)
+        return None
 
     def estimate(self, creative: Creative, estimate_data: CreativeEstimationData) -> None:
         creative.hook = estimate_data.hook
