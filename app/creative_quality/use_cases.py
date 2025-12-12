@@ -39,7 +39,7 @@ class SendEstimationMessageUseCase:
         self.estimation_service = estimation_service
 
     def execute(self) -> dict:
-        creatives = Creative.objects.need_send_estimate_message()
+        creatives = Creative.objects.need_send_estimate_message().select_related("task")
         for creative in creatives:
             self.estimation_service.send_reminder(creative=creative)
         return {"count": len(creatives)}
