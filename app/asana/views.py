@@ -1,3 +1,4 @@
+from django.http import HttpRequest, HttpResponse
 from django.shortcuts import get_object_or_404
 from rest_framework import status
 from rest_framework.response import Response
@@ -8,7 +9,8 @@ from .tasks import process_asana_webhook_task
 
 
 class AsanaWebhookView(APIView):
-    def post(self, request, webhook_name, format=None):  # noqa: A002
+    def post(self, request: HttpRequest, webhook_name: str, format: str | None = None) -> HttpResponse:  # noqa: A002
+        _ = format
         webhook = get_object_or_404(AsanaWebhook, name=webhook_name)
         header_secret = request.headers.get("X-Hook-Secret")
         if header_secret and webhook.secret == "":
