@@ -81,6 +81,7 @@ class CreativeStatus(models.TextChoices):
     WAITING = "waiting", "Ожидает"
     NEED_REVIEW = "need_review", "Нужна оценка"
     RATED = "rated", "Оценено"
+    REMINDER_LIMIT_REACHED = "reminder_limit_reached", "Лимит напоминаний достигнут"
     CANCELED = "canceled", "Оценка отменена"
     EXPIRED = "expired", "Просрочено"
 
@@ -89,16 +90,39 @@ class Creative(models.Model):
     task = models.OneToOneField(Task, on_delete=models.CASCADE, related_name="creative")
     status = models.CharField(max_length=50, choices=CreativeStatus, default=CreativeStatus.WAITING)
     comment = models.TextField(blank=True)
-    hook = models.PositiveIntegerField(null=True, default=None, blank=True)
-    hold = models.PositiveIntegerField(null=True, default=None, blank=True)
-    crt = models.PositiveIntegerField(null=True, default=None, blank=True)
+    hook = models.PositiveIntegerField(null=True, blank=True)
+    hold = models.PositiveIntegerField(null=True, blank=True)
+    crt = models.PositiveIntegerField(null=True, blank=True)
     need_rated_at = models.DateTimeField(null=True)
     created = models.DateTimeField(auto_now_add=True)
 
-    def cancel_estimation(self) -> None:
+    next_reminder_at = models.DateTimeField(null=True, blank=True)
+    reminder_success_count = models.PositiveIntegerField(default=0)
+    reminder_failure_count = models.PositiveIntegerField(default=0)
+    reminder_fail_reason = models.TextField(blank=True)
+
+    def mark_rated(self, save: bool = True) -> None:
+        self.status = CreativeStatus.RATED
+        self.next_reminder_at = None
+        if save:
+            self.save()
+
+    def mark_need_estimate(self, save: bool = True) -> None:
+        self.status = CreativeStatus.NEED_REVIEW
+        if save:
+            self.save()
+
+    def mark_reminder_limit_reached(self, save: bool = True) -> None:
+        self.status = CreativeStatus.REMINDER_LIMIT_REACHED
+        self.next_reminder_at = None
+        if save:
+            self.save()
+
+    def cancel_estimation(self, save: bool = True) -> None:
         self.status = CreativeStatus.CANCELED
         self.need_rated_at = None
-        self.save()
+        if save:
+            self.save()
 
     def is_can_be_updated(self) -> bool:
         return True
