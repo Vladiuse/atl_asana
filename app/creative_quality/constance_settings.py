@@ -19,6 +19,11 @@ CONSTANCE_CONFIG = {
         "Число попыток для отправки сообщений, успешных и нет",
         int,
     ),
+    "TASK_MAX_LOAD_FAILURES": (
+        3,
+        "Максимальное число ошибок загрузки нового таска",
+        int,
+    ),
 }
 
 CONSTANCE_CONFIG_FIELDSETS = {
@@ -26,5 +31,6 @@ CONSTANCE_CONFIG_FIELDSETS = {
         "NEED_RATED_AT",
         "NEXT_SUCCESS_REMINDER_DELTA",
         "FAILURE_RETRY_INTERVAL",
+        "TASK_MAX_LOAD_FAILURES",
     ),
 }
