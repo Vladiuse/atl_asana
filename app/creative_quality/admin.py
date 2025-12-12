@@ -51,6 +51,7 @@ class CreativeAdmin(admin.ModelAdmin):
         "comment",
         "display_estimate_url",
         "need_rated_at",
+        "gsheet_sent",
         "created",
     )
     list_filter = ("status",)

@@ -110,6 +110,12 @@ class CreativeManager(models.Manager):
             next_reminder_at__lte=timezone.now(),
         )
 
+    def need_send_to_gsheet(self) -> QuerySet["Creative"]:
+        return self.get_queryset().filter(
+            status=CreativeStatus.RATED,
+            gsheet_sent=False,
+        )
+
 
 class CreativeStatus(models.TextChoices):
     WAITING = "waiting", "Ожидает"
@@ -128,6 +134,7 @@ class Creative(models.Model):
     hold = models.PositiveIntegerField(null=True, blank=True)
     crt = models.PositiveIntegerField(null=True, blank=True)
     need_rated_at = models.DateTimeField(null=True)
+    gsheet_sent= models.BooleanField(default=False)
     created = models.DateTimeField(auto_now_add=True)
 
     next_reminder_at = models.DateTimeField(null=True, blank=True)
@@ -162,7 +169,7 @@ class Creative(models.Model):
             self.save()
 
     def is_can_be_updated(self) -> bool:
-        return True
+        return not self.gsheet_sent
 
     def get_estimate_url(self, domain: str | None = None) -> str:
         url = reverse(
