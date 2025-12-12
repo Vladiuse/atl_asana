@@ -18,7 +18,16 @@ logging.basicConfig(level=logging.INFO)
 
 @admin.register(Task)
 class TaskAdmin(admin.ModelAdmin):
-    list_display = ("task_id", "task_name", "status", "is_completed", "assignee_id", "bayer_code", "created", "url_display")
+    list_display = (
+        "task_id",
+        "task_name",
+        "status",
+        "is_completed",
+        "assignee_id",
+        "bayer_code",
+        "created",
+        "url_display",
+    )
     list_filter = ("status",)
     search_fields = ("task_id", "task_name", "assignee_id", "bayer_code")
     ordering = ("-created",)
@@ -32,10 +41,26 @@ class TaskAdmin(admin.ModelAdmin):
 
 @admin.register(Creative)
 class CreativeAdmin(admin.ModelAdmin):
-    list_display = ("id", "task", "status", "hook", "hold", "crt", "comment", "need_rated_at", "created")
+    list_display = (
+        "id",
+        "task",
+        "status",
+        "hook",
+        "hold",
+        "crt",
+        "comment",
+        "display_estimate_url",
+        "need_rated_at",
+        "created",
+    )
     list_filter = ("status",)
     search_fields = ("task__task_id", "task__task_name")
     ordering = ("-created",)
+
+    @admin.display(description="Estimate url")
+    def display_estimate_url(self, obj: Creative) -> str:
+        return format_html('<a href="{}" target="_blank">url</a>', obj.get_estimate_url())
+
 
 
 @admin.register(CreativeProjectSection)
