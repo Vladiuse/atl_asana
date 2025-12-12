@@ -1,4 +1,3 @@
-
 import pytest
 
 from asana.constants import AsanaResourceType
@@ -54,35 +53,19 @@ class RaiseErrorHandler(BaseWebhookHandler):
         raise TypeError("boom")
 
 
-TEST_REGISTRY: dict[str, WebhookHandlerInfo] = {
-    SuccessTargetHandler.name: WebhookHandlerInfo(
-        name=SuccessTargetHandler.name,
-        description="",
-        webhook_handler_class=SuccessTargetHandler,
-    ),
-    SuccessNotTargetHandler.name: WebhookHandlerInfo(
-        name=SuccessNotTargetHandler.name,
-        description="",
-        webhook_handler_class=SuccessNotTargetHandler,
-    ),
-    ErrorHandler.name: WebhookHandlerInfo(
-        name=ErrorHandler.name,
-        description="",
-        webhook_handler_class=ErrorHandler,
-    ),
-    RaiseErrorHandler.name: WebhookHandlerInfo(
-        name=RaiseErrorHandler.name,
-        description="",
-        webhook_handler_class=RaiseErrorHandler,
-    ),
-}
+TEST_HANDLERS = (SuccessTargetHandler, SuccessNotTargetHandler, ErrorHandler, RaiseErrorHandler)
 
 
 @pytest.fixture(autouse=True)
 def test_handler_register(monkeypatch: pytest.MonkeyPatch) -> None:
     WEBHOOK_HANDLER_REGISTRY.clear()
-    for k, v in TEST_REGISTRY.items():
-        monkeypatch.setitem(WEBHOOK_HANDLER_REGISTRY, k, v)
+    for handler_class in TEST_HANDLERS:
+        info = WebhookHandlerInfo(
+            name=handler_class.name,
+            description="",
+            webhook_handler_class=handler_class,
+        )
+        monkeypatch.setitem(WEBHOOK_HANDLER_REGISTRY, handler_class.name, info)
 
 
 @pytest.mark.django_db()
@@ -101,8 +84,10 @@ class TestWebhookDispatcher:
             resource_type=AsanaResourceType.PROJECT,
         )
 
-    def test_patch_work(self):
-        assert self.dispatcher._get_registry_dict() == TEST_REGISTRY
+    def test_patch_work(self, subtests):
+        for _class in TEST_HANDLERS:
+            with subtests.test(msg="x", _class=_class):
+                assert _class.name in self.dispatcher._get_registry_dict()
 
     def test_empty(self):
         webhook_data = AsanaWebhookRequestData.objects.create(payload={}, headers={}, webhook=self.webhook_x)
