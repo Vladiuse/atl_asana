@@ -28,6 +28,7 @@ ignore = [
     "ANN101",
     "ANN102",
     "ANN204",
+    "PT004",
 ]
 
 [lint.extend-per-file-ignores]
