@@ -1,13 +1,12 @@
-from unittest.mock import patch
 
-from django.test import TestCase
+import pytest
 
+from asana.constants import AsanaResourceType
 from asana.models import AsanaWebhook, AsanaWebhookRequestData, ProcessingStatus, WebhookHandler
-from ...constants import AsanaResourceType
 
 from ..abstract import BaseWebhookHandler, WebhookHandlerResult
 from ..dispatcher import WebhookDispatcher, WebhookDispatcherResult
-from ..registry import WebhookHandlerInfo
+from ..registry import WEBHOOK_HANDLER_REGISTRY, WebhookHandlerInfo
 
 
 class SuccessTargetHandler(BaseWebhookHandler):
@@ -79,9 +78,18 @@ TEST_REGISTRY: dict[str, WebhookHandlerInfo] = {
 }
 
 
-@patch.dict("asana.webhook_handlers.registry.WEBHOOK_HANDLER_REGISTRY", TEST_REGISTRY, clear=True)
-class WebhookDispatcherTest(TestCase):
-    def setUp(self):
+@pytest.fixture(autouse=True)
+def test_handler_register(monkeypatch: pytest.MonkeyPatch) -> dict:
+    WEBHOOK_HANDLER_REGISTRY.clear()
+    for k, v in TEST_REGISTRY.items():
+        monkeypatch.setitem(WEBHOOK_HANDLER_REGISTRY, k, v)
+    return TEST_REGISTRY
+
+
+@pytest.mark.django_db()
+class TestWebhookDispatcher:
+    @pytest.fixture(autouse=True)
+    def setup(self) -> None:
         self.dispatcher = WebhookDispatcher()
         self.webhook_x = AsanaWebhook.objects.create(
             name="xxx",
@@ -95,7 +103,7 @@ class WebhookDispatcherTest(TestCase):
         )
 
     def test_patch_work(self):
-        assert self.dispatcher._get_registry_dict() == TEST_REGISTRY, f"actual: {self.dispatcher._get_registry_dict()}"
+        assert self.dispatcher._get_registry_dict() == TEST_REGISTRY
 
     def test_empty(self):
         webhook_data = AsanaWebhookRequestData.objects.create(payload={}, headers={}, webhook=self.webhook_x)
