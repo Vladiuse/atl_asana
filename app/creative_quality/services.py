@@ -92,18 +92,6 @@ class UpdateTaskInfoService:
             task.mark_deleted()
 
 
-class CreateCreativeService:
-    def __init__(self, asana_api_client: AsanaApiClient):
-        self.asana_api_client = asana_api_client
-        self.update_service = UpdateTaskInfoService(asana_api_client=asana_api_client)
-
-    def create(self, creative_task: Task) -> None:
-        creative_task = self.update_service.update(creative_task=creative_task)
-        if creative_task.status == TaskStatus.CREATED:
-            need_rated_at = creative_task.created + timedelta(days=config.NEED_RATED_AT)
-            Creative.objects.create(task=creative_task, need_rated_at=need_rated_at)
-
-
 @dataclass(frozen=True)
 class CreativeEstimationData:
     comment: str
@@ -117,6 +105,12 @@ class CreativeService:
     def __init__(self, asan_api_client: AsanaApiClient):
         self.asan_api_client = asan_api_client
         self.update_service = UpdateTaskInfoService(asana_api_client=asan_api_client)
+
+    def create_creative(self, creative_task: Task) -> None:
+        creative_task = self.update_service.update(creative_task=creative_task)
+        if creative_task.status == TaskStatus.CREATED:
+            need_rated_at = creative_task.created + timedelta(days=config.NEED_RATED_AT)
+            Creative.objects.create(task=creative_task, need_rated_at=need_rated_at)
 
     def estimate(self, creative: Creative, estimate_data: CreativeEstimationData) -> None:
         creative.hook = estimate_data.hook
