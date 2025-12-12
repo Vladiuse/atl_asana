@@ -24,6 +24,16 @@ CONSTANCE_CONFIG = {
         "Максимальное число ошибок загрузки нового таска",
         int,
     ),
+    "CREATIVE_GOOGLE_TABLE_ID": (
+        "1ztb8tw4nlT7Xk8FJAy_I-wXsWAggP_pKudXIDRVvSz8",
+        "Айди гугл таблицы для креативов",
+        str,
+    ),
+    "CREATIVE_TABLE_LIST_NAME": (
+        "Лист1",
+        "Название листа с креативами",
+        str,
+    ),
 }
 
 CONSTANCE_CONFIG_FIELDSETS = {
@@ -31,6 +41,9 @@ CONSTANCE_CONFIG_FIELDSETS = {
         "NEED_RATED_AT",
         "NEXT_SUCCESS_REMINDER_DELTA",
         "FAILURE_RETRY_INTERVAL",
+        "SEND_REMINDER_TRY_COUNT",
         "TASK_MAX_LOAD_FAILURES",
+        "CREATIVE_GOOGLE_TABLE_ID",
+        "CREATIVE_TABLE_LIST_NAME",
     ),
 }
