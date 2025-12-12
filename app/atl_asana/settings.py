@@ -19,6 +19,7 @@ SECRET_KEY = os.environ["DJANGO_SECRET_KEY"]
 ASANA_HOOK_SECRET = os.environ["ASANA_HOOK_SECRET"]
 DOMAIN_MESSAGE_API_KEY = os.environ["DOMAIN_MESSAGE_API_KEY"]
 ASANA_API_KEY = os.environ["ASANA_API_KEY"]
+GOOGLE_CREDENTIALS_PATH = os.environ.get("GOOGLE_APPLICATION_CREDENTIALS")
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = os.environ.get("DJANGO_DEBUG", "false").lower() == "true"
