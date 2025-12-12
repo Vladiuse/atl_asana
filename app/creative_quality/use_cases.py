@@ -1,5 +1,5 @@
 from creative_quality.models import Creative, Task
-from creative_quality.services import CreativeService
+from creative_quality.services import CreativeService, SendEstimationMessageService
 
 
 class CreateCreativesForNewTasksUseCase:
@@ -23,8 +23,23 @@ class CreativesOverDueForEstimateUseCase:
     """
     Change status of Creative if due estimate time
     """
+
     def execute(self) -> dict:
         creatives = Creative.objects.overdue_for_estimate()
         for creative in creatives:
             creative.mark_need_estimate()
+        return {"count": len(creatives)}
+
+
+class SendEstimationMessageUseCase:
+    """
+    Send estimation message if reach send time
+    """
+    def __init__(self, estimation_service: SendEstimationMessageService):
+        self.estimation_service = estimation_service
+
+    def execute(self) -> dict:
+        creatives = Creative.objects.need_send_estimate_message()
+        for creative in creatives:
+            self.estimation_service.send_reminder(creative=creative)
         return {"count": len(creatives)}
