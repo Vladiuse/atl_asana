@@ -1,7 +1,17 @@
 from asana.models import AtlasUser
+from constance import config
 from django.db import models, transaction
+from django.db.models import QuerySet
 from django.urls import reverse
 from django.utils import timezone
+
+
+class TaskManager(models.Manager):
+    def needs_update(self) -> QuerySet["Task"]:
+        return self.get_queryset().filter(
+            status__in=[TaskStatus.PENDING, TaskStatus.ERROR_LOAD_INFO],
+            load_failure_count__lt=config.TASK_MAX_LOAD_FAILURES,
+        )
 
 
 class TaskStatus(models.TextChoices):
@@ -12,6 +22,7 @@ class TaskStatus(models.TextChoices):
 
 
 class Task(models.Model):
+    objects = TaskManager()
     REQUIRED_FOR_ESTIMATION = ["assignee_id", "bayer_code"]
 
     task_id = models.CharField(
@@ -47,6 +58,7 @@ class Task(models.Model):
     created = models.DateTimeField(
         auto_now_add=True,
     )
+    load_failure_count = models.PositiveIntegerField(default=0)
 
     def missing_required_fields(self) -> list[str]:
         missing = []
@@ -76,6 +88,12 @@ class Task(models.Model):
             self.save()
             if hasattr(self, "creative"):
                 self.creative.cancel_estimation()
+
+    def mark_error_load_info(self, save: bool = True) -> None:
+        self.status = TaskStatus.ERROR_LOAD_INFO
+        self.load_failure_count += 1
+        if save:
+            self.save()
 
 
 class CreativeStatus(models.TextChoices):
