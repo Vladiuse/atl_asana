@@ -79,11 +79,10 @@ TEST_REGISTRY: dict[str, WebhookHandlerInfo] = {
 
 
 @pytest.fixture(autouse=True)
-def test_handler_register(monkeypatch: pytest.MonkeyPatch) -> dict:
+def test_handler_register(monkeypatch: pytest.MonkeyPatch) -> None:
     WEBHOOK_HANDLER_REGISTRY.clear()
     for k, v in TEST_REGISTRY.items():
         monkeypatch.setitem(WEBHOOK_HANDLER_REGISTRY, k, v)
-    return TEST_REGISTRY
 
 
 @pytest.mark.django_db()
@@ -93,11 +92,6 @@ class TestWebhookDispatcher:
         self.dispatcher = WebhookDispatcher()
         self.webhook_x = AsanaWebhook.objects.create(
             name="xxx",
-            resource_id="123",
-            resource_type=AsanaResourceType.PROJECT,
-        )
-        self.webhook_y = AsanaWebhook.objects.create(
-            name="yyy",
             resource_id="123",
             resource_type=AsanaResourceType.PROJECT,
         )
