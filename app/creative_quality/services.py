@@ -10,7 +10,7 @@ from constance import config
 from django.conf import settings
 from django.utils import timezone
 
-from .models import Creative, CreativeProjectSection, CreativeStatus, Task, TaskStatus
+from .models import Creative, CreativeProjectSection, Task, TaskStatus
 
 
 @dataclass
