@@ -95,6 +95,11 @@ class TestWebhookDispatcher:
             resource_id="123",
             resource_type=AsanaResourceType.PROJECT,
         )
+        self.webhook_y = AsanaWebhook.objects.create(
+            name="yyy",
+            resource_id="123",
+            resource_type=AsanaResourceType.PROJECT,
+        )
 
     def test_patch_work(self):
         assert self.dispatcher._get_registry_dict() == TEST_REGISTRY
