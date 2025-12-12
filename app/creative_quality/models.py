@@ -22,7 +22,6 @@ class TaskStatus(models.TextChoices):
 
 
 class Task(models.Model):
-    objects = TaskManager()
     REQUIRED_FOR_ESTIMATION = ["assignee_id", "bayer_code"]
 
     task_id = models.CharField(
@@ -60,6 +59,8 @@ class Task(models.Model):
     )
     load_failure_count = models.PositiveIntegerField(default=0)
 
+    objects = TaskManager()
+
     def missing_required_fields(self) -> list[str]:
         missing = []
         for field_name in self.REQUIRED_FOR_ESTIMATION:
@@ -96,9 +97,17 @@ class Task(models.Model):
             self.save()
 
 
+class CreativeManager(models.Manager):
+    def overdue_for_estimate(self) -> QuerySet["Creative"]:
+        return self.get_queryset().filter(
+            status=CreativeStatus.WAITING,
+            need_rated_at__lte=timezone.now(),
+        )
+
+
 class CreativeStatus(models.TextChoices):
     WAITING = "waiting", "Ожидает"
-    NEED_REVIEW = "need_review", "Нужна оценка"
+    NEED_ESTIMATE = "need_review", "Нужна оценка"
     RATED = "rated", "Оценено"
     REMINDER_LIMIT_REACHED = "reminder_limit_reached", "Лимит напоминаний достигнут"
     CANCELED = "canceled", "Оценка отменена"
@@ -120,6 +129,8 @@ class Creative(models.Model):
     reminder_failure_count = models.PositiveIntegerField(default=0)
     reminder_fail_reason = models.TextField(blank=True)
 
+    objects = CreativeManager()
+
     def mark_rated(self, save: bool = True) -> None:
         self.status = CreativeStatus.RATED
         self.next_reminder_at = None
@@ -127,7 +138,7 @@ class Creative(models.Model):
             self.save()
 
     def mark_need_estimate(self, save: bool = True) -> None:
-        self.status = CreativeStatus.NEED_REVIEW
+        self.status = CreativeStatus.NEED_ESTIMATE
         self.next_reminder_at = timezone.now()
         if save:
             self.save()
