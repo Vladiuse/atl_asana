@@ -47,7 +47,7 @@ class TaskService:
              AsanaApiClientError
         """
 
-        assignee_id = "" if task_data["assignee"] is None else task_data.get("assignee", {}).get("gid", "")
+        assignee_id = "" if task_data["assignee"] is None else task_data["assignee"]["gid"]
         task_name = task_data["name"]
         url = task_data["permalink_url"]
         bayer_code = ""
