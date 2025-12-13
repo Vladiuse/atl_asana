@@ -37,7 +37,7 @@ ignore = [
     #"ANN201",  # return type in serializers
 ]
 "*/test_*.py" = [
-    "ANN201",
+    "ANN201", # missing-return-type-undocumented-public-function
 ]
 
 [format]
