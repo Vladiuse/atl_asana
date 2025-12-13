@@ -10,7 +10,7 @@ def pytest_runtest_setup() -> None:
     disable_socket()
 
 
-@pytest.fixture(autouse=True)
+@pytest.fixture(autouse=True, scope="session")
 def mock_requests(monkeypatch: pytest.MonkeyPatch) -> None:
     mock_response = MagicMock()
     mock_response.status_code = 200
