@@ -8,31 +8,28 @@ from ..dispatcher import WebhookDispatcher, WebhookDispatcherResult
 from ..registry import WEBHOOK_HANDLER_REGISTRY, WebhookHandlerInfo
 
 
-class SuccessTargetHandler(BaseWebhookHandler):
+class FakeBaseWebhookHandler(BaseWebhookHandler):
+
+    def handle(self, webhook_data: AsanaWebhookRequestData) -> WebhookHandlerResult:
+        _ = webhook_data
+        return self.result
+
+class SuccessTargetHandler(FakeBaseWebhookHandler):
     name = "success_target"
     result = WebhookHandlerResult(
         is_success=True,
         is_target_event=True,
     )
 
-    def handle(self, webhook_data: AsanaWebhookRequestData) -> WebhookHandlerResult:
-        _ = webhook_data
-        return self.result
-
-
-class SuccessNotTargetHandler(BaseWebhookHandler):
+class SuccessNotTargetHandler(FakeBaseWebhookHandler):
     name = "success_not_target"
     result = WebhookHandlerResult(
         is_success=True,
         is_target_event=False,
     )
 
-    def handle(self, webhook_data: AsanaWebhookRequestData) -> WebhookHandlerResult:
-        _ = webhook_data
-        return self.result
 
-
-class ErrorHandler(BaseWebhookHandler):
+class ErrorHandler(FakeBaseWebhookHandler):
     name = "error_handler"
     result = WebhookHandlerResult(
         is_success=False,
@@ -40,12 +37,7 @@ class ErrorHandler(BaseWebhookHandler):
         error="error",
     )
 
-    def handle(self, webhook_data: AsanaWebhookRequestData) -> WebhookHandlerResult:
-        _ = webhook_data
-        return self.result
-
-
-class RaiseErrorHandler(BaseWebhookHandler):
+class RaiseErrorHandler(FakeBaseWebhookHandler):
     name = "raise_error_handler"
 
     def handle(self, webhook_data: AsanaWebhookRequestData) -> WebhookHandlerResult:
