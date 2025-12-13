@@ -84,7 +84,7 @@ class TestWebhookDispatcher:
             resource_type=AsanaResourceType.PROJECT,
         )
 
-    def test_patch_work(self, subtests):
+    def test_patch_work(self, subtests: pytest.Subtests):
         for _class in TEST_HANDLERS:
             with subtests.test(msg="x", _class=_class):
                 assert _class.name in self.dispatcher._get_registry_dict()
