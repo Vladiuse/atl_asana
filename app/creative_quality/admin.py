@@ -47,7 +47,7 @@ class CreativeAdmin(admin.ModelAdmin):
         "status",
         "hook",
         "hold",
-        "crt",
+        "ctr",
         "comment",
         "display_estimate_url",
         "need_rated_at",

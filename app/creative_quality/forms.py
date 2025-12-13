@@ -13,7 +13,7 @@ class CreativeForm(forms.ModelForm):
         help_text="Укажите значение hold",
     )
     ctr = forms.IntegerField(
-        label="CRT",
+        label="CTR",
         help_text="Укажите значение CTR",
     )
     comment = forms.CharField(

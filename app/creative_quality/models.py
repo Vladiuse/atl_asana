@@ -132,7 +132,7 @@ class Creative(models.Model):
     comment = models.TextField(blank=True)
     hook = models.PositiveIntegerField(null=True, blank=True)
     hold = models.PositiveIntegerField(null=True, blank=True)
-    crt = models.PositiveIntegerField(null=True, blank=True)
+    ctr = models.PositiveIntegerField(null=True, blank=True)
     need_rated_at = models.DateTimeField(null=True)
     gsheet_sent= models.BooleanField(default=False)
     created = models.DateTimeField(auto_now_add=True)

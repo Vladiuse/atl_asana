@@ -115,7 +115,7 @@ class CreativeService:
     def estimate(self, creative: Creative, estimate_data: CreativeEstimationData) -> None:
         creative.hook = estimate_data.hook
         creative.hold = estimate_data.hold
-        creative.crt = estimate_data.ctr
+        creative.ctr = estimate_data.ctr
         creative.comment = estimate_data.comment
         creative.mark_rated()
         # make asana task complete

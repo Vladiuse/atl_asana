@@ -35,7 +35,7 @@ class CreativeUpdateView(View):
         if form.is_valid():
             estimate_data = CreativeEstimationData(
                 hook=form.cleaned_data["hook"],
-                hold=form.cleaned_data["hook"],
+                hold=form.cleaned_data["hold"],
                 ctr=form.cleaned_data["ctr"],
                 comment=form.cleaned_data["comment"],
                 need_complete_task=True,
