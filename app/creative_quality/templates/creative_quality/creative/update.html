@@ -119,12 +119,15 @@
                 {% endfor %}
             </div>
 
-            <button type="submit" class="btn btn-primary">
+            <button type="submit" class="btn btn-primary" {%if not creative.is_can_be_updated%}disabled{%endif%}>
                 Сохранить
                 <div class="spinner-grow text-light" role="status" style="display: none;">
                     <span class="visually-hidden">Loading...</span>
                 </div>
             </button>
+            {%if not creative.is_can_be_updated%}
+            <p>* Данные по креативу уже добавлены в гугл таблицу, обновление невозможно</p>
+            {%endif%}
         </form>
     </div>
 </div>
