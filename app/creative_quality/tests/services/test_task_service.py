@@ -100,3 +100,37 @@ class TestTaskService:
         service = TaskService(asana_api_client=mock_asana_client)
         with pytest.raises(AsanaApiClientError):
             service.mark_completed(task=task)
+
+    def test_update_success(self, mock_asana_client: Mock):
+        task = Task.objects.create(task_id="x")
+        service = TaskService(asana_api_client=mock_asana_client)
+        data = TaskService.TaskData(
+            assignee_id="assignee_id",
+            bayer_code="bayer_code",
+            name="name",
+            url="url",
+        )
+        service._get_task_dto = Mock(return_value=data)
+        service.update(creative_task=task)
+        task.refresh_from_db()
+        assert task.assignee_id == "assignee_id"
+        assert task.bayer_code == "bayer_code"
+        assert task.task_name == "name"
+        assert task.url == "url"
+
+    @pytest.mark.parametrize("error_type", [AsanaNotFoundError, AsanaForbiddenError])
+    def test_update_error_task_not_exist(self, mock_asana_client: Mock, error_type: type[AsanaApiClientError]):
+        task = Mock(spec=Task)
+        mock_asana_client.get_task.side_effect = error_type("error")
+        service = TaskService(asana_api_client=mock_asana_client)
+        service.update(creative_task=task)
+        assert task.mark_deleted.called
+        task.mark_error_load_info.assert_not_called()
+
+    def test_update_unexpected_asana_error(self, mock_asana_client: Mock):
+        task = Mock(spec=Task)
+        mock_asana_client.get_task.side_effect = AsanaApiClientError("boom")
+        service = TaskService(asana_api_client=mock_asana_client)
+        service.update(creative_task=task)
+        assert task.mark_error_load_info.called
+        task.mark_deleted.assert_not_called()
