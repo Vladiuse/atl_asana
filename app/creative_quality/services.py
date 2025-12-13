@@ -22,14 +22,14 @@ class CreativeProjectSectionService:
         Raises:
              AsanaApiClientError: if cant get some data from asana
         """
-        section_data = self.asana_api_client.get_section(creative_project_section.section_id)
+        section_data = self.asana_api_client.get_section(section_id=creative_project_section.section_id)
         creative_project_section.section_name = section_data["name"]
         creative_project_section.project_name = section_data["project"]["name"]
         creative_project_section.save()
 
 
 @dataclass
-class UpdateTaskInfoService:
+class TaskService:
     asana_api_client: AsanaApiClient
 
     @dataclass(frozen=True)
@@ -103,7 +103,7 @@ class CreativeEstimationData:
 class CreativeService:
     def __init__(self, asan_api_client: AsanaApiClient):
         self.asan_api_client = asan_api_client
-        self.update_service = UpdateTaskInfoService(asana_api_client=asan_api_client)
+        self.update_service = TaskService(asana_api_client=asan_api_client)
 
     def create_creative(self, creative_task: Task) -> Creative | None:
         creative_task = self.update_service.update(creative_task=creative_task)
