@@ -8,6 +8,15 @@ from constance.test import override_config
 from creative_quality.models import Task
 from creative_quality.services import TaskService
 
+FIELD_NAME = "TEST_FIELD"
+
+
+@pytest.fixture(autouse=True)
+def patch_constance():
+    with override_config(DESIGN_TASK_BAER_CUSTOM_FIELD_NAME=FIELD_NAME):
+        yield
+
+
 GET_DTO_TEST_DATA = [
     (
         {
@@ -15,7 +24,7 @@ GET_DTO_TEST_DATA = [
             "name": "NAME",
             "permalink_url": "URL",
             "custom_fields": [
-                {"name": "TEST_FIELD", "text_value": "XXX"},
+                {"name": FIELD_NAME, "text_value": "XXX"},
                 {"name": "NAME", "text_value": "YYY"},
             ],
         },
@@ -54,12 +63,6 @@ GET_DTO_TEST_DATA = [
         KeyError,
     ),
 ]
-
-
-@pytest.fixture(autouse=True)
-def patch_constance():
-    with override_config(DESIGN_TASK_BAER_CUSTOM_FIELD_NAME="TEST_FIELD"):
-        yield
 
 
 @pytest.fixture(scope="module")
