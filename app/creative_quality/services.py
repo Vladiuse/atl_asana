@@ -27,6 +27,10 @@ class CreativeProjectSectionService:
         creative_project_section.project_name = section_data["project"]["name"]
         creative_project_section.save()
 
+    def fetch_tasks_ids(self, creative_project_section: CreativeProjectSection) -> list[str]:
+        section_tasks = self.asana_api_client.get_section_tasks(section_id=creative_project_section.section_id)
+        return [task["gid"] for task in section_tasks]
+
 
 @dataclass
 class TaskService:
