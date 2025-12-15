@@ -9,6 +9,7 @@ from constance import config
 from constance.test import override_config
 from django.utils import timezone
 
+from common.exception import MessageSenderError
 from creative_quality.models import Creative, Task, TaskStatus
 from creative_quality.services import (
     CreativeEstimationData,
@@ -127,15 +128,17 @@ class TestCreativeService:
 
 @pytest.mark.django_db()
 class TestSendEstimationMessageService:
+    @pytest.mark.parametrize("bayer_code", ["", "123"])
     @pytest.mark.parametrize("reminder_failure_count_start_value", [0, SEND_REMINDER_TRY_COUNT])
-    def test_empty_bayer_code_no_limit(
+    def test_incorrect_bayer_code(
         self,
         send_estimate_message_service: SendEstimationMessageService,
         fixed_now: datetime,
         reminder_failure_count_start_value: int,
+        bayer_code: str,
     ):
         creative = Mock(spec=Creative)
-        creative.task.bayer_code = ""
+        creative.task.bayer_code = bayer_code
         creative.reminder_failure_count = reminder_failure_count_start_value
         send_estimate_message_service.send_reminder(creative=creative)
         if reminder_failure_count_start_value == 0:
@@ -146,3 +149,26 @@ class TestSendEstimationMessageService:
         assert creative.reminder_failure_count == reminder_failure_count_start_value + 1
         assert creative.reminder_fail_reason != ""
         creative.save.assert_called()
+        send_estimate_message_service.message_sender.send_message_to_user.assert_not_called()
+
+    @pytest.mark.parametrize("reminder_failure_count_start_value", [0, SEND_REMINDER_TRY_COUNT])
+    def test_error_send_message(
+        self,
+        send_estimate_message_service: SendEstimationMessageService,
+        fixed_now: datetime,
+        reminder_failure_count_start_value: int,
+    ):
+        creative = Mock(spec=Creative)
+        creative.task.bayer_code = "adm"
+        send_estimate_message_service.message_sender.send_message_to_user.side_effect = MessageSenderError("boom")
+        creative.reminder_failure_count = reminder_failure_count_start_value
+        send_estimate_message_service.send_reminder(creative=creative)
+        if reminder_failure_count_start_value == 0:
+            creative.mark_reminder_limit_reached.assert_not_called()
+            assert creative.next_reminder_at == fixed_now + timedelta(hours=config.FAILURE_RETRY_INTERVAL)
+        else:
+            creative.mark_reminder_limit_reached.assert_called()
+        assert creative.reminder_failure_count == reminder_failure_count_start_value + 1
+        assert creative.reminder_fail_reason == "boom"
+        creative.save.assert_called()
+        send_estimate_message_service.message_sender.send_message_to_user.assert_called()
