@@ -13,10 +13,11 @@ def fixed_now(monkeypatch: pytest.MonkeyPatch) -> datetime:
     monkeypatch.setattr(timezone, "now", lambda: fixed)
     return fixed
 
+
 @pytest.fixture()
 def creative_model() -> Creative:
     task = Task.objects.create(task_id="x")
-    return  Creative.objects.create(task=task, status=CreativeStatus.WAITING)
+    return Creative.objects.create(task=task, status=CreativeStatus.WAITING)
 
 
 @pytest.mark.django_db()
@@ -38,7 +39,6 @@ class TestCreative:
         fixed_now: datetime,
         creative_model: Creative,
     ):
-
         method = getattr(creative_model, method_name)
         method()
         creative_model.reminder_at = next_reminder_at
@@ -50,7 +50,8 @@ class TestCreative:
 
     @pytest.mark.parametrize("save", [True, False])
     @pytest.mark.parametrize(
-        "method_name", ["mark_rated", "mark_need_estimate", "mark_reminder_limit_reached", "cancel_estimation"],
+        "method_name",
+        ["mark_rated", "mark_need_estimate", "mark_reminder_limit_reached", "cancel_estimation"],
     )
     def test_mark_save(self, save: bool, method_name: str, creative_model: Creative):
         creative_model.save = Mock()
@@ -61,3 +62,14 @@ class TestCreative:
         else:
             creative_model.save.assert_not_called()
 
+    @pytest.mark.parametrize(
+        ("gsheet_sent", "expected"),
+        [
+            (True, False),
+            (False, True),
+        ],
+    )
+    def test_is_can_be_updated(self, creative_model: Creative, gsheet_sent: bool, expected: bool):
+        creative_model.gsheet_sent = gsheet_sent
+        creative_model.save()
+        assert creative_model.is_can_be_updated() == expected
