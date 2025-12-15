@@ -6,8 +6,8 @@ from django.conf import settings
 from django.utils import timezone
 
 from .models import Creative, CreativeStatus, Task
-from .services import CreativeProjectSectionService, TaskService
-from .use_cases import FetchMissingTasksUseCase
+from .services import CreativeProjectSectionService, CreativeService, TaskService
+from .use_cases import CreateCreativesForNewTasksUseCase, FetchMissingTasksUseCase
 
 asana_api_client = AsanaApiClient(api_key=settings.ASANA_API_KEY)
 message_sender = MessageSender(request_sender=RequestsSender())
@@ -21,6 +21,13 @@ def mark_asana_task_completed_task(self: CeleryTask, task_pk: int) -> None:
         task_service.mark_completed(task=task)
     except Exception as error:  # noqa: BLE001
         self.retry(exc=error)
+
+
+@shared_task
+def create_creatives_for_new_task() -> dict:
+    creative_service = CreativeService(asan_api_client=asana_api_client)
+    use_case = CreateCreativesForNewTasksUseCase(creative_service=creative_service)
+    return use_case.execute()
 
 
 @shared_task
