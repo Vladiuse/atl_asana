@@ -63,7 +63,7 @@ class SendCreativesToGoogleSheetUseCase:
             hook=creative.hook,
             ctr=creative.ctr,
             task_name=creative.task.task_name,
-            task_url=creative.task.task_url,
+            task_url=creative.task.url,
             status=creative.status,
             comment=creative.comment,
         )
