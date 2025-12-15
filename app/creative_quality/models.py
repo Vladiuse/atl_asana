@@ -67,6 +67,9 @@ class Task(models.Model):
 
     objects = TaskManager()
 
+    def __str__(self):
+        return self.task_id
+
     def missing_required_fields(self) -> list[str]:
         missing = []
         for field_name in self.REQUIRED_FOR_ESTIMATION:
