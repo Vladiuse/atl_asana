@@ -140,6 +140,7 @@ class TestSendEstimationMessageService:
         creative = Mock(spec=Creative)
         creative.task.bayer_code = bayer_code
         creative.reminder_failure_count = reminder_failure_count_start_value
+        creative.reminder_fail_reason = ""
         send_estimate_message_service.send_reminder(creative=creative)
         if reminder_failure_count_start_value == 0:
             creative.mark_reminder_limit_reached.assert_not_called()
@@ -160,6 +161,7 @@ class TestSendEstimationMessageService:
     ):
         creative = Mock(spec=Creative)
         creative.task.bayer_code = "adm"
+        creative.reminder_fail_reason = ""
         send_estimate_message_service.message_sender.send_message_to_user.side_effect = MessageSenderError("boom")
         creative.reminder_failure_count = reminder_failure_count_start_value
         send_estimate_message_service.send_reminder(creative=creative)
@@ -170,5 +172,27 @@ class TestSendEstimationMessageService:
             creative.mark_reminder_limit_reached.assert_called()
         assert creative.reminder_failure_count == reminder_failure_count_start_value + 1
         assert creative.reminder_fail_reason == "boom"
+        creative.save.assert_called()
+        send_estimate_message_service.message_sender.send_message_to_user.assert_called()
+
+    @pytest.mark.parametrize("reminder_success_count_start_value", [0, SEND_REMINDER_TRY_COUNT])
+    def test_send_success(
+        self,
+        send_estimate_message_service: SendEstimationMessageService,
+        fixed_now: datetime,
+        reminder_success_count_start_value: int,
+    ):
+        creative = Mock(spec=Creative)
+        creative.task.bayer_code = "adm"
+        creative.reminder_fail_reason = ""
+        creative.reminder_success_count = reminder_success_count_start_value
+        send_estimate_message_service.send_reminder(creative=creative)
+        if reminder_success_count_start_value == 0:
+            creative.mark_reminder_limit_reached.assert_not_called()
+            assert creative.next_reminder_at == fixed_now + timedelta(hours=config.NEXT_SUCCESS_REMINDER_DELTA)
+        else:
+            creative.mark_reminder_limit_reached.assert_called()
+        assert creative.reminder_success_count == reminder_success_count_start_value + 1
+        assert creative.reminder_fail_reason == ""
         creative.save.assert_called()
         send_estimate_message_service.message_sender.send_message_to_user.assert_called()
