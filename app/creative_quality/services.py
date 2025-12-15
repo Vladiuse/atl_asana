@@ -106,7 +106,7 @@ class CreativeEstimationData:
 
 class CreativeService:
     def __init__(self, asan_api_client: AsanaApiClient):
-        self.asan_api_client = asan_api_client
+        self.asana_api_client = asan_api_client
         self.task_service = TaskService(asana_api_client=asan_api_client)
 
     def create_creative(self, creative_task: Task) -> Creative | None:
