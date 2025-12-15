@@ -134,7 +134,7 @@ class CreativeService:
 class SendEstimationMessageService:
     message = """
     Нужно оценить креатив:<br>
-    Task: {{task_id}}<br>
+    Task: {{task_name}}<br>
     Estimate Link: {{estimate_url}}<br>
     """
 
@@ -149,7 +149,7 @@ class SendEstimationMessageService:
                 raise ValueError(f"Empty baer code in creative: {creative}")
             user_tag = UserTag(bayer_code)
             context = {
-                "task_id": creative.task.task_id,
+                "task_name": creative.task.task_name,
                 "estimate_url": self._get_estimation_url(creative=creative),
             }
             message = self.message_renderer.render(template=self.message, context=context)
