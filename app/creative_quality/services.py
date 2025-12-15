@@ -103,10 +103,10 @@ class CreativeEstimationData:
 class CreativeService:
     def __init__(self, asan_api_client: AsanaApiClient):
         self.asan_api_client = asan_api_client
-        self.update_service = TaskService(asana_api_client=asan_api_client)
+        self.task_service = TaskService(asana_api_client=asan_api_client)
 
     def create_creative(self, creative_task: Task) -> Creative | None:
-        creative_task = self.update_service.update(creative_task=creative_task)
+        creative_task = self.task_service.update(creative_task=creative_task)
         if creative_task.status == TaskStatus.CREATED:
             need_rated_at = creative_task.created + timedelta(days=config.NEED_RATED_AT)
             return Creative.objects.create(task=creative_task, need_rated_at=need_rated_at)
@@ -121,7 +121,7 @@ class CreativeService:
         # make asana task complete
         if estimate_data.need_complete_task is True:
             try:
-                self.update_service.mark_completed(task=creative.task)
+                self.task_service.mark_completed(task=creative.task)
             except AsanaApiClientError:
                 from .tasks import mark_asana_task_completed_task
 
