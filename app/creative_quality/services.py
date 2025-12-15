@@ -161,7 +161,7 @@ class SendEstimationMessageService:
                 creative.next_reminder_at = timezone.now() + timedelta(hours=config.NEXT_SUCCESS_REMINDER_DELTA)
         except (ValueError, MessageSenderError) as error:
             creative.reminder_failure_count += 1
-            if creative.reminder_success_count >= config.SEND_REMINDER_TRY_COUNT:
+            if creative.reminder_failure_count >= config.SEND_REMINDER_TRY_COUNT:
                 creative.mark_reminder_limit_reached(save=False)
             else:
                 creative.next_reminder_at = timezone.now() + timedelta(hours=config.FAILURE_RETRY_INTERVAL)
