@@ -137,7 +137,7 @@ class CreativeService:
 
 class SendEstimationMessageService:
     message = """
-    Нужно оценить креатив:<br>
+    ✏️ Нужно оценить креатив:<br>
     Task: {{task_name}}<br>
     Estimate Link: {{estimate_url}}<br>
     """
