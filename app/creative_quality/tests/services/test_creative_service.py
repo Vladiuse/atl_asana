@@ -5,11 +5,12 @@ import pytest
 from asana.client import AsanaApiClient
 from asana.client.exception import AsanaApiClientError
 from common import MessageRenderer, MessageSender
+from common.exception import MessageSenderError
+from common.message_sender import UserTag
 from constance import config
 from constance.test import override_config
 from django.utils import timezone
 
-from common.exception import MessageSenderError
 from creative_quality.models import Creative, Task, TaskStatus
 from creative_quality.services import (
     CreativeEstimationData,
@@ -128,6 +129,8 @@ class TestCreativeService:
 
 @pytest.mark.django_db()
 class TestSendEstimationMessageService:
+    VALID_USER_TAG = "adm"
+
     @pytest.mark.parametrize("bayer_code", ["", "123"])
     @pytest.mark.parametrize("reminder_failure_count_start_value", [0, SEND_REMINDER_TRY_COUNT])
     def test_incorrect_bayer_code(
@@ -160,7 +163,7 @@ class TestSendEstimationMessageService:
         reminder_failure_count_start_value: int,
     ):
         creative = Mock(spec=Creative)
-        creative.task.bayer_code = "adm"
+        creative.task.bayer_code = self.VALID_USER_TAG
         creative.reminder_fail_reason = ""
         send_estimate_message_service.message_sender.send_message_to_user.side_effect = MessageSenderError("boom")
         creative.reminder_failure_count = reminder_failure_count_start_value
@@ -183,7 +186,7 @@ class TestSendEstimationMessageService:
         reminder_success_count_start_value: int,
     ):
         creative = Mock(spec=Creative)
-        creative.task.bayer_code = "adm"
+        creative.task.bayer_code = self.VALID_USER_TAG
         creative.reminder_fail_reason = ""
         creative.reminder_success_count = reminder_success_count_start_value
         send_estimate_message_service.send_reminder(creative=creative)
@@ -196,3 +199,18 @@ class TestSendEstimationMessageService:
         assert creative.reminder_fail_reason == ""
         creative.save.assert_called()
         send_estimate_message_service.message_sender.send_message_to_user.assert_called()
+
+    def test_message(self, send_estimate_message_service: SendEstimationMessageService):
+        task_name = "TASK_NAME"
+        url = "https://URL.com"
+        send_estimate_message_service._get_estimation_url = Mock(return_value=url)
+        creative = Mock(spec=Creative)
+        creative.task.bayer_code = self.VALID_USER_TAG
+        creative.task.task_name = task_name
+        creative.reminder_success_count = 0
+        send_estimate_message_service.send_reminder(creative=creative)
+        send_estimate_message_service.message_sender.send_message_to_user.assert_called_once()
+        _, kwargs = send_estimate_message_service.message_sender.send_message_to_user.call_args
+        assert kwargs["user_tags"] == [UserTag(self.VALID_USER_TAG)]
+        assert task_name in kwargs["message"]
+        assert url in kwargs["message"]
