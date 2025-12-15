@@ -108,7 +108,7 @@
                 </label>
 
                 <textarea type="text" name="{{ form.comment.html_name }}" id="{{ form.comment.id_for_label }}"
-                    value="{{ form.comment.value|default:'' }}" class="form-control"></textarea>
+                     class="form-control">{{ form.comment.value|default:'' }}</textarea>
 
                 {% if form.comment.help_text %}
                 <div class="form-text">{{ form.comment.help_text }}</div>
