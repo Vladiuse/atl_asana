@@ -3,11 +3,10 @@ from celery import shared_task
 from celery.app.task import Task as CeleryTask
 from common import MessageSender, RequestsSender
 from django.conf import settings
-from django.utils import timezone
 
-from .models import Creative, CreativeStatus, Task
+from .models import Task
 from .services import CreativeProjectSectionService, CreativeService, TaskService
-from .use_cases import CreateCreativesForNewTasksUseCase, FetchMissingTasksUseCase
+from .use_cases import CreateCreativesForNewTasksUseCase, CreativesOverDueForEstimateUseCase, FetchMissingTasksUseCase
 
 asana_api_client = AsanaApiClient(api_key=settings.ASANA_API_KEY)
 message_sender = MessageSender(request_sender=RequestsSender())
@@ -31,16 +30,8 @@ def create_creatives_for_new_task() -> dict:
 
 
 @shared_task
-def update_overdue_creatives() -> None:
-    """
-    # Mark creatives as NEED_REVIEW if their need_rated_at date is older than 3(or other value) days
-    """
-    creatives = Creative.objects.filter(
-        status=CreativeStatus.WAITING,
-        need_rated_at__lte=timezone.now(),
-    )
-    for creative in creatives:
-        creative.mark_need_estimate()
+def update_overdue_creatives_task() -> dict:
+    return CreativesOverDueForEstimateUseCase().execute()
 
 
 @shared_task
