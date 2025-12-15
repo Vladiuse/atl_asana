@@ -9,6 +9,7 @@ from .services import CreativeProjectSectionService, CreativeService, SendEstima
 from .use_cases import (
     CreateCreativesForNewTasksUseCase,
     CreativesOverDueForEstimateUseCase,
+    DataIntegrityCheckUseCase,
     FetchMissingTasksUseCase,
     SendCreativesToGoogleSheetUseCase,
     SendEstimationMessageUseCase,
@@ -58,3 +59,8 @@ def fetch_missing_section_tasks_task() -> dict:
 @shared_task
 def add_new_creatives_in_gs_table() -> dict:
     return SendCreativesToGoogleSheetUseCase().execute()
+
+
+@shared_task
+def data_integrity_check_task() -> None:
+    DataIntegrityCheckUseCase().execute()
