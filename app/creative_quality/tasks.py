@@ -10,6 +10,7 @@ from .use_cases import (
     CreateCreativesForNewTasksUseCase,
     CreativesOverDueForEstimateUseCase,
     FetchMissingTasksUseCase,
+    SendCreativesToGoogleSheetUseCase,
     SendEstimationMessageUseCase,
 )
 
@@ -52,3 +53,8 @@ def fetch_missing_section_tasks_task() -> dict:
     creative_project_section_service = CreativeProjectSectionService(asana_api_client=asana_api_client)
     use_case = FetchMissingTasksUseCase(creative_project_section_service=creative_project_section_service)
     return use_case.execute()
+
+
+@shared_task
+def add_new_creatives_in_gs_table() -> dict:
+    return SendCreativesToGoogleSheetUseCase().execute()
