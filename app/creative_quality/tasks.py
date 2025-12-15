@@ -1,12 +1,13 @@
-from django.utils import timezone
 from asana.client import AsanaApiClient
 from celery import shared_task
 from celery.app.task import Task as CeleryTask
 from common import MessageSender, RequestsSender
 from django.conf import settings
+from django.utils import timezone
 
-from .models import Task, Creative, CreativeStatus
-from .services import TaskService
+from .models import Creative, CreativeStatus, Task
+from .services import CreativeProjectSectionService, TaskService
+from .use_cases import FetchMissingTasksUseCase
 
 asana_api_client = AsanaApiClient(api_key=settings.ASANA_API_KEY)
 message_sender = MessageSender(request_sender=RequestsSender())
@@ -22,7 +23,6 @@ def mark_asana_task_completed_task(self: CeleryTask, task_pk: int) -> None:
         self.retry(exc=error)
 
 
-
 @shared_task
 def update_overdue_creatives() -> None:
     """
@@ -34,3 +34,10 @@ def update_overdue_creatives() -> None:
     )
     for creative in creatives:
         creative.mark_need_estimate()
+
+
+@shared_task
+def fetch_missing_section_tasks_task() -> dict:
+    creative_project_section_service = CreativeProjectSectionService(asana_api_client=asana_api_client)
+    use_case = FetchMissingTasksUseCase(creative_project_section_service=creative_project_section_service)
+    return use_case.execute()
