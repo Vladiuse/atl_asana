@@ -60,9 +60,15 @@ class CreativeGoogleTable:
         ]
 
     def add_creatives(self, creatives: list[CreativeDto]) -> JSONResponse:
+        """
+        Raises:
+             GSpreadException
+        """
         data_to_send = []
         for creative in creatives:
             data_to_send.append(self._convert_creative_to_line(creative_dto=creative))
-        sheet = self.client.open_by_key(config.CREATIVE_GOOGLE_TABLE_ID).worksheet(title=config.CREATIVE_TABLE_LIST_NAME)
+        sheet = self.client.open_by_key(config.CREATIVE_GOOGLE_TABLE_ID).worksheet(
+            title=config.CREATIVE_TABLE_LIST_NAME,
+        )
         json_response: JSONResponse = sheet.append_rows(values=data_to_send)
         return json_response

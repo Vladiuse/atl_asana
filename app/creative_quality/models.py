@@ -134,7 +134,7 @@ class Creative(models.Model):
     hold = models.PositiveIntegerField(null=True, blank=True)
     ctr = models.PositiveIntegerField(null=True, blank=True)
     need_rated_at = models.DateTimeField(null=True)
-    gsheet_sent= models.BooleanField(default=False)
+    gsheet_sent = models.BooleanField(default=False)
     created = models.DateTimeField(auto_now_add=True)
 
     next_reminder_at = models.DateTimeField(null=True, blank=True)
