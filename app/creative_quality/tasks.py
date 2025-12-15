@@ -1,15 +1,21 @@
 from asana.client import AsanaApiClient
 from celery import shared_task
 from celery.app.task import Task as CeleryTask
-from common import MessageSender, RequestsSender
+from common import MessageRenderer, MessageSender, RequestsSender
 from django.conf import settings
 
 from .models import Task
-from .services import CreativeProjectSectionService, CreativeService, TaskService
-from .use_cases import CreateCreativesForNewTasksUseCase, CreativesOverDueForEstimateUseCase, FetchMissingTasksUseCase
+from .services import CreativeProjectSectionService, CreativeService, SendEstimationMessageService, TaskService
+from .use_cases import (
+    CreateCreativesForNewTasksUseCase,
+    CreativesOverDueForEstimateUseCase,
+    FetchMissingTasksUseCase,
+    SendEstimationMessageUseCase,
+)
 
 asana_api_client = AsanaApiClient(api_key=settings.ASANA_API_KEY)
 message_sender = MessageSender(request_sender=RequestsSender())
+message_renderer = MessageRenderer()
 
 
 @shared_task(bind=True, max_retries=1, default_retry_delay=1 * 3600)
@@ -32,6 +38,13 @@ def create_creatives_for_new_task() -> dict:
 @shared_task
 def update_overdue_creatives_task() -> dict:
     return CreativesOverDueForEstimateUseCase().execute()
+
+
+@shared_task
+def send_estimation_message_task() -> dict:
+    estimation_service = SendEstimationMessageService(message_sender=message_sender, message_renderer=message_renderer)
+    use_case = SendEstimationMessageUseCase(estimation_service=estimation_service)
+    return use_case.execute()
 
 
 @shared_task
