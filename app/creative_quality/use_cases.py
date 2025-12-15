@@ -1,5 +1,8 @@
-from creative_quality.models import Creative, Task
-from creative_quality.services import CreativeService, SendEstimationMessageService
+from django.db import IntegrityError
+from message_sender.tasks import send_log_message_task
+
+from creative_quality.models import Creative, CreativeProjectSection, Task
+from creative_quality.services import CreativeProjectSectionService, CreativeService, SendEstimationMessageService
 
 
 class CreateCreativesForNewTasksUseCase:
@@ -35,6 +38,7 @@ class SendEstimationMessageUseCase:
     """
     Send estimation message if reach send time
     """
+
     def __init__(self, estimation_service: SendEstimationMessageService):
         self.estimation_service = estimation_service
 
@@ -43,3 +47,29 @@ class SendEstimationMessageUseCase:
         for creative in creatives:
             self.estimation_service.send_reminder(creative=creative)
         return {"count": len(creatives)}
+
+
+class FetchMissingTasksUseCase:
+    def __init__(self, creative_project_section_service: CreativeProjectSectionService):
+        self.creative_project_section_service = creative_project_section_service
+
+    def execute(self) -> dict:
+        sections = CreativeProjectSection.objects.all()
+        new_found = []
+        with_errors = []
+        for section in sections:
+            exist_task_ids = set(Task.objects.values_list("task_id", flat=True))
+            section_task_ids = self.creative_project_section_service.fetch_tasks_ids(
+                creative_project_section=section,
+            )
+            for task_id in section_task_ids:
+                if task_id not in exist_task_ids:
+                    try:
+                        Task.objects.create(task_id=task_id)
+                        new_found.append(task_id)
+                    except IntegrityError:
+                        with_errors.append(task_id)
+        if any([new_found, with_errors]):
+            message = f"{self.__class__.__name__}: Found {len(new_found)} missing creatives taks"
+            send_log_message_task.delay(message=message)
+        return {"new_found": new_found, "with_errors": with_errors}
