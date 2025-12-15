@@ -13,6 +13,12 @@ class TaskManager(models.Manager):
             load_failure_count__lt=config.TASK_MAX_LOAD_FAILURES,
         )
 
+    def error_load_info(self) -> QuerySet["Task"]:
+        return self.get_queryset().filter(
+            status=TaskStatus.ERROR_LOAD_INFO,
+            load_failure_count__gte=config.TASK_MAX_LOAD_FAILURES,
+        )
+
 
 class TaskStatus(models.TextChoices):
     PENDING = "pending", "Ожидает"
