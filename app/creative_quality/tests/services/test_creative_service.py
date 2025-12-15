@@ -1,10 +1,11 @@
-from unittest.mock import Mock
+from unittest.mock import Mock, patch
 
 import pytest
 from asana.client import AsanaApiClient
+from asana.client.exception import AsanaApiClientError
 
 from creative_quality.models import Creative, Task, TaskStatus
-from creative_quality.services import CreativeService, TaskService
+from creative_quality.services import CreativeEstimationData, CreativeService, TaskService
 
 
 @pytest.fixture()
@@ -14,6 +15,27 @@ def creative_service() -> CreativeService:
     creative_service = CreativeService(asan_api_client=mock_asana)
     creative_service.task_service = mock_task_service
     return creative_service
+
+
+@pytest.fixture()
+def estimate_data() -> CreativeEstimationData:
+    return CreativeEstimationData(
+        hold=1,
+        hook=2,
+        ctr=3,
+        comment="123",
+        need_complete_task=True,
+    )
+
+@pytest.fixture()
+def estimate_data_not_need_check() -> CreativeEstimationData:
+    return CreativeEstimationData(
+        hold=1,
+        hook=2,
+        ctr=3,
+        comment="123",
+        need_complete_task=False,
+    )
 
 
 @pytest.mark.django_db()
@@ -30,3 +52,32 @@ class TestCreativeService:
             assert Creative.objects.count() == 0
             assert not Creative.objects.filter(task=task).exists()
 
+    def test_estimate_creative(self, creative_service: CreativeService, estimate_data: CreativeEstimationData):
+        creative = Mock(spec=Creative)
+        creative_service.estimate(creative=creative, estimate_data=estimate_data)
+        assert creative.mark_rated.called
+        assert creative_service.task_service.mark_completed.called
+        assert creative.hold == 1
+        assert creative.hook == 2  # noqa: PLR2004
+        assert creative.ctr == 3  # noqa: PLR2004
+        assert creative.comment == "123"
+
+    def test_estimate_creative_need_complete(
+        self,
+        creative_service: CreativeService,
+        estimate_data: CreativeEstimationData,
+    ):
+        creative = Mock(spec=Creative)
+        creative_service.task_service.mark_completed.side_effect = AsanaApiClientError("boom")
+        with patch("creative_quality.tasks.mark_asana_task_completed_task.apply_async") as mock_task:
+            creative_service.estimate(creative=creative, estimate_data=estimate_data)
+            assert mock_task.called
+
+    def test_estimate_creative_not_need_complete(
+        self, creative_service: CreativeService, estimate_data_not_need_check: CreativeEstimationData,
+    ):
+        creative = Mock(spec=Creative)
+        creative_service.task_service.mark_completed.assert_not_called()
+        with patch("creative_quality.tasks.mark_asana_task_completed_task.apply_async") as mock_task:
+            creative_service.estimate(creative=creative, estimate_data=estimate_data_not_need_check)
+            mock_task.assert_not_called()
