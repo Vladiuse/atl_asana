@@ -71,7 +71,7 @@ class TaskService:
             task_data = self.asana_api_client.get_task(task_id=creative_task.task_id)
             task_dto = self._get_task_dto(task_data=task_data)
             creative_task.assignee_id = task_dto.assignee_id
-            creative_task.bayer_code = task_dto.bayer_code
+            creative_task.bayer_code = task_dto.bayer_code.strip().lower()
             creative_task.task_name = task_dto.name
             creative_task.url = task_dto.url
             creative_task.status = TaskStatus.CREATED
@@ -151,7 +151,7 @@ class SendEstimationMessageService:
             bayer_code = creative.task.bayer_code
             if bayer_code == "":
                 raise ValueError(f"Empty baer code in creative: {creative}")
-            user_tag = UserTag(bayer_code)
+            user_tag = UserTag(bayer_code.lower())
             context = {
                 "task_name": creative.task.task_name,
                 "estimate_url": self._get_estimation_url(creative=creative),
