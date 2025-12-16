@@ -9,7 +9,7 @@ from django.db.models import QuerySet
 from django.http import HttpRequest
 from django.utils.html import format_html
 
-from .models import Creative, CreativeProjectSection, Task
+from .models import Creative, CreativeGeoData, CreativeProjectSection, Task
 from .services import CreativeProjectSectionService
 
 asana_client = AsanaApiClient(api_key=settings.ASANA_API_KEY)
@@ -45,10 +45,6 @@ class CreativeAdmin(admin.ModelAdmin):
         "id",
         "task",
         "status",
-        "hook",
-        "hold",
-        "ctr",
-        "comment",
         "display_estimate_url",
         "need_rated_at",
         "gsheet_sent",
@@ -62,6 +58,16 @@ class CreativeAdmin(admin.ModelAdmin):
     def display_estimate_url(self, obj: Creative) -> str:
         return format_html('<a href="{}" target="_blank">url</a>', obj.get_estimate_url())
 
+
+@admin.register(CreativeGeoData)
+class CreativeGeoDataAdmin(admin.ModelAdmin):
+    list_display = ("creative", "hook", "hold", "ctr", "short_comment", "created")
+    ordering = ("creative",)
+
+    def short_comment(self, obj: CreativeGeoData) -> str:
+        return (obj.comment[:50] + "...") if obj.comment and len(obj.comment) > 50 else obj.comment
+
+    short_comment.short_description = "Comment"
 
 
 @admin.register(CreativeProjectSection)

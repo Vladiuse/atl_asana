@@ -138,10 +138,6 @@ class CreativeStatus(models.TextChoices):
 class Creative(models.Model):
     task = models.OneToOneField(Task, on_delete=models.CASCADE, related_name="creative")
     status = models.CharField(max_length=50, choices=CreativeStatus, default=CreativeStatus.WAITING)
-    comment = models.TextField(blank=True)
-    hook = models.PositiveIntegerField(null=True, blank=True)
-    hold = models.PositiveIntegerField(null=True, blank=True)
-    ctr = models.PositiveIntegerField(null=True, blank=True)
     need_rated_at = models.DateTimeField(null=True)
     gsheet_sent = models.BooleanField(default=False)
     created = models.DateTimeField(auto_now_add=True)
@@ -188,6 +184,15 @@ class Creative(models.Model):
         if domain:
             return f"https://{domain}{url}"
         return url
+
+
+class CreativeGeoData(models.Model):
+    creative = models.ForeignKey(Creative, on_delete=models.CASCADE, related_name="geo_data")
+    hook = models.PositiveIntegerField()
+    hold = models.PositiveIntegerField()
+    ctr = models.PositiveIntegerField()
+    comment = models.TextField(blank=True)
+    created = models.DateTimeField(auto_now_add=True)
 
 
 class CreativeProjectSection(models.Model):
