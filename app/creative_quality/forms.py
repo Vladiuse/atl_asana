@@ -1,9 +1,16 @@
+from common.models import Country
 from django import forms
 
-from .models import Creative
+from .models import Creative, CreativeGeoData
 
 
-class CreativeForm(forms.ModelForm):
+class CreativeGeoDataForm(forms.ModelForm):
+    country = forms.ModelChoiceField(
+        queryset=Country.objects.all(),
+        required=True,
+        label="Country",
+        empty_label="Select a country",
+    )
     hook = forms.IntegerField(
         label="Hook",
         help_text="Укажите значение hook",
@@ -23,5 +30,24 @@ class CreativeForm(forms.ModelForm):
     )
 
     class Meta:
-        model = Creative
-        fields = ["hook", "hold", "ctr", "comment"]
+        model = CreativeGeoData
+        fields = ["hook", "hold", "ctr", "comment", "country"]
+
+    def __init__(self, *args, creative: Creative, **kwargs):  # noqa: ANN002, ANN003
+        self.creative = creative
+        super().__init__(*args, **kwargs)
+
+    def clean(self) -> dict:
+        cleaned_data = super().clean()
+        country = cleaned_data.get("country")
+
+        if (
+            country
+            and CreativeGeoData.objects.filter(
+                creative=self.creative,
+                country=country,
+            ).exists()
+        ):
+            raise forms.ValidationError(f"Для этого креатива данные по {country} уже существуют.")
+
+        return cleaned_data
