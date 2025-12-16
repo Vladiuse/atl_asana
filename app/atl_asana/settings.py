@@ -62,6 +62,7 @@ INSTALLED_APPS = [
     "webhook_pinger.apps.WebhookPingerConfig",
     "message_sender.apps.MessageSenderConfig",
     "creative_quality.apps.CreativeQualityConfig",
+    "common.apps.CommonConfig",
 ]
 
 MIDDLEWARE = [
