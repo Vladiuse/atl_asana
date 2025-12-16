@@ -23,6 +23,10 @@
                     <td><a href="{{ creative.task.url }}" target="_blank">открыть</a></td>
                 </tr>
                 <tr>
+                    <th scope="row">Данных по страннам</th>
+                    <td>{{creative.geo_data.all|length}}</td>
+                </tr>
+                <tr>
                     <th scope="row">Таск завершен</th>
                     <td>
                         {% if creative.task.is_completed %}
@@ -38,14 +42,35 @@
                 </tr>
             </tbody>
         </table>
-           <a class="btn btn-primary"
-            href="{% url 'creative_quality:creative_geo_data_create' creative.pk%}">
+        <a class="btn btn-primary" href="{% url 'creative_quality:creative_geo_data_create' creative.pk%}">
             Добавить данные по гео
         </a>
-        {{creative.geo_data.all}}
-        {%for geo_data in creative.geo_data.all%}
-        {{geo_data}}
-        {%endfor%}
+        <table class="table table-bordered w-full mx-auto">
+            <tbody>
+                {%for geo_data in creative.geo_data.all%}
+                <tr>
+                    <th scope="row">Country</th>
+                    <td>{{ geo_data.country }}</td>
+                </tr>
+                <tr>
+                    <th scope="row">Hook</th>
+                    <td>{{ geo_data.hook }}</td>
+                </tr>
+                <tr>
+                    <th scope="row">Hold</th>
+                    <td>{{ geo_data.hold }}</td>
+                </tr>
+                <tr>
+                    <th scope="row">Ctr</th>
+                    <td>{{ geo_data.ctr }}</td>
+                </tr>
+                <tr>
+                    <th scope="row">Коментарий</th>
+                    <td>{{ geo_data.comment|default:"-" }}</td>
+                </tr>
+                {%endfor%}
+            </tbody>
+        </table>
     </div>
 </div>
 
