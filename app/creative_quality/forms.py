@@ -24,4 +24,4 @@ class CreativeForm(forms.ModelForm):
 
     class Meta:
         model = Creative
-        fields = ["hook", "hold", "ctr"]
+        fields = ["hook", "hold", "ctr", "comment"]
