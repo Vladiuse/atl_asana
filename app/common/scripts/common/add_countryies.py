@@ -33,6 +33,6 @@ countries = [
 
 def run() -> None:
     for code, name in countries:
-        created, obj = Country.objects.get_or_create(iso_code=code, defaults={"name": name})
+        obj, created = Country.objects.get_or_create(iso_code=code, defaults={"name": name})
         if created:
             logging.info("Added country %s to %s", code, name)
