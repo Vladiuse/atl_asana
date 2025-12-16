@@ -82,7 +82,7 @@ class CreativeProjectSectionAdmin(admin.ModelAdmin):
         super().save_model(request, obj, form, change)
         service = CreativeProjectSectionService(asana_api_client=asana_client)
         try:
-            service.load(creative_project_section=obj)
+            service.update_additional_info(creative_project_section=obj)
         except AsanaApiClientError:
             self.message_user(
                 request,
@@ -96,7 +96,7 @@ class CreativeProjectSectionAdmin(admin.ModelAdmin):
         success_updated = 0
         for section in queryset:
             try:
-                service.load(creative_project_section=section)
+                service.update_additional_info(creative_project_section=section)
                 success_updated += 1
             except AsanaApiClientError:
                 self.message_user(
