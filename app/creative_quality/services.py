@@ -123,7 +123,7 @@ class CreativeService:
         creative.comment = estimate_data.comment
         creative.mark_rated()
         # make asana task complete
-        if estimate_data.need_complete_task is True:
+        if estimate_data.need_complete_task is True and creative.task.is_completed is False:
             try:
                 self.task_service.mark_completed(task=creative.task)
             except AsanaApiClientError:
