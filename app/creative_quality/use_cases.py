@@ -7,7 +7,7 @@ from gspread import Client
 from message_sender.tasks import send_log_message_task
 
 from creative_quality.creative_table import CreativeDto, CreativeGoogleTable
-from creative_quality.models import Creative, CreativeProjectSection, CreativeStatus, Task
+from creative_quality.models import Creative, CreativeProjectSection, CreativeStatus, Task, TaskStatus
 from creative_quality.services import CreativeProjectSectionService, CreativeService, SendEstimationMessageService
 
 
@@ -137,7 +137,7 @@ class FetchMissingTasksUseCase:
 
 class DataIntegrityCheckUseCase:
     def _check_tasks_full_data(self) -> None:
-        tasks_qs = Task.objects.filter(Q(assignee_id="") | Q(bayer_code=""))
+        tasks_qs = Task.objects.fileter(status=TaskStatus.CREATED).filter(Q(assignee_id="") | Q(bayer_code=""))
         if tasks_qs.exists():
             tasks_ids = tasks_qs.values_list("task_id", flat=True)
             message = f"{self.__class__.__name__}: Found tasks without required data: {tasks_ids}"
