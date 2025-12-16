@@ -1,0 +1,52 @@
+{%extends 'base.html'%}
+{% load static %}
+
+{%block content%}
+<div class="d-flex justify-content-center" style="padding-top: 40px;">
+    <div style="width: 600px;">
+        <table class="table table-bordered w-full mx-auto">
+            <tbody>
+                <tr>
+                    <th scope="row">Таск</th>
+                    <td>{{ creative.task.task_name }}</td>
+                </tr>
+                <tr>
+                    <th scope="row">Исполнитель</th>
+                    <td>{{ creative.task.get_assignee_display }}</td>
+                </tr>
+                <tr>
+                    <th scope="row">Баер</th>
+                    <td>{{ creative.task.bayer_code }}</td>
+                </tr>
+                <tr>
+                    <th scope="row">Ссылка</th>
+                    <td><a href="{{ creative.task.url }}" target="_blank">открыть</a></td>
+                </tr>
+                <tr>
+                    <th scope="row">Таск завершен</th>
+                    <td>
+                        {% if creative.task.is_completed %}
+                        <span style="color: green;">✔</span>
+                        {% else %}
+                        <span style="color: #ccc;">✖</span>
+                        {% endif %}
+                    </td>
+                </tr>
+                <tr>
+                    <th scope="row">Статус</th>
+                    <td>{{ creative.get_status_display }}</td>
+                </tr>
+            </tbody>
+        </table>
+           <a class="btn btn-primary"
+            href="{% url 'creative_quality:creative_geo_data_create' creative.pk%}">
+            Добавить данные по гео
+        </a>
+        {{creative.geo_data.all}}
+        {%for geo_data in creative.geo_data.all%}
+        {{geo_data}}
+        {%endfor%}
+    </div>
+</div>
+
+{%endblock%}
