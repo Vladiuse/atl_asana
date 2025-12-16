@@ -62,5 +62,10 @@ def add_new_creatives_in_gs_table() -> dict:
 
 
 @shared_task
+def add_test_creative_to_table_task() -> dict:
+    return SendCreativesToGoogleSheetUseCase().send_test_creative_to_table()
+
+
+@shared_task
 def data_integrity_check_task() -> None:
     DataIntegrityCheckUseCase().execute()
