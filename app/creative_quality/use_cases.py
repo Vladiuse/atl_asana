@@ -3,6 +3,7 @@ from django.conf import settings
 from django.db import IntegrityError
 from django.db.models import Q
 from google.oauth2.service_account import Credentials
+from gspread import Client
 from message_sender.tasks import send_log_message_task
 
 from creative_quality.creative_table import CreativeDto, CreativeGoogleTable
@@ -68,20 +69,41 @@ class SendCreativesToGoogleSheetUseCase:
             comment=creative.comment,
         )
 
-    def execute(self) -> dict:
-        """
-        Raises:
-             gspread.GSpreadException
-        """
-        creatives_to_send = Creative.objects.need_send_to_gsheet().select_related("task")
-        creatives_dto = [self._convert_creative_to_dto(creative=creative) for creative in creatives_to_send]
+    def _get_client(self) -> Client:
         scopes = ["https://www.googleapis.com/auth/spreadsheets"]
         creds = Credentials.from_service_account_file(
             settings.GOOGLE_CREDENTIALS_PATH,
             scopes=scopes,
         )
-        client = gspread.authorize(credentials=creds)
+        return gspread.authorize(credentials=creds)
+
+    def execute(self) -> dict:
+        """
+        Raises:
+             gspread.GSpreadException
+        """
+        client = self._get_client()
+        creatives_to_send = Creative.objects.need_send_to_gsheet().select_related("task")
+        creatives_dto = [self._convert_creative_to_dto(creative=creative) for creative in creatives_to_send]
         google_table = CreativeGoogleTable(client=client)
+        result = google_table.add_creatives(creatives=creatives_dto)
+        return dict(result)
+
+    def send_test_creative_to_table(self) -> dict:
+        creative_dto = CreativeDto(
+            assignee="assigne",
+            bayer_code="XXX",
+            hold="1",
+            hook="2",
+            ctr="3",
+            task_name="TASK NAME",
+            task_url="url",
+            status="STATUS",
+            comment="comment text",
+        )
+        client = self._get_client()
+        google_table = CreativeGoogleTable(client=client)
+        creatives_dto = [creative_dto]
         result = google_table.add_creatives(creatives=creatives_dto)
         return dict(result)
 
@@ -107,9 +129,7 @@ class FetchMissingTasksUseCase:
                     except IntegrityError:
                         with_errors.append(task_id)
         if any([new_found, with_errors]):
-            message = (
-                f"{self.__class__.__name__}: Found new_found:{new_found} missing creatives tasks, errors: {with_errors}"
-            )
+            message = f"{self.__class__.__name__}: Found new_found:{new_found} missing creatives tasks, errors: {with_errors}"
             send_log_message_task.delay(message=message)
         return {"new_found": new_found, "with_errors": with_errors}
 
