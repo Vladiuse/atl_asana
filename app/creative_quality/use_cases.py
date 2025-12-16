@@ -87,6 +87,7 @@ class SendCreativesToGoogleSheetUseCase:
         creatives_dto = [self._convert_creative_to_dto(creative=creative) for creative in creatives_to_send]
         google_table = CreativeGoogleTable(client=client)
         result = google_table.add_creatives(creatives=creatives_dto)
+        creatives_to_send.update(gsheet_sent=True)
         return dict(result)
 
     def send_test_creative_to_table(self) -> dict:
