@@ -30,6 +30,7 @@ sheet.append_rows(
 
 @dataclass
 class CreativeDto:
+    country: str
     assignee: str
     bayer_code: str
     hook: str
@@ -48,6 +49,7 @@ class CreativeGoogleTable:
     def _convert_creative_to_line(self, creative_dto: CreativeDto) -> list:
         return [
             timezone.localtime().strftime("%Y-%m-%d %H:%M:%S"),
+            creative_dto.country,
             creative_dto.task_name,
             creative_dto.task_url,
             creative_dto.assignee,
