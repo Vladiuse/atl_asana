@@ -38,7 +38,7 @@ class CreativeMarkEstimateView(View):
         return redirect("creative_quality:creative_detail", creative_pk=creative.pk, task_id=creative.task.task_id)
 
 
-class CreativeGeoDataView(View):
+class CreativeGeoDataDetailView(View):
     template_name = "creative_quality/creative_geo_data/index.html"
 
     def get(self, request: HttpRequest, geo_data_pk: int) -> HttpResponse:
@@ -61,7 +61,7 @@ class CreativeGeoDataView(View):
         if form.is_valid():
             creative_geo_data = form.save(commit=False)
             creative_geo_data.save()
-            return redirect("creative_quality:creative_detail", creative_id=creative.pk, task_id=creative.task.task_id)
+            return redirect("creative_quality:creative_detail", creative_pk=creative.pk, task_id=creative.task.task_id)
         context = {
             "form": form,
             "creative_geo_data": creative_geo_data,
@@ -92,7 +92,7 @@ class CreativeGeoDataCreateView(View):
             geo_data = form.save(commit=False)
             geo_data.creative = creative
             geo_data.save()
-            return redirect("creative_quality:creative_detail", creative_id=creative.pk, task_id=creative.task.task_id)
+            return redirect("creative_quality:creative_detail", creative_pk=creative.pk, task_id=creative.task.task_id)
         context = {
             "form": form,
             "creative": creative,
@@ -106,4 +106,4 @@ class CreativeGeoDataDeleteView(View):
         geo_data = get_object_or_404(CreativeGeoData, pk=geo_data_pk)
         creative = geo_data.creative
         geo_data.delete()
-        return redirect("creative_quality:creative_detail", creative_id=creative.pk, task_id=creative.task.task_id)
+        return redirect("creative_quality:creative_detail", creative_pk=creative.pk, task_id=creative.task.task_id)

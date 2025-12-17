@@ -18,7 +18,7 @@ urlpatterns = [
     ),
     path(
         "creative-geo-data/<int:geo_data_pk>/",
-        views.CreativeGeoDataView.as_view(),
+        views.CreativeGeoDataDetailView.as_view(),
         name="creative_geo_data",
     ),
     path(
