@@ -81,7 +81,11 @@ class TestCreativeEstimateView:
 @pytest.mark.django_db()
 class TestCreativeGeoDataDetailView:
     def test_post(
-        self, creative_task: tuple[Creative, Task], client: Client, country_by: Country, country_ru: Country,
+        self,
+        creative_task: tuple[Creative, Task],
+        client: Client,
+        country_by: Country,
+        country_ru: Country,
     ):
         creative, task = creative_task
         geo_data = CreativeGeoData.objects.create(creative=creative, hold=0, hook=0, ctr=0, country=country_by)
@@ -120,3 +124,15 @@ class TestCreativeGeoDataCreateView:
         assert geo_data.hook == 2  # noqa: PLR2004
         assert geo_data.ctr == 3  # noqa: PLR2004
         assert geo_data.country == country_ru
+
+
+@pytest.mark.django_db()
+class TestCreativeGeoDataDeleteView:
+    def test_delete(self, creative_task: tuple[Creative, Task], client: Client, country_by: Country):
+        creative, task = creative_task
+        geo_data = CreativeGeoData.objects.create(creative=creative, hold=0, hook=0, ctr=0, country=country_by)
+        url = reverse("creative_quality:creative_geo_data_delete", kwargs={"geo_data_pk": geo_data.pk})
+        response = client.post(url)
+        assert response.status_code == HTTPStatus.FOUND
+        with pytest.raises(CreativeGeoData.DoesNotExist):
+            CreativeGeoData.objects.get(pk=geo_data.pk)
