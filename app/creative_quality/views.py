@@ -49,12 +49,11 @@ class CreativeGeoDataView(View):
             self.template_name,
             {
                 "form": form,
-                "creative": creative_geo_data,
+                "creative_geo_data": creative_geo_data,
             },
         )
 
     def post(self, request: HttpRequest, geo_data_pk: int) -> HttpResponse:
-        print("xxxx")
         geo_data = get_object_or_404(CreativeGeoData, pk=geo_data_pk)
         creative = geo_data.creative
         form = CreativeGeoDataForm(request.POST, creative=creative, instance=geo_data)
@@ -97,3 +96,12 @@ class CreativeGeoDataCreateView(View):
             "creative": creative,
         }
         return render(request, self.template_name, context)
+
+
+class CreativeGeoDataDeleteView(View):
+    def post(self, request: HttpRequest, geo_data_pk: int) -> HttpResponse:
+        _ = request
+        geo_data = get_object_or_404(CreativeGeoData, pk=geo_data_pk)
+        creative = geo_data.creative
+        geo_data.delete()
+        return redirect("creative_quality:creative_detail", creative_id=creative.pk, task_id=creative.task.task_id)
