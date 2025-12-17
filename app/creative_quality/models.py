@@ -187,6 +187,11 @@ class Creative(models.Model):
         return url
 
 
+class CreativeGeoDataStatus(models.TextChoices):
+    ZASHEL = "зашел", "Зашел"
+    NE_ZASHEL = "незашел", "Не зашел"
+
+
 class CreativeGeoData(models.Model):
     creative = models.ForeignKey(Creative, on_delete=models.CASCADE, related_name="geo_data")
     country = models.ForeignKey(Country, on_delete=models.CASCADE)
@@ -198,6 +203,12 @@ class CreativeGeoData(models.Model):
 
     class Meta:
         unique_together = ("creative", "country")
+
+    @property
+    def status(self) -> CreativeGeoDataStatus:
+        if self.hook >= 30 and self.hold >= 10 and self.ctr >= 6:  # noqa: PLR2004
+            return CreativeGeoDataStatus.ZASHEL
+        return CreativeGeoDataStatus.NE_ZASHEL
 
 
 class CreativeProjectSection(models.Model):
