@@ -135,7 +135,6 @@ class AsanaWebhookRequestDataAdmin(admin.ModelAdmin):
 class AsanaCommentAdmin(admin.ModelAdmin):
     list_display = (
         "id",
-        "user_id",
         "task_id",
         "comment_id",
         "project",
