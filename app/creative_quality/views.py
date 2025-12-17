@@ -17,8 +17,8 @@ message_sender = MessageSender(request_sender=RequestsSender())
 class CreativeDetailView(View):
     template_name = "creative_quality/creative/index.html"
 
-    def get(self, request: HttpRequest, creative_id: int, task_id: str) -> HttpResponse:
-        creative = get_object_or_404(Creative, pk=creative_id, task__task_id=task_id)
+    def get(self, request: HttpRequest, creative_pk: int, task_id: str) -> HttpResponse:
+        creative = get_object_or_404(Creative, pk=creative_pk, task__task_id=task_id)
         return render(
             request,
             self.template_name,
@@ -35,7 +35,7 @@ class CreativeMarkEstimateView(View):
         creative = get_object_or_404(Creative, pk=creative_pk)
         creative_service = CreativeService(asana_api_client=asana_api_client)
         creative_service.end_estimate(creative=creative)
-        return redirect("creative_quality:creative_detail", creative_id=creative.pk, task_id=creative.task.task_id)
+        return redirect("creative_quality:creative_detail", creative_pk=creative.pk, task_id=creative.task.task_id)
 
 
 class CreativeGeoDataView(View):

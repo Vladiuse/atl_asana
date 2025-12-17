@@ -12,7 +12,7 @@ urlpatterns = [
         name="creative_mark_estimate",
     ),
     path(
-        "creative/<int:creative_id>/<str:task_id>/",
+        "creative/<int:creative_pk>/<str:task_id>/",
         views.CreativeDetailView.as_view(),
         name="creative_detail",
     ),
