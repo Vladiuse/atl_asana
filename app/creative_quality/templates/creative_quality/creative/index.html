@@ -4,76 +4,133 @@
 {%block content%}
 <div class="container">
     <table class="table table-bordered w-full mx-auto">
-            <tbody>
-                <tr>
-                    <th scope="row">Таск</th>
-                    <td>{{ creative.task.task_name }}</td>
-                </tr>
-                <tr>
-                    <th scope="row">Исполнитель</th>
-                    <td>{{ creative.task.get_assignee_display }}</td>
-                </tr>
-                <tr>
-                    <th scope="row">Баер</th>
-                    <td>{{ creative.task.bayer_code }}</td>
-                </tr>
-                <tr>
-                    <th scope="row">Ссылка</th>
-                    <td><a href="{{ creative.task.url }}" target="_blank">открыть</a></td>
-                </tr>
-                <tr>
-                    <th scope="row">Данных по страннам</th>
-                    <td>{{creative.geo_data.all|length}}</td>
-                </tr>
-                <tr>
-                    <th scope="row">Таск завершен</th>
-                    <td>
-                        {% if creative.task.is_completed %}
-                        <span style="color: green;">✔</span>
-                        {% else %}
-                        <span style="color: #ccc;">✖</span>
-                        {% endif %}
-                    </td>
-                </tr>
-                <tr>
-                    <th scope="row">Статус</th>
-                    <td>{{ creative.get_status_display }}</td>
-                </tr>
-            </tbody>
-        </table>
+        <tbody>
+            <tr>
+                <th scope="row">Таск</th>
+                <td>{{ creative.task.task_name }}</td>
+            </tr>
+            <tr>
+                <th scope="row">Исполнитель</th>
+                <td>{{ creative.task.get_assignee_display }}</td>
+            </tr>
+            <tr>
+                <th scope="row">Баер</th>
+                <td>{{ creative.task.bayer_code }}</td>
+            </tr>
+            <tr>
+                <th scope="row">Ссылка</th>
+                <td><a href="{{ creative.task.url }}" target="_blank">открыть</a></td>
+            </tr>
+            <tr>
+                <th scope="row">Данных по страннам</th>
+                <td>{{creative.geo_data.all|length}}</td>
+            </tr>
+            <tr>
+                <th scope="row">Таск завершен</th>
+                <td>
+                    {% if creative.task.is_completed %}
+                    <span style="color: green;">✔</span>
+                    {% else %}
+                    <span style="color: #ccc;">✖</span>
+                    {% endif %}
+                </td>
+            </tr>
+            <tr>
+                <th scope="row">Статус</th>
+                <td>{{ creative.get_status_display }}</td>
+            </tr>
+        </tbody>
+    </table>
+    <div class="d-flex flex-row gap-3">
+        {%if creative.is_can_be_updated %}
         <a class="btn btn-primary" href="{% url 'creative_quality:creative_geo_data_create' creative.pk%}">
             Добавить данные по гео
         </a>
-        <table class="table table-bordered w-100 geo-data-table mt-3">
-            <thead>
-                <tr>
-                    <th>Country</th>
-                    <th>Hook</th>
-                    <th>Hold</th>
-                    <th>CTR</th>
-                    <th>Comment</th>
-                    <th>Action</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for geo_data in creative.geo_data.all %}
-                <tr>
-                    <td>{{ geo_data.country }}</td>
-                    <td>{{ geo_data.hook}}</td>
-                    <td>{{ geo_data.hold}}</td>
-                    <td>{{ geo_data.ctr }}</td>
-                    <td>{{ geo_data.comment}}</td>
-                    <td></td>
-                </tr>
-                {% empty %}
-                <tr>
-                    <td colspan="6" class="text-center text-muted">
-                        No geo data
-                    </td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
-</div>
+        {%if creative.geo_data.all%}
+        <form method="post" action="{% url 'creative_quality:creative_mark_estimate' creative.pk %}">
+            {% csrf_token %}
+            <button type="submit" class="btn btn-success">
+                Завершить оценку
+            </button>
+        </form>
+        {%endif%}
+        {%endif%}
+    </div>
 
+    <table class="table table-bordered w-100 geo-data-table mt-3">
+        <thead>
+            <tr>
+                <th>Country</th>
+                <th>Hook</th>
+                <th>Hold</th>
+                <th>CTR</th>
+                <th>Comment</th>
+                <th>Action</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for geo_data in creative.geo_data.all %}
+            <tr>
+                <td>{{ geo_data.country }}</td>
+                <td>{{ geo_data.hook}}</td>
+                <td>{{ geo_data.hold}}</td>
+                <td>{{ geo_data.ctr }}</td>
+                <td>{{ geo_data.comment}}</td>
+                <td>
+                    {%if creative.is_can_be_updated %}
+                    <a class="btn btn-primary" href="{% url 'creative_quality:creative_geo_data' geo_data.pk%}">
+                        <i class="fa-solid fa-pen-to-square"></i>
+                    </a>
+                    <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#deleteGeoData"
+                        data-bs-geo-data-pk="{{geo_data.pk}}"
+                        data-bs-geo-data-country="{{geo_data.country}}"
+                        >
+                        <i class="fa-solid fa-trash"></i>
+                    </button>
+                    {%endif%}
+                </td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="6" class="text-center text-muted">
+                    No geo data
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+<div class="modal fade" id="deleteGeoData" tabindex="-1" aria-labelledby="deleteGeoDataLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="deleteGeoDataabel">Удалить</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form method="POST" id="geo-data-delete-form" data-base-url="{% url 'creative_quality:creative_geo_data_delete' 0 %}">
+                {%csrf_token%}
+                <div class="modal-body">
+                    <p class="text" id="geo-data-delete-info"></p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Закрыть</button>
+                    <button type="submit" class="btn btn-danger">Удалить</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+<script>
+    var deketeGeoDataModal = document.getElementById('deleteGeoData')
+    var deleteForm = document.getElementById("geo-data-delete-form")
+    var geoDataDEleteInfo = document.getElementById("geo-data-delete-info")
+    deketeGeoDataModal.addEventListener('show.bs.modal', function (event) {
+        var button = event.relatedTarget
+        var geoDataId = button.getAttribute('data-bs-geo-data-pk')
+        var country = button.getAttribute('data-bs-geo-data-country')
+        geoDataDEleteInfo.innerText = `Удалить данные по ${country}?`
+        deleteForm.action = deleteForm.dataset.baseUrl.replace("/0/", `/${geoDataId}/`)
+    })
+
+</script>
 {%endblock%}

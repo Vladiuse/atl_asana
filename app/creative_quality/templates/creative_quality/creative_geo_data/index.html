@@ -38,19 +38,19 @@
             <tbody>
                 <tr>
                     <th scope="row">Task</th>
-                    <td>{{ creative.task.task_name }}</td>
+                    <td>{{ creative_geo_data.creative.task.task_name }}</td>
                 </tr>
                 <tr>
                     <th scope="row">Исполнитель</th>
-                    <td>{{ creative.task.get_assignee_display }}</td>
+                    <td>{{ creative_geo_data.creative.task.get_assignee_display }}</td>
                 </tr>
                 <tr>
                     <th scope="row">Баер</th>
-                    <td>{{ creative.task.bayer_code }}</td>
+                    <td>{{ creative_geo_data.creative.task.bayer_code }}</td>
                 </tr>
                 <tr>
                     <th scope="row">Url</th>
-                    <td><a href="{{ creative.task.url }}" target="_blank">открыть</a></td>
+                    <td><a href="{{ creative_geo_data.creative.task.url }}" target="_blank">открыть</a></td>
                 </tr>
             </tbody>
         </table>
