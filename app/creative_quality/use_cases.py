@@ -145,7 +145,7 @@ class FetchMissingTasksUseCase:
                     except IntegrityError:
                         with_errors.append(task_id)
         if any([new_found, with_errors]):
-            message = f"{self.__class__.__name__}: Found new_found:{new_found} missing creatives tasks, errors: {with_errors}"
+            message = f"⚠️ {self.__class__.__name__}: Found new_found:{new_found} missing creatives tasks, errors: {with_errors}"
             send_log_message_task.delay(message=message)
         return {"new_found": new_found, "with_errors": with_errors}
 
@@ -155,21 +155,21 @@ class DataIntegrityCheckUseCase:
         tasks_qs = Task.objects.fileter(status=TaskStatus.CREATED).filter(Q(assignee_id="") | Q(bayer_code=""))
         if tasks_qs.exists():
             tasks_ids = tasks_qs.values_list("task_id", flat=True)
-            message = f"{self.__class__.__name__}: Found tasks without required data: {tasks_ids}"
+            message = f"⚠️ {self.__class__.__name__}: Found tasks without required data: {tasks_ids}"
             send_log_message_task.delay(message=message)
 
     def _check_task_error_load_info(self) -> None:
         tasks_qs = Task.objects.error_load_info()
         if tasks_qs.exists():
             tasks_ids = tasks_qs.values_list("task_id", flat=True)
-            message = f"{self.__class__.__name__}: Found tasks cant load info: {tasks_ids}"
+            message = f"⚠️ {self.__class__.__name__}: Found tasks cant load info: {tasks_ids}"
             send_log_message_task.delay(message=message)
 
     def _check_creatives_cant_send_message(self) -> None:
         creatives_qs = Creative.objects.filter(status=CreativeStatus.REMINDER_LIMIT_REACHED)
         if creatives_qs.exists():
             creatives_ids = creatives_qs.values_list("pk", flat=True)
-            message = f"{self.__class__.__name__}: Found creatives with status {CreativeStatus.REMINDER_LIMIT_REACHED}: {creatives_ids}"
+            message = f"⚠️ {self.__class__.__name__}: Found creatives with status {CreativeStatus.REMINDER_LIMIT_REACHED}: {creatives_ids}"
             send_log_message_task.delay(message=message)
 
     def execute(self) -> None:
