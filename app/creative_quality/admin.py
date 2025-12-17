@@ -61,7 +61,7 @@ class CreativeAdmin(admin.ModelAdmin):
 
 @admin.register(CreativeGeoData)
 class CreativeGeoDataAdmin(admin.ModelAdmin):
-    list_display = ("creative", "hook", "hold", "ctr", "short_comment", "created")
+    list_display = ("creative", "country", "hook", "hold", "ctr", "short_comment", "created")
     ordering = ("creative",)
 
     def short_comment(self, obj: CreativeGeoData) -> str:
