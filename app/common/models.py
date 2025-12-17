@@ -10,4 +10,4 @@ class Country(models.Model):
 
     def save(self, **kwargs) -> None:  # noqa: ANN003
         self.iso_code = self.iso_code.upper()
-        self.save(**kwargs)
+        super().save(**kwargs)
