@@ -50,19 +50,21 @@ class CreativeGeoDataView(View):
             {
                 "form": form,
                 "creative_geo_data": creative_geo_data,
+                "creative": creative_geo_data.creative,
             },
         )
 
     def post(self, request: HttpRequest, geo_data_pk: int) -> HttpResponse:
-        geo_data = get_object_or_404(CreativeGeoData, pk=geo_data_pk)
-        creative = geo_data.creative
-        form = CreativeGeoDataForm(request.POST, creative=creative, instance=geo_data)
+        creative_geo_data = get_object_or_404(CreativeGeoData, pk=geo_data_pk)
+        creative = creative_geo_data.creative
+        form = CreativeGeoDataForm(request.POST, creative=creative, instance=creative_geo_data)
         if form.is_valid():
-            geo_data = form.save(commit=False)
-            geo_data.save()
+            creative_geo_data = form.save(commit=False)
+            creative_geo_data.save()
             return redirect("creative_quality:creative_detail", creative_id=creative.pk, task_id=creative.task.task_id)
         context = {
             "form": form,
+            "creative_geo_data": creative_geo_data,
             "creative": creative,
         }
         return render(request, self.template_name, context)
