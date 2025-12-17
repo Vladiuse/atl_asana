@@ -19,9 +19,11 @@ class UserTag(Enum):
     ACE_FAG = "ace_fag"
     ACE_SGG = "ace_sgg"
     ADM = "adm"
+    AVK = "avk"
     ALISA_SALAMAHINA = "alisasalamahina"
     APA = "apa"
     BRY = "bry"
+    BPA = "bpa"
     BSY = "bsy"
     BYA2 = "bya2"
     CAN = "can"
@@ -40,6 +42,8 @@ class UserTag(Enum):
     MMV = "mmv"
     MSE = "mse"
     MYA = "mya"
+    OMF = "omf"
+    OMN = "omn"
     PAA = "paa"
     PEV = "pev"
     RAA = "raa"
@@ -48,6 +52,7 @@ class UserTag(Enum):
     SVV = "svv"
     TESTU = "testu"
     VGA = "vga"
+    VVA = "vva"
     ZVA = "zva"
 
     @classmethod
