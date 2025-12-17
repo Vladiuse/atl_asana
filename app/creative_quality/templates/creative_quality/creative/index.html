@@ -41,7 +41,7 @@
             </tr>
         </tbody>
     </table>
-    <div class="d-flex flex-row gap-3">
+    <div class="d-flex flex-row gap-3 justify-content-between">
         {%if creative.is_can_be_updated %}
         <a class="btn btn-primary" href="{% url 'creative_quality:creative_geo_data_create' creative.pk%}">
             Добавить данные по гео
