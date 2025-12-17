@@ -95,19 +95,10 @@ class TaskService:
             task.mark_deleted()
 
 
-@dataclass(frozen=True)
-class CreativeEstimationData:
-    comment: str
-    hook: int
-    hold: int
-    ctr: int
-    need_complete_task: bool
-
-
 class CreativeService:
-    def __init__(self, asan_api_client: AsanaApiClient):
-        self.asana_api_client = asan_api_client
-        self.task_service = TaskService(asana_api_client=asan_api_client)
+    def __init__(self, asana_api_client: AsanaApiClient):
+        self.asana_api_client = asana_api_client
+        self.task_service = TaskService(asana_api_client=asana_api_client)
 
     def create_creative(self, creative_task: Task) -> Creative | None:
         creative_task = self.task_service.update(creative_task=creative_task)
@@ -116,23 +107,18 @@ class CreativeService:
             return Creative.objects.create(task=creative_task, need_rated_at=need_rated_at)
         return None
 
-    def estimate(self, creative: Creative, estimate_data: CreativeEstimationData) -> None:
-        creative.hook = estimate_data.hook
-        creative.hold = estimate_data.hold
-        creative.ctr = estimate_data.ctr
-        creative.comment = estimate_data.comment
+    def end_estimate(self, creative: Creative) -> None:
         creative.mark_rated()
         # make asana task complete
-        if estimate_data.need_complete_task is True and creative.task.is_completed is False:
-            try:
-                self.task_service.mark_completed(task=creative.task)
-            except AsanaApiClientError:
-                from .tasks import mark_asana_task_completed_task
+        try:
+            self.task_service.mark_completed(task=creative.task)
+        except AsanaApiClientError:
+            from .tasks import mark_asana_task_completed_task
 
-                mark_asana_task_completed_task.apply_async(
-                    kwargs={"task_pk": creative.task.pk},
-                    countdown=3600,
-                )
+            mark_asana_task_completed_task.apply_async(
+                kwargs={"task_pk": creative.task.pk},
+                countdown=3600,
+            )
 
 
 class SendEstimationMessageService:
