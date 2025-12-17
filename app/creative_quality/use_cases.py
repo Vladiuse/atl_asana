@@ -7,7 +7,7 @@ from gspread import Client
 from message_sender.tasks import send_log_message_task
 
 from creative_quality.creative_table import CreativeDto, CreativeGoogleTable
-from creative_quality.models import Creative, CreativeProjectSection, CreativeStatus, Task, TaskStatus
+from creative_quality.models import Creative, CreativeGeoData, CreativeProjectSection, CreativeStatus, Task, TaskStatus
 from creative_quality.services import CreativeProjectSectionService, CreativeService, SendEstimationMessageService
 
 
@@ -56,17 +56,20 @@ class SendEstimationMessageUseCase:
 
 
 class SendCreativesToGoogleSheetUseCase:
-    def _convert_creative_to_dto(self, creative: Creative) -> CreativeDto:
+    def _convert_creative_to_dto(self, creative_geo_data: CreativeGeoData) -> CreativeDto:
+        creative = creative_geo_data.creative
+        task = creative.task
         return CreativeDto(
-            assignee=creative.task.get_assignee_display(),
-            bayer_code=creative.task.bayer_code,
-            hold=creative.hold,
-            hook=creative.hook,
-            ctr=creative.ctr,
-            task_name=creative.task.task_name,
-            task_url=creative.task.url,
-            status=creative.status,
-            comment=creative.comment,
+            assignee=task.get_assignee_display(),
+            bayer_code=task.bayer_code,
+            hold=creative_geo_data.hold,
+            hook=creative_geo_data.hook,
+            ctr=creative_geo_data.ctr,
+            task_name=task.task_name,
+            task_url=task.url,
+            status=str(creative_geo_data.status.value),
+            comment=creative_geo_data.comment,
+            country=creative_geo_data.country.iso_code,
         )
 
     def _get_client(self) -> Client:
@@ -83,15 +86,27 @@ class SendCreativesToGoogleSheetUseCase:
              gspread.GSpreadException
         """
         client = self._get_client()
-        creatives_to_send = Creative.objects.need_send_to_gsheet().select_related("task")
-        creatives_dto = [self._convert_creative_to_dto(creative=creative) for creative in creatives_to_send]
-        google_table = CreativeGoogleTable(client=client)
-        result = google_table.add_creatives(creatives=creatives_dto)
-        creatives_to_send.update(gsheet_sent=True)
-        return dict(result)
+        creatives_to_send = (
+            Creative.objects.need_send_to_gsheet()
+            .select_related("task")
+            .prefetch_related("geo_data", "geo_data__country")
+        )
+        send_result: list[dict] = []
+        for creative in creatives_to_send:
+            creatives_geo_data_dto = [
+                self._convert_creative_to_dto(creative_geo_data=creative_geo_data)
+                for creative_geo_data in creative.geo_data.all()
+            ]
+            google_table = CreativeGoogleTable(client=client)
+            result = google_table.add_creatives(creatives=creatives_geo_data_dto)
+            send_result.append(dict(result))
+            creative.gsheet_sent = True
+            creative.save()
+        return {"creatives_to_send": len(creatives_to_send), "send_result": send_result}
 
     def send_test_creative_to_table(self) -> dict:
         creative_dto = CreativeDto(
+            country="XX",
             assignee="assigne",
             bayer_code="XXX",
             hold="1",
@@ -104,7 +119,7 @@ class SendCreativesToGoogleSheetUseCase:
         )
         client = self._get_client()
         google_table = CreativeGoogleTable(client=client)
-        creatives_dto = [creative_dto]
+        creatives_dto = [creative_dto, creative_dto]
         result = google_table.add_creatives(creatives=creatives_dto)
         return dict(result)
 

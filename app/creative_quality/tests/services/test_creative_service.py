@@ -32,7 +32,7 @@ def patch_constance():
 def creative_service() -> CreativeService:
     mock_asana = Mock(spec=AsanaApiClient)
     mock_task_service = Mock(spec=TaskService, asana_api_client=mock_asana)
-    creative_service = CreativeService(asan_api_client=mock_asana)
+    creative_service = CreativeService(asana_api_client=mock_asana)
     creative_service.task_service = mock_task_service
     return creative_service
 
@@ -96,7 +96,7 @@ class TestCreativeService:
 
     def test_estimate_creative(self, creative_service: CreativeService, estimate_data: CreativeEstimationData):
         creative = Mock(spec=Creative)
-        creative_service.estimate(creative=creative, estimate_data=estimate_data)
+        creative_service.end_estimate(creative=creative, estimate_data=estimate_data)
         assert creative.mark_rated.called
         assert creative_service.task_service.mark_completed.called
         assert creative.hold == 1
@@ -112,7 +112,7 @@ class TestCreativeService:
         creative = Mock(spec=Creative)
         creative_service.task_service.mark_completed.side_effect = AsanaApiClientError("boom")
         with patch("creative_quality.tasks.mark_asana_task_completed_task.apply_async") as mock_task:
-            creative_service.estimate(creative=creative, estimate_data=estimate_data)
+            creative_service.end_estimate(creative=creative, estimate_data=estimate_data)
             assert mock_task.called
 
     def test_estimate_creative_not_need_complete(
@@ -123,7 +123,7 @@ class TestCreativeService:
         creative = Mock(spec=Creative)
         creative_service.task_service.mark_completed.assert_not_called()
         with patch("creative_quality.tasks.mark_asana_task_completed_task.apply_async") as mock_task:
-            creative_service.estimate(creative=creative, estimate_data=estimate_data_not_need_check)
+            creative_service.end_estimate(creative=creative, estimate_data=estimate_data_not_need_check)
             mock_task.assert_not_called()
 
 
