@@ -32,7 +32,7 @@ def mark_asana_task_completed_task(self: CeleryTask, task_pk: int) -> None:
 
 @shared_task
 def create_creatives_for_new_task() -> dict:
-    creative_service = CreativeService(asan_api_client=asana_api_client)
+    creative_service = CreativeService(asana_api_client=asana_api_client)
     use_case = CreateCreativesForNewTasksUseCase(creative_service=creative_service)
     return use_case.execute()
 
