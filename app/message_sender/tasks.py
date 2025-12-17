@@ -5,6 +5,7 @@ from common.message_sender import UserTag
 message_sender = MessageSender(request_sender=RequestsSender())
 DELAY_RETRY = 60
 
+
 @shared_task(bind=True, max_retries=2, default_retry_delay=DELAY_RETRY)
 def send_log_message_task(self, message: str) -> dict | None:
     try:

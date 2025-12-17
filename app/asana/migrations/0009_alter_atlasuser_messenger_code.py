@@ -4,7 +4,6 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("asana", "0008_alter_atlasuser_avatar_url_alter_atlasuser_position"),
     ]

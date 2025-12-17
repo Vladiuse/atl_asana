@@ -4,7 +4,6 @@ from django.db import migrations
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("comment_notifier", "0006_asanacomment_text"),
     ]

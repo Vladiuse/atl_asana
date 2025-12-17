@@ -2,6 +2,7 @@ import os
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
+
 def count_lines_in_dir(path: str) -> tuple[int, int]:
     """Возвращает (строк_кода, строк_тестов) для указанной папки."""
     code_lines = 0

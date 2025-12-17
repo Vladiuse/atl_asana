@@ -4,7 +4,6 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("webhook_pinger", "0002_webhook_resource_name_webhook_resource_type_and_more"),
     ]

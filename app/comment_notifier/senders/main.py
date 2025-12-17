@@ -24,6 +24,7 @@ class SilentSender(BaseCommentSender):
         _ = comment_dto
         return CommentSendMessageResult(is_send=False, messages=[])
 
+
 @register_sender(
     name="LogSender",
     description="Отправка дебаг сообщения",
@@ -43,6 +44,7 @@ class LogSender(BaseCommentSender):
         message = self._normalize_message(message)
         result = self.message_sender.send_log_message(message=message)
         return CommentSendMessageResult(is_send=False, messages=[result])
+
 
 @register_sender(
     name="PersonalSender",

@@ -1,0 +1,49 @@
+CONSTANCE_CONFIG = {
+    "NEED_RATED_AT": (
+        3,
+        "Через сколько дней присылать сообщение об оценке креатива",
+        int,
+    ),
+    "NEXT_SUCCESS_REMINDER_DELTA": (
+        24,
+        "Через сколько часов отправлять повторное смс об оценке креатива",
+        int,
+    ),
+    "FAILURE_RETRY_INTERVAL": (
+        2,
+        "Через сколько часов попытаться отправит смс об оценке при ошибке отправки",
+        int,
+    ),
+    "SEND_REMINDER_TRY_COUNT": (
+        3,
+        "Число попыток для отправки сообщений, успешных и нет",
+        int,
+    ),
+    "TASK_MAX_LOAD_FAILURES": (
+        3,
+        "Максимальное число ошибок загрузки нового таска",
+        int,
+    ),
+    "CREATIVE_GOOGLE_TABLE_ID": (
+        "1ztb8tw4nlT7Xk8FJAy_I-wXsWAggP_pKudXIDRVvSz8",
+        "Айди гугл таблицы для креативов",
+        str,
+    ),
+    "CREATIVE_TABLE_LIST_NAME": (
+        "Лист1",
+        "Название листа с креативами",
+        str,
+    ),
+}
+
+CONSTANCE_CONFIG_FIELDSETS = {
+    "CREATIVE_ESTIMATE": (
+        "NEED_RATED_AT",
+        "NEXT_SUCCESS_REMINDER_DELTA",
+        "FAILURE_RETRY_INTERVAL",
+        "SEND_REMINDER_TRY_COUNT",
+        "TASK_MAX_LOAD_FAILURES",
+        "CREATIVE_GOOGLE_TABLE_ID",
+        "CREATIVE_TABLE_LIST_NAME",
+    ),
+}

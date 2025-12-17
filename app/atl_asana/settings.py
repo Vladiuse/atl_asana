@@ -1,6 +1,10 @@
 import os
 from pathlib import Path
 
+from asana.constance_settings import CONSTANCE_CONFIG as ASANA_CONSTANCE_CONFIG
+from asana.constance_settings import CONSTANCE_CONFIG_FIELDSETS as ASANA_FIELDSETS
+from creative_quality.constance_settings import CONSTANCE_CONFIG as CREATIVE_ESTIMATE_CONSTANCE_CONFIG
+from creative_quality.constance_settings import CONSTANCE_CONFIG_FIELDSETS as CREATIVE_ESTIMATE_FIELDSETS
 from dotenv import load_dotenv
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -15,15 +19,18 @@ SECRET_KEY = os.environ["DJANGO_SECRET_KEY"]
 ASANA_HOOK_SECRET = os.environ["ASANA_HOOK_SECRET"]
 DOMAIN_MESSAGE_API_KEY = os.environ["DOMAIN_MESSAGE_API_KEY"]
 ASANA_API_KEY = os.environ["ASANA_API_KEY"]
+GOOGLE_CREDENTIALS_PATH = os.environ["GOOGLE_APPLICATION_CREDENTIALS"]
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = os.environ.get("DJANGO_DEBUG", "false").lower() == "true"
 
+
+DOMAIN = "atl-asana.vim-store.ru"
 ALLOWED_HOSTS = [
     "127.0.0.1",
     "83.222.20.96",
     "37.1.208.252",
-    "atl-asana.vim-store.ru",
+    DOMAIN,
 ]
 
 CSRF_TRUSTED_ORIGINS = [
@@ -47,12 +54,15 @@ INSTALLED_APPS = [
     "django_extensions",
     "django_celery_results",
     "django_celery_beat",
+    "constance",
     # apps
     "vga_lands.apps.VgaLandsConfig",
     "comment_notifier.apps.CommentNotifierConfig",
     "asana.apps.AsanaConfig",
     "webhook_pinger.apps.WebhookPingerConfig",
     "message_sender.apps.MessageSenderConfig",
+    "creative_quality.apps.CreativeQualityConfig",
+    "common.apps.CommonConfig",
 ]
 
 MIDDLEWARE = [
@@ -70,7 +80,7 @@ ROOT_URLCONF = "atl_asana.urls"
 TEMPLATES = [
     {
         "BACKEND": "django.template.backends.django.DjangoTemplates",
-        "DIRS": [],
+        "DIRS": [os.path.join(BASE_DIR, "templates")],
         "APP_DIRS": True,
         "OPTIONS": {
             "context_processors": [
@@ -160,3 +170,42 @@ STATICFILES_DIRS = [
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
+
+
+CONSTANCE_BACKEND = "constance.backends.database.DatabaseBackend"
+
+CONSTANCE_ADDITIONAL_FIELDS = {
+    "country_select": (
+        "django.forms.ChoiceField",
+        {
+            "widget": "django.forms.Select",
+            "choices": (("CA", "CANADA"), ("US", "USA")),
+        },
+    ),
+}
+
+
+CONSTANCE_CONFIG = {
+    "DEFAULT_COUNTRY": (
+        "US",
+        "Страна по умолчанию",
+        "country_select",
+    ),
+    "ENABLE_SMS_SENDING": (
+        True,
+        "Включить отправку СМС",
+        bool,
+    ),
+    **ASANA_CONSTANCE_CONFIG,
+    **CREATIVE_ESTIMATE_CONSTANCE_CONFIG,
+}
+
+
+CONSTANCE_CONFIG_FIELDSETS = {
+    "Examples": (
+        "ENABLE_SMS_SENDING",
+        "DEFAULT_COUNTRY",
+    ),
+    **ASANA_FIELDSETS,
+    **CREATIVE_ESTIMATE_FIELDSETS,
+}

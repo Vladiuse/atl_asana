@@ -17,7 +17,6 @@ requests_logger.propagate = False
 
 
 class RequestsSender:
-
     def request(self, **kwargs) -> str:
         url = kwargs.get("url")
         method = kwargs.get("method", "GET")

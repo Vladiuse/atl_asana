@@ -25,28 +25,19 @@ select = [
     "BLE",
 ]
 ignore = [
-    "COM819",
     "ANN101",
     "ANN102",
     "ANN204",
-    "ANN001",
-    "ANN002",
-    "ANN003",
-
+    "PT004",
 ]
 
 [lint.extend-per-file-ignores]
-"*/views.py" = [
-    "ARG002",  # args
-    "ANN201",  # return type in views
-]
-
 "*/serializers.py" = [
     "ARG002",  # args
     #"ANN201",  # return type in serializers
 ]
 "*/test_*.py" = [
-    "ANN201",
+    "ANN201", # missing-return-type-undocumented-public-function
 ]
 
 [format]

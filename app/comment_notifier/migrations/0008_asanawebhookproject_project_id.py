@@ -4,7 +4,6 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("comment_notifier", "0007_rename_asanaproject_asanawebhookproject"),
     ]
@@ -13,9 +12,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name="asanawebhookproject",
             name="project_id",
-            field=models.CharField(
-                default="1210393628043121", max_length=50, unique=True
-            ),
+            field=models.CharField(default="1210393628043121", max_length=50, unique=True),
             preserve_default=False,
         ),
     ]

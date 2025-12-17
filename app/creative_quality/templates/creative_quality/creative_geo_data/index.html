@@ -1,0 +1,208 @@
+{%extends 'base.html'%}
+{% load static %}
+
+{%block content%}
+<style>
+    .spinner-grow {
+        width: 15px;
+        height: 15px;
+    }
+
+    button[type=submit] {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+    }
+
+    /* Высота самого контейнера */
+    .select2-container .select2-selection--single {
+        height: 38px !important;
+        /* Ваша высота */
+    }
+
+    /* Центрирование текста внутри */
+    .select2-container--default .select2-selection--single .select2-selection__rendered {
+        line-height: 38px !important;
+        /* Должно совпадать с height */
+    }
+
+    /* Центрирование стрелочки */
+    .select2-container--default .select2-selection--single .select2-selection__arrow {
+        height: 38px !important;
+        /* Должно совпадать с height */
+    }
+</style>
+<div class="d-flex justify-content-center" style="padding-top: 40px;">
+    <div style="width: 600px;">
+        <table class="table table-bordered w-full mx-auto">
+            <tbody>
+                <tr>
+                    <th scope="row">Task</th>
+                    <td>{{ creative.task.task_name }}</td>
+                </tr>
+                <tr>
+                    <th scope="row">Исполнитель</th>
+                    <td>{{ creative.task.get_assignee_display }}</td>
+                </tr>
+                <tr>
+                    <th scope="row">Баер</th>
+                    <td>{{ creative.task.bayer_code }}</td>
+                </tr>
+                <tr>
+                    <th scope="row">Url</th>
+                    <td><a href="{{ creative.task.url }}" target="_blank">открыть</a></td>
+                </tr>
+            </tbody>
+        </table>
+        <form id="creative-form" method="post" novalidate>
+
+            {% csrf_token %}
+
+            <!-- non-field errors -->
+            {% if form.non_field_errors %}
+            <div class="alert alert-danger">
+                {{ form.non_field_errors }}
+            </div>
+            {% endif %}
+
+            <!-- country -->
+            <div class="mb-3">
+                <label for="{{ form.country.id_for_label }}" class="form-label">
+                    {{ form.country.label }}:
+                </label>
+
+                <select name="{{ form.country.html_name }}" id="{{ form.country.id_for_label }}" class="form-select">
+                    {% for country in form.country.field.queryset %}
+                    <option value="{{ country.pk }}" data-code="{{ country.iso_code }}" {% if form.country.value|stringformat:"s" == country.pk|stringformat:"s" %} selected {% endif %}>
+                        {{ country.name }}
+                    </option>
+                    {% endfor %}
+                </select>
+
+                {% if form.country.help_text %}
+                <div class="form-text">{{ form.country.help_text }}</div>
+                {% endif %}
+
+                {% for error in form.country.errors %}
+                <div class="text-danger small">{{ error }}</div>
+                {% endfor %}
+            </div>
+
+            <!-- hook -->
+            <div class="mb-3">
+                <label for="{{ form.hook.id_for_label }}" class="form-label">
+                    {{ form.hook.label }}:
+                </label>
+
+                <input type="text" name="{{ form.hook.html_name }}" id="{{ form.hook.id_for_label }}"
+                    value="{{ form.hook.value|default:'' }}" class="form-control">
+
+
+                {% if form.hook.help_text %}
+                <div class="form-text">{{ form.hook.help_text }}</div>
+                {% endif %}
+
+                {% for error in form.hook.errors %}
+                <div class="text-danger small">{{ error }}</div>
+                {% endfor %}
+            </div>
+
+            <!-- hold -->
+            <div class="mb-3">
+                <label for="{{ form.hold.id_for_label }}" class="form-label">
+                    {{ form.hold.label }}:
+                </label>
+
+                <input type="text" name="{{ form.hold.html_name }}" id="{{ form.hold.id_for_label }}"
+                    value="{{ form.hold.value|default:'' }}" class="form-control">
+
+                {% if form.hold.help_text %}
+                <div class="form-text">{{ form.hold.help_text }}</div>
+                {% endif %}
+
+                {% for error in form.hold.errors %}
+                <div class="text-danger small">{{ error }}</div>
+                {% endfor %}
+            </div>
+
+            <!-- ctr -->
+            <div class="mb-3">
+                <label for="{{ form.ctr.id_for_label }}" class="form-label">
+                    {{ form.ctr.label }}:
+                </label>
+
+                <input type="text" name="{{ form.ctr.html_name }}" id="{{ form.ctr.id_for_label }}"
+                    value="{{ form.ctr.value|default:'' }}" class="form-control">
+
+                {% if form.ctr.help_text %}
+                <div class="form-text">{{ form.ctr.help_text }}</div>
+                {% endif %}
+
+                {% for error in form.ctr.errors %}
+                <div class="text-danger small">{{ error }}</div>
+                {% endfor %}
+            </div>
+            <!-- comment -->
+            <div class="mb-3">
+                <label for="{{ form.comment.id_for_label }}" class="form-label">
+                    {{ form.comment.label }}:
+                </label>
+
+                <textarea type="text" name="{{ form.comment.html_name }}" id="{{ form.comment.id_for_label }}"
+                    class="form-control">{{ form.comment.value|default:'' }}</textarea>
+
+                {% if form.comment.help_text %}
+                <div class="form-text">{{ form.comment.help_text }}</div>
+                {% endif %}
+
+                {% for error in form.comment.errors %}
+                <div class="text-danger small">{{ error }}</div>
+                {% endfor %}
+            </div>
+
+            <button type="submit" class="btn btn-primary" >
+                Сохранить
+                <div class="spinner-grow text-light" role="status" style="display: none;">
+                    <span class="visually-hidden">Loading...</span>
+                </div>
+            </button>
+            <!-- {%if not creative.is_can_be_updated%}
+            <p>* Данные по креативу уже добавлены в гугл таблицу, обновление невозможно</p>
+            {%endif%} -->
+        </form>
+    </div>
+</div>
+<script>
+    var form = document.getElementById("creative-form")
+    form.addEventListener("submit", function (e) {
+        e.preventDefault()
+        form.querySelector("button[type=submit]").disabled = true;
+        form.querySelector("button[type=submit]").querySelector(".spinner-grow").style.display = "block"
+        form.submit()
+    })
+</script>
+
+<script>
+    function matchCustom(params, data) {
+        if ($.trim(params.term) === '') {
+            return data;
+        }
+        console.log(data.element.dataset.code, params.term)
+        // ищем по тексту и по data-code
+        if ((data.text && data.text.toLowerCase().includes(params.term.toLowerCase())) ||
+            (data.element.dataset.code && data.element.dataset.code.toLowerCase().includes(params.term.toLowerCase()))) {
+            return data;
+
+        }
+
+        return null;
+    }
+    $(document).ready(function () {
+        $('#{{ form.country.id_for_label }}').select2({
+            width: '100%',
+            placeholder: 'Select a country',
+            matcher: matchCustom
+        });
+    });
+</script>
+{%endblock%}

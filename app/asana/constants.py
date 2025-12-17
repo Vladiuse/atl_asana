@@ -14,3 +14,9 @@ class Position(models.TextChoices):
     BUYER = "buyer", "Баер"
     FARMER = "farmer", "Фармер"
     MANAGER = "manager", "Менеджер"
+    DESIGNER = "designer", "Дизайнер"
+
+
+class AsanaResourceType(models.TextChoices):
+    PROJECT = "project", "Проект"
+    SECTION = "section", "Секция"

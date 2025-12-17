@@ -25,4 +25,5 @@ def register_sender(name: str, description: str) -> Callable[[type[BaseCommentSe
         )
         SENDERS_REGISTRY[name] = sender_info
         return cls
+
     return wrap
