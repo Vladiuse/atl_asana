@@ -46,7 +46,9 @@ class CreativeGeoDataForm(forms.ModelForm):
             and CreativeGeoData.objects.filter(
                 creative=self.creative,
                 country=country,
-            ).exists()
+            )
+            .exclude(pk=self.instance.pk)
+            .exists()
         ):
             raise forms.ValidationError(f"Для этого креатива данные по {country} уже существуют.")
 
