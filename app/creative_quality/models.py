@@ -1,4 +1,5 @@
 from asana.models import AtlasUser
+from common.models import Country
 from constance import config
 from django.db import models, transaction
 from django.db.models import QuerySet
@@ -174,11 +175,11 @@ class Creative(models.Model):
             self.save()
 
     def is_can_be_updated(self) -> bool:
-        return not self.gsheet_sent
+        return self.status != CreativeStatus.RATED
 
     def get_estimate_url(self, domain: str | None = None) -> str:
         url = reverse(
-            "creative_quality:update-creative",
+            "creative_quality:creative_detail",
             kwargs={"creative_id": self.pk, "task_id": self.task.task_id},
         )
         if domain:
@@ -188,11 +189,15 @@ class Creative(models.Model):
 
 class CreativeGeoData(models.Model):
     creative = models.ForeignKey(Creative, on_delete=models.CASCADE, related_name="geo_data")
+    country = models.ForeignKey(Country, on_delete=models.CASCADE)
     hook = models.PositiveIntegerField()
     hold = models.PositiveIntegerField()
     ctr = models.PositiveIntegerField()
     comment = models.TextField(blank=True)
     created = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        unique_together = ("creative", "country")
 
 
 class CreativeProjectSection(models.Model):
