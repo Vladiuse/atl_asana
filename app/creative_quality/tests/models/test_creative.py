@@ -62,14 +62,11 @@ class TestCreative:
         else:
             creative_model.save.assert_not_called()
 
-    @pytest.mark.parametrize(
-        ("gsheet_sent", "expected"),
-        [
-            (True, False),
-            (False, True),
-        ],
-    )
-    def test_is_can_be_updated(self, creative_model: Creative, gsheet_sent: bool, expected: bool):
-        creative_model.gsheet_sent = gsheet_sent
+    @pytest.mark.parametrize("creative_status", list(CreativeStatus))
+    def test_is_can_be_updated(self, creative_model: Creative, creative_status: CreativeStatus):
+        creative_model.status = creative_status
         creative_model.save()
-        assert creative_model.is_can_be_updated() == expected
+        if creative_status == CreativeStatus.RATED:
+            assert creative_model.is_can_be_updated() is False
+        else:
+            assert creative_model.is_can_be_updated() is True
