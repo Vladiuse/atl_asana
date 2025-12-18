@@ -198,17 +198,12 @@ class CreativeGeoData(models.Model):
     hook = models.FloatField()
     hold = models.FloatField()
     ctr = models.FloatField()
+    status = models.CharField(max_length=50, choices=CreativeGeoDataStatus)
     comment = models.TextField(blank=True)
     created = models.DateTimeField(auto_now_add=True)
 
     class Meta:
         unique_together = ("creative", "country")
-
-    @property
-    def status(self) -> CreativeGeoDataStatus:
-        if self.hook >= 30 and self.hold >= 10 and self.ctr >= 6:  # noqa: PLR2004
-            return CreativeGeoDataStatus.ZASHEL
-        return CreativeGeoDataStatus.NE_ZASHEL
 
 
 class CreativeProjectSection(models.Model):
