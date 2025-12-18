@@ -77,7 +77,7 @@
                 <td>{{ geo_data.hook}}</td>
                 <td>{{ geo_data.hold}}</td>
                 <td>{{ geo_data.ctr }}</td>
-                <td>{{ geo_data.comment}}</td>
+                <td>{{ geo_data.comment|default:"-"}}</td>
                 <td>
                     {%if creative.is_can_be_updated %}
                     <a class="btn btn-primary" href="{% url 'creative_quality:creative_geo_data' geo_data.pk%}">
