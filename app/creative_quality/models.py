@@ -180,7 +180,7 @@ class Creative(models.Model):
     def get_estimate_url(self, domain: str | None = None) -> str:
         url = reverse(
             "creative_quality:creative_detail",
-            kwargs={"creative_id": self.pk, "task_id": self.task.task_id},
+            kwargs={"creative_pk": self.pk, "task_id": self.task.task_id},
         )
         if domain:
             return f"https://{domain}{url}"
@@ -195,9 +195,9 @@ class CreativeGeoDataStatus(models.TextChoices):
 class CreativeGeoData(models.Model):
     creative = models.ForeignKey(Creative, on_delete=models.CASCADE, related_name="geo_data")
     country = models.ForeignKey(Country, on_delete=models.CASCADE)
-    hook = models.PositiveIntegerField()
-    hold = models.PositiveIntegerField()
-    ctr = models.PositiveIntegerField()
+    hook = models.FloatField()
+    hold = models.FloatField()
+    ctr = models.FloatField()
     comment = models.TextField(blank=True)
     created = models.DateTimeField(auto_now_add=True)
 

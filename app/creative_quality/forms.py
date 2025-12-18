@@ -11,17 +11,20 @@ class CreativeGeoDataForm(forms.ModelForm):
         label="Country",
         empty_label="Select a country",
     )
-    hook = forms.IntegerField(
+    hook = forms.DecimalField(
         label="Hook",
-        help_text="Укажите значение hook",
+        help_text="Укажите значение hook в %",
+        decimal_places=2,
     )
-    hold = forms.IntegerField(
+    hold = forms.DecimalField(
         label="Hold",
-        help_text="Укажите значение hold",
+        help_text="Укажите значение hold в %",
+        decimal_places=2,
     )
-    ctr = forms.IntegerField(
+    ctr = forms.DecimalField(
         label="CTR",
-        help_text="Укажите значение CTR",
+        help_text="Укажите значение CTR в %",
+        decimal_places=2,
     )
     comment = forms.CharField(
         required=False,
