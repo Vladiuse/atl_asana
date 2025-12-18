@@ -67,7 +67,7 @@ class SendCreativesToGoogleSheetUseCase:
             ctr=creative_geo_data.ctr,
             task_name=task.task_name,
             task_url=task.url,
-            status=str(creative_geo_data.status.value),
+            status=creative_geo_data.status,
             comment=creative_geo_data.comment,
             country=creative_geo_data.country.iso_code,
         )

@@ -1,7 +1,7 @@
 from common.models import Country
 from django import forms
 
-from .models import Creative, CreativeGeoData
+from .models import Creative, CreativeGeoData, CreativeGeoDataStatus
 
 
 class CreativeGeoDataForm(forms.ModelForm):
@@ -10,6 +10,12 @@ class CreativeGeoDataForm(forms.ModelForm):
         required=True,
         label="Country",
         empty_label="Select a country",
+    )
+    status = forms.ChoiceField(
+        choices=[("", "— выберите статус —"), *CreativeGeoDataStatus.choices],
+        label="Status",
+        initial="",
+        help_text="Укажите статус",
     )
     hook = forms.DecimalField(
         label="Hook",

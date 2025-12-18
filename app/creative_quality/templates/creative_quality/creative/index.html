@@ -61,6 +61,7 @@
         <thead>
             <tr>
                 <th>Country</th>
+                <th>Status</th>
                 <th>Hook</th>
                 <th>Hold</th>
                 <th>CTR</th>
@@ -72,6 +73,7 @@
             {% for geo_data in creative.geo_data.all %}
             <tr>
                 <td>{{ geo_data.country }}</td>
+                <td>{{ geo_data.status }}</td>
                 <td>{{ geo_data.hook}}</td>
                 <td>{{ geo_data.hold}}</td>
                 <td>{{ geo_data.ctr }}</td>
