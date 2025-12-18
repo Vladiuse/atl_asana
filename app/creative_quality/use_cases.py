@@ -152,7 +152,7 @@ class FetchMissingTasksUseCase:
 
 class DataIntegrityCheckUseCase:
     def _check_tasks_full_data(self) -> None:
-        tasks_qs = Task.objects.fileter(status=TaskStatus.CREATED).filter(Q(assignee_id="") | Q(bayer_code=""))
+        tasks_qs = Task.objects.filter(status=TaskStatus.CREATED).filter(Q(assignee_id="") | Q(bayer_code=""))
         if tasks_qs.exists():
             tasks_ids = tasks_qs.values_list("task_id", flat=True)
             message = f"⚠️ {self.__class__.__name__}: Found tasks without required data: {tasks_ids}"
