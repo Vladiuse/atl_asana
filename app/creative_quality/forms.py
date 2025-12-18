@@ -40,7 +40,7 @@ class CreativeGeoDataForm(forms.ModelForm):
 
     class Meta:
         model = CreativeGeoData
-        fields = ["hook", "hold", "ctr", "comment", "country"]
+        fields = ["hook", "hold", "ctr", "comment", "country", "status"]
 
     def __init__(self, *args, creative: Creative, **kwargs):  # noqa: ANN002, ANN003
         self.creative = creative
