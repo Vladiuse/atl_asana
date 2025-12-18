@@ -6,7 +6,7 @@ from common.models import Country
 from django.test import Client
 from django.urls import reverse
 
-from creative_quality.models import Creative, CreativeGeoData, Task
+from creative_quality.models import Creative, CreativeGeoData, CreativeGeoDataStatus, Task
 
 
 @pytest.fixture()
@@ -94,6 +94,7 @@ class TestCreativeGeoDataDetailView:
             "hook": 2,
             "ctr": 3,
             "country": country_ru.pk,
+            "status": CreativeGeoDataStatus.ZASHEL.value,
         }
         url = reverse("creative_quality:creative_geo_data", kwargs={"geo_data_pk": geo_data.pk})
         response = client.post(url, data=data)
@@ -103,6 +104,7 @@ class TestCreativeGeoDataDetailView:
         assert geo_data.hook == 2  # noqa: PLR2004
         assert geo_data.ctr == 3  # noqa: PLR2004
         assert geo_data.country == country_ru
+        assert geo_data.status == CreativeGeoDataStatus.ZASHEL.value
 
 
 @pytest.mark.django_db()
@@ -114,6 +116,7 @@ class TestCreativeGeoDataCreateView:
             "hook": 2,
             "ctr": 3,
             "country": country_ru.pk,
+            "status": CreativeGeoDataStatus.NE_ZASHEL.value,
         }
         url = reverse("creative_quality:creative_geo_data_create", kwargs={"creative_pk": creative.pk})
         response = client.post(url, data=data)
@@ -124,6 +127,7 @@ class TestCreativeGeoDataCreateView:
         assert geo_data.hook == 2  # noqa: PLR2004
         assert geo_data.ctr == 3  # noqa: PLR2004
         assert geo_data.country == country_ru
+        assert geo_data.status == CreativeGeoDataStatus.NE_ZASHEL.value
 
 
 @pytest.mark.django_db()
