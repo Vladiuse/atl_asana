@@ -23,12 +23,11 @@ class ProcessAsanaWebhookUseCase:
                 completed_task.response_text = response_text
                 completed_task.is_send_in_table = True
                 completed_task.save()
-                message = f"Task add {completed_task.task_id} to table: {response_text}"
             except TableSenderError as error:
                 message_sender.send_message(handler="kva_test", message=str(error))
                 completed_task.is_send_in_table = False
                 completed_task.error_text = str(error)
                 completed_task.save()
                 message = f"Error add task {completed_task.task_id}: {error}"
-            message_sender.send_message(handler="kva_test", message=message)
+                message_sender.send_message(handler="kva_test", message=message)
         return created
