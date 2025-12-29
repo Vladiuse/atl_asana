@@ -13,8 +13,8 @@ asana_client = AsanaApiClient(api_key=settings.ASANA_API_KEY)
 
 @admin.register(Webhook)
 class WebhookAdmin(admin.ModelAdmin):
-    list_display = ["id", "webhook_id", "resource_name", "resource_type", "target", "description"]
-    list_display_links = ["id", "webhook_id"]
+    list_display = ("id", "webhook_id", "resource_name", "resource_type", "target", "description")
+    list_display_links = ("id", "webhook_id")
     actions = ("add_new_webhooks",)
 
     @admin.action(description="Добавить новые вебхуки из асаны")
