@@ -7,6 +7,9 @@ class AsanaProject(models.Model):
     table_url = models.CharField(max_length=100, unique=True)
     secret = models.CharField(max_length=100, blank=True)
 
+    def __str__(self) -> str:
+        return f"<AsanaProject:{self.name}>"
+
 
 class AsanaWebhookRequestData(models.Model):
     created = models.DateTimeField(auto_now_add=True)
@@ -15,9 +18,8 @@ class AsanaWebhookRequestData(models.Model):
     payload = models.JSONField()
     is_target_event = models.BooleanField(null=True, default=None)
 
-    @property
-    def events(self) -> list[dict]:
-        return self.payload["events"]
+    def __str__(self) -> str:
+        return f"<AsanaWebhookRequestData:{self.pk}>"
 
 
 class CompletedTask(models.Model):
@@ -29,3 +31,6 @@ class CompletedTask(models.Model):
     is_send_in_table = models.BooleanField(null=True, default=None)
     response_text = models.TextField(blank=True)
     error_text = models.TextField(blank=True)
+
+    def __str__(self) -> str:
+        return f"<CompletedTask:{self.task_id}>"
