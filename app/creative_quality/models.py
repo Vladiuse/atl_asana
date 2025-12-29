@@ -7,7 +7,7 @@ from django.urls import reverse
 from django.utils import timezone
 
 
-class TaskManager(models.Manager):
+class TaskManager(models.Manager["Task"]):
     def needs_update(self) -> QuerySet["Task"]:
         return self.get_queryset().filter(
             status__in=[TaskStatus.PENDING, TaskStatus.ERROR_LOAD_INFO],
@@ -29,7 +29,7 @@ class TaskStatus(models.TextChoices):
 
 
 class Task(models.Model):
-    REQUIRED_FOR_ESTIMATION = ["assignee_id", "bayer_code"]
+    REQUIRED_FOR_ESTIMATION = ("assignee_id", "bayer_code")
 
     task_id = models.CharField(
         max_length=20,
@@ -68,20 +68,8 @@ class Task(models.Model):
 
     objects = TaskManager()
 
-    def __str__(self):
+    def __str__(self) -> str:
         return self.task_id
-
-    def missing_required_fields(self) -> list[str]:
-        missing = []
-        for field_name in self.REQUIRED_FOR_ESTIMATION:
-            field = Task._meta.get_field(field_name)
-            value = getattr(self, field_name)
-            if not value:
-                missing.append(field.verbose_name)
-        return missing
-
-    def has_required_fields(self) -> bool:
-        return not self.missing_required_fields()
 
     def get_assignee_display(self) -> str:
         value = self.assignee_id
@@ -100,14 +88,14 @@ class Task(models.Model):
             if hasattr(self, "creative"):
                 self.creative.cancel_estimation()
 
-    def mark_error_load_info(self, save: bool = True) -> None:
+    def mark_error_load_info(self, *, save: bool = True) -> None:
         self.status = TaskStatus.ERROR_LOAD_INFO
         self.load_failure_count += 1
         if save:
             self.save()
 
 
-class CreativeManager(models.Manager):
+class CreativeManager(models.Manager["Creative"]):
     def overdue_for_estimate(self) -> QuerySet["Creative"]:
         return self.get_queryset().filter(
             status=CreativeStatus.WAITING,
@@ -150,25 +138,28 @@ class Creative(models.Model):
 
     objects = CreativeManager()
 
-    def mark_rated(self, save: bool = True) -> None:
+    def __str__(self) -> str:
+        return f"<Creative:{self.task}>"
+
+    def mark_rated(self, *, save: bool = True) -> None:
         self.status = CreativeStatus.RATED
         self.next_reminder_at = None
         if save:
             self.save()
 
-    def mark_need_estimate(self, save: bool = True) -> None:
+    def mark_need_estimate(self, *, save: bool = True) -> None:
         self.status = CreativeStatus.NEED_ESTIMATE
         self.next_reminder_at = timezone.now()
         if save:
             self.save()
 
-    def mark_reminder_limit_reached(self, save: bool = True) -> None:
+    def mark_reminder_limit_reached(self, *, save: bool = True) -> None:
         self.status = CreativeStatus.REMINDER_LIMIT_REACHED
         self.next_reminder_at = None
         if save:
             self.save()
 
-    def cancel_estimation(self, save: bool = True) -> None:
+    def cancel_estimation(self, *, save: bool = True) -> None:
         self.status = CreativeStatus.CANCELED
         self.need_rated_at = None
         if save:
@@ -205,6 +196,9 @@ class CreativeGeoData(models.Model):
     class Meta:
         unique_together = ("creative", "country")
 
+    def __str__(self) -> str:
+        return f"{self.country}-{self.creative}"
+
 
 class CreativeProjectSection(models.Model):
     section_id = models.CharField(max_length=30)
@@ -212,5 +206,5 @@ class CreativeProjectSection(models.Model):
     project_name = models.CharField(max_length=254, blank=True)
     created = models.DateTimeField(auto_now_add=True)
 
-    def __str__(self):
+    def __str__(self) -> str:
         return self.section_name if self.section_name else self.section_id
