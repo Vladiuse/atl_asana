@@ -14,13 +14,18 @@ class ProjectIgnoredSectionForm(forms.ModelForm):
         fields = "__all__"
 
     def clean(self) -> None:
-        """
+        """Clean form.
+
         Raises:
             AsanaApiClientError
+
         """
         data = super().clean()
+        if data is None:
+            return
         if data["project"] and data.get("section_id"):
             project_sections = asana_api_client.get_project_sections(project_id=data["project"].project_id)
             project_section_ids = [section["gid"] for section in project_sections]
             if data["section_id"] not in project_section_ids:
-                raise ValidationError(f"Section {data['section_id']} not found in project {project_sections} sections")
+                msg = f"Section {data['section_id']} not found in project {project_sections} sections"
+                raise ValidationError(msg)
