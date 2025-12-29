@@ -1,7 +1,8 @@
 import logging
+from collections.abc import Generator
 from dataclasses import asdict, dataclass
 from time import sleep
-from typing import Generator
+from typing import TYPE_CHECKING
 
 from asana.client import AsanaApiClient
 from asana.client.exception import AsanaApiClientError
@@ -14,7 +15,7 @@ from django.db.models import Q, QuerySet
 
 from .collectors.comment_data import CommentDataCollector
 from .collectors.dto import CommentDto
-from .collectors.exceptions import CommentDeleted
+from .collectors.exceptions import CommentDeletedError
 from .models import (
     AsanaComment,
     AsanaWebhookProject,
@@ -23,8 +24,10 @@ from .models import (
     ProjectNotifySender,
 )
 from .senders import BaseCommentSender
-from .senders.dto import CommentSendMessageResult
 from .senders.registry import SENDERS_REGISTRY
+
+if TYPE_CHECKING:
+    from .senders.dto import CommentSendMessageResult
 
 
 class ProcessAsanaNewCommentEvent:
@@ -86,22 +89,24 @@ class AsanaCommentNotifier:
             ⚠️ Not found asana user for profiles:
 
             Task url: {task_url}
-            Profiles: {comment_dto.profile_url_not_found_in_db}                
+            Profiles: {comment_dto.profile_url_not_found_in_db}
         """
         message = normalize_multiline(message)
         self.message_sender.send_log_message(message=message)
 
     def process(self, comment_model: AsanaComment) -> None:
-        """
+        """Process asana comment.
+
         Raises:
              AsanaApiClientError: if cant get some data from asana
+
         """
         comment_data_collector = CommentDataCollector(
             asana_api_client=self.asana_api_client,
         )
         try:
             comment_dto = comment_data_collector.collect(comment_model=comment_model)
-        except CommentDeleted:
+        except CommentDeletedError:
             comment_model.mark_as_deleted()
             return
         if len(comment_dto.profile_url_not_found_in_db) > 0:
@@ -116,8 +121,8 @@ class AsanaCommentNotifier:
 
 
 class ProjectCommentsGenerator:
-    """
-    Search comments in tasks and return it.
+    """Search comments in tasks and return it.
+
     In projects cant be ignored sections.
     """
 
@@ -127,22 +132,22 @@ class ProjectCommentsGenerator:
         self.asana_api_client = asana_api_client
 
     def _get_project_active_sections(self, project: AsanaWebhookProject) -> list[dict]:
-        """
+        """Get project active sections.
+
         Raises:
              AsanaApiClientError: if cant get some data from asana
+
         """
-        result = []
         ignored_sections_ids = [ignored_section.section_id for ignored_section in project.ignored_sections.all()]
         sections = self.asana_api_client.get_project_sections(project_id=project.project_id)
-        for section_data in sections:
-            if section_data["gid"] not in ignored_sections_ids:
-                result.append(section_data)
-        return result
+        return [section_data["gid"] for section_data in sections if section_data["gid"] not in ignored_sections_ids]
 
     def generate(self, project: AsanaWebhookProject) -> Generator[dict, None, None]:
-        """
+        """Return comments from project sections.
+
         Raises:
              AsanaApiClientError: if cant get some data from asana
+
         """
         logging.info("%s: project: %s", self.__class__.__name__, project)
         sections_to_check = self._get_project_active_sections(project=project)
@@ -178,9 +183,11 @@ class LoadAdditionalInfoForComment:
         self.asana_comment_prettifier = asana_comment_prettifier
 
     def load(self, comment: AsanaComment) -> None:
-        """
+        """Load comment data.
+
         Raises:
              AsanaApiClientError: if cant get some data from asana
+
         """
         task_data = self.asana_api_client.get_task(task_id=comment.task_id)
         comment_data = self.asana_api_client.get_comment(comment_id=comment.comment_id)
@@ -209,9 +216,11 @@ class LoadAdditionalInfoForProjectIgnoredSection:
     asana_api_client: AsanaApiClient
 
     def load(self, project_ignored_section: ProjectIgnoredSection) -> None:
-        """
+        """Load project data.
+
         Raises:
              AsanaApiClientError: if cant get some data from asana
+
         """
         section_data = self.asana_api_client.get_section(project_ignored_section.section_id)
         project_ignored_section.section_name = section_data["name"]
@@ -223,9 +232,11 @@ class LoadCommentsAdditionalInfo:
     asana_api_client: AsanaApiClient
 
     def load(self, queryset: QuerySet[AsanaComment]) -> dict:
-        """
+        """Load comment info.
+
         Raises:
              AsanaApiClientError: if cant get some data from asana
+
         """
         comments_to_update = queryset.filter(
             Q(text="") | Q(task_url=""),
