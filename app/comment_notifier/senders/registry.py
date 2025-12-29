@@ -17,7 +17,8 @@ SENDERS_REGISTRY: dict[str, SenderInfo] = {}
 def register_sender(name: str, description: str) -> Callable[[type[BaseCommentSender]], type[BaseCommentSender]]:
     def wrap(cls: type[BaseCommentSender]) -> type[BaseCommentSender]:
         if name in SENDERS_REGISTRY:
-            raise RuntimeError(f"Sender name {name} already registered")
+            msg = f"Sender name {name} already registered"
+            raise RuntimeError(msg)
         sender_info = SenderInfo(
             name=name,
             description=description,
