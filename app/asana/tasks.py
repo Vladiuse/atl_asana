@@ -1,6 +1,6 @@
 from dataclasses import asdict
 
-from celery import shared_task
+from celery import Task, shared_task
 from django.conf import settings
 
 from asana.webhook_handlers import WebhookDispatcher
@@ -15,7 +15,7 @@ asana_user_repository = AsanaUserRepository(api_client=asana_api_client)
 
 
 @shared_task(bind=True, max_retries=1, default_retry_delay=60 * 3)
-def process_asana_webhook_task(self, asana_webhook_data_id: int) -> dict | None:
+def process_asana_webhook_task(self: Task, asana_webhook_data_id: int) -> dict | None:
     try:
         webhook_data = AsanaWebhookRequestData.objects.get(pk=asana_webhook_data_id)
         dispatcher = WebhookDispatcher()
@@ -23,6 +23,7 @@ def process_asana_webhook_task(self, asana_webhook_data_id: int) -> dict | None:
         return asdict(dispatcher_result)
     except Exception as error:  # noqa: BLE001
         self.retry(exc=error)
+        return None
 
 
 @shared_task
