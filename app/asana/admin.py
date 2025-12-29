@@ -19,7 +19,7 @@ asana_user_repository = AsanaUserRepository(api_client=asana_api_client)
 
 
 @admin.register(AtlasUser)
-class AtlasUserAdmin(admin.ModelAdmin[AtlasUser]):
+class AtlasUserAdmin(admin.ModelAdmin):
     list_display = (
         "user_id",
         "membership_id",
@@ -92,7 +92,7 @@ class WebhookHandlerAdmin(admin.ModelAdmin):
 
 
 @admin.register(AsanaWebhook)
-class AsanaWebhookAdmin(admin.ModelAdmin[AsanaWebhook]):
+class AsanaWebhookAdmin(admin.ModelAdmin):
     list_display = (
         "id",
         "name",

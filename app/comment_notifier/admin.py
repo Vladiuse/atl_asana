@@ -35,16 +35,16 @@ repository = AsanaUserRepository(api_client=asana_client)
 
 @admin.register(AsanaWebhookProject)
 class AsanaProjectAdmin(admin.ModelAdmin):
-    list_display = ["name", "secret", "project_name", "project_url_short", "message_sender"]
-    list_display_links = ["name"]
-    actions = ["update_project_data"]
+    list_display = ("name", "secret", "project_name", "project_url_short", "message_sender")
+    list_display_links = ("name",)
+    actions = ("update_project_data",)
 
     def save_model(
         self,
         request: HttpRequest,
         obj: AsanaWebhookProject,
         form: forms.ModelForm,
-        change: bool,
+        change: bool, # noqa: FBT001
     ) -> None:
         super().save_model(request, obj, form, change)
         service = LoadAdditionalInfoForWebhookProject(asana_api_client=asana_client)
@@ -53,7 +53,7 @@ class AsanaProjectAdmin(admin.ModelAdmin):
         except AsanaApiClientError:
             self.message_user(
                 request,
-                message=f"Не удаллось обновить проект: {obj}",
+                message=f"Не удалось обновить проект: {obj}",
                 level=messages.ERROR,
             )
 
@@ -64,7 +64,7 @@ class AsanaProjectAdmin(admin.ModelAdmin):
         return "—"
 
     @admin.action(description="Обновить данные по проекту")
-    def update_project_data(self, request: HttpRequest, queryset: QuerySet) -> None:
+    def update_project_data(self, request: HttpRequest, queryset: QuerySet[AsanaWebhookProject]) -> None:
         service = LoadAdditionalInfoForWebhookProject(asana_api_client=asana_client)
         for webhook_project in queryset:
             try:
@@ -72,7 +72,7 @@ class AsanaProjectAdmin(admin.ModelAdmin):
             except AsanaApiClientError:
                 self.message_user(
                     request,
-                    message=f"Не удаллось обновить проект: {webhook_project}",
+                    message=f"Не удалось обновить проект: {webhook_project}",
                     level=messages.ERROR,
                 )
         self.message_user(request, message="Данные обновлены")
@@ -80,10 +80,10 @@ class AsanaProjectAdmin(admin.ModelAdmin):
 
 @admin.register(ProjectIgnoredSection)
 class ProjectIgnoredSectionAdmin(admin.ModelAdmin):
-    list_display = ["project", "section_name", "section_id"]
-    list_display_links = ["section_id", "section_name"]
-    readonly_fields = ["section_name"]
-    actions = ["update_additional_section_data"]
+    list_display = ("project", "section_name", "section_id")
+    list_display_links = ("section_id", "section_name")
+    readonly_fields = ("section_name",)
+    actions = ("update_additional_section_data",)
     form = ProjectIgnoredSectionForm
 
     def save_model(
@@ -91,7 +91,7 @@ class ProjectIgnoredSectionAdmin(admin.ModelAdmin):
         request: HttpRequest,
         obj: ProjectIgnoredSection,
         form: ProjectIgnoredSectionForm,
-        change: bool,
+        change: bool,  # noqa: FBT001
     ) -> None:
         super().save_model(request, obj, form, change)
         service = LoadAdditionalInfoForProjectIgnoredSection(asana_api_client=asana_client)
@@ -100,12 +100,12 @@ class ProjectIgnoredSectionAdmin(admin.ModelAdmin):
         except AsanaApiClientError:
             self.message_user(
                 request,
-                message=f"Не удаллось обновить данные по секции: {obj}",
+                message=f"Не удалось обновить данные по секции: {obj}",
                 level=messages.ERROR,
             )
 
     @admin.action(description="Обновить доп. данные по секциям")
-    def update_additional_section_data(self, request: HttpRequest, queryset: QuerySet) -> None:
+    def update_additional_section_data(self, request: HttpRequest, queryset: QuerySet[ProjectIgnoredSection]) -> None:
         service = LoadAdditionalInfoForProjectIgnoredSection(asana_api_client=asana_client)
         success_updated = 0
         for section in queryset:
@@ -115,20 +115,20 @@ class ProjectIgnoredSectionAdmin(admin.ModelAdmin):
             except AsanaApiClientError:
                 self.message_user(
                     request,
-                    message=f"Не удаллось обновить данные по секции: {section}",
+                    message=f"Не удалось обновить данные по секции: {section}",
                     level=messages.ERROR,
                 )
-        self.message_user(request, message=f"Обновленно секций: {success_updated}")
+        self.message_user(request, message=f"Обновлено секций: {success_updated}")
 
 
 @admin.register(AsanaWebhookRequestData)
 class AsanaWebhookRequestDataAdmin(admin.ModelAdmin):
-    list_display = ["id", "__str__", "is_target_event", "project__name", "created"]
-    list_display_links = ["id", "__str__"]
-    list_filter = [
+    list_display = ("id", "__str__", "is_target_event", "project__name", "created")
+    list_display_links = ("id", "__str__")
+    list_filter = (
         "is_target_event",
         "project__name",
-    ]
+    )
 
 
 @admin.register(AsanaComment)
@@ -169,38 +169,38 @@ class AsanaCommentAdmin(admin.ModelAdmin):
         return Truncator(obj.text).chars(200)
 
     @admin.action(description="Создать ссылки на таски (глобальный)")
-    def fetch_task_urls(self, request: HttpRequest, queryset: QuerySet) -> None:
+    def fetch_task_urls(self, request: HttpRequest, queryset: QuerySet[AsanaComment]) -> None:
         _ = queryset
         result = fetch_comment_tasks_urls_task.delay()
-        self.message_user(request, message=f"Таск запущен: {result.id}")
+        self.message_user(request, message=f"Задача запущена: {result.id}")
 
-    @admin.action(description="Поменить коментарии как отправленые")
-    def mark_comments_as_sent(self, request: HttpRequest, queryset: QuerySet) -> None:
+    @admin.action(description="Пометить комментарии как отправленные")
+    def mark_comments_as_sent(self, request: HttpRequest, queryset: QuerySet[AsanaComment]) -> None:
         queryset.update(is_notified=False)
         self.message_user(request, message=f"{queryset.count()} помечены как отправленные")
 
-    @admin.action(description="Найти пропущеные коментари без отправки смс (глобальный)")
-    def fetch_missing_project_comments(self, request: HttpRequest, queryset: QuerySet) -> None:
+    @admin.action(description="Найти пропущенные комментарии без отправки смс (глобальный)")
+    def fetch_missing_project_comments(self, request: HttpRequest, queryset: QuerySet[AsanaComment]) -> None:
         _ = queryset
         result = fetch_missing_project_comments_task.delay(send_messages=False)
-        self.message_user(request, message=f"Таск запущен: {result.id}")
+        self.message_user(request, message=f"Задача запущена: {result.id}")
 
     @admin.action(description="Пометить как не отправленные")
-    def mark_as_not_notified(self, request: HttpRequest, queryset: QuerySet) -> None:
+    def mark_as_not_notified(self, request: HttpRequest, queryset: QuerySet[AsanaComment]) -> None:
         queryset.update(has_mention=None, is_notified=None)
-        self.message_user(request, message=f"{queryset.count()} коментарив помечены как не отправление")
+        self.message_user(request, message=f"{queryset.count()} комментариев помечены как не отправление")
 
     @admin.action(description="Пометить как необработанный")
-    def mark_as_not_processed(self, request: HttpRequest, queryset: QuerySet) -> None:
+    def mark_as_not_processed(self, request: HttpRequest, queryset: QuerySet[AsanaComment]) -> None:
         queryset.update(has_mention=None, is_notified=None, is_deleted=False, task_url="", text="", send_result={})
         self.message_user(request, message=f"{queryset.count()} комментариев помечены как необработанные")
 
     @admin.action(description="Обработать комментарий и оповестить")
-    def process_comment_and_notify(self, request: HttpRequest, queryset: QuerySet) -> None:
+    def process_comment_and_notify(self, request: HttpRequest, queryset: QuerySet[AsanaComment]) -> None:
         if queryset.exclude(is_notified=None).count() != 0:
             self.message_user(
                 request,
-                message="Выбранные коментарии должны быть необработаными",
+                message="Выбранные комментарии должны быть необработанными",
                 level=messages.WARNING,
             )
             return
@@ -216,13 +216,13 @@ class AsanaCommentAdmin(admin.ModelAdmin):
             except AsanaApiClientError:
                 self.message_user(
                     request,
-                    message=f"Коментарий {comment.comment_id} не удалось обработать",
+                    message=f"Комментарий {comment.comment_id} не удалось обработать",
                     level=messages.ERROR,
                 )
-        self.message_user(request, message=f"Успешно обработано коментариев: {success_processed_comments}")
+        self.message_user(request, message=f"Успешно обработано комментариев: {success_processed_comments}")
 
-    @admin.action(description="Обновить ссылку на таск коммента и текст")
-    def update_additional_comment_data(self, request: HttpRequest, queryset: QuerySet) -> None:
+    @admin.action(description="Обновить ссылку на задачу коммента и текст")
+    def update_additional_comment_data(self, request: HttpRequest, queryset: QuerySet[AsanaComment]) -> None:
         fetch_additional_comments_data_use_case = LoadCommentsAdditionalInfo(
             asana_api_client=asana_client,
         )
@@ -232,12 +232,16 @@ class AsanaCommentAdmin(admin.ModelAdmin):
 
 @admin.register(ProjectNotifySender)
 class ProjectNotifySenderAdmin(admin.ModelAdmin):
-    list_display = ["name", "description"]
-    list_display_links = ["name"]
-    readonly_fields = ["name", "description"]
+    list_display = ("name", "description")
+    list_display_links = ("name",)
+    readonly_fields = ("name", "description")
 
-    def has_add_permission(self, request: HttpRequest, obj: ProjectNotifySender | None = None) -> bool:  # noqa: ARG002
+    def has_add_permission(self, request: HttpRequest, obj: ProjectNotifySender | None = None) -> bool:
+        _ = request
+        _ = obj
         return False
 
-    def has_delete_permission(self, request: HttpRequest, obj: ProjectNotifySender | None = None) -> bool:  # noqa: ARG002
+    def has_delete_permission(self, request: HttpRequest, obj: ProjectNotifySender | None = None) -> bool:
+        _ = request
+        _ = obj
         return False
