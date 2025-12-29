@@ -1,22 +1,14 @@
+from creative_quality.models import CreativeProjectSection, Task
+
 from asana.models import AsanaWebhookRequestData
 
 from .abstract import BaseWebhookHandler, WebhookHandlerResult
 from .registry import register_webhook_handler
-from creative_quality.models import Task, CreativeProjectSection
-
-
-@register_webhook_handler(
-    name="TEst1",
-    description="some desc 1",
-)
-class TestOneHandler(BaseWebhookHandler):
-    def handle(self, webhook_data: AsanaWebhookRequestData) -> None:
-        pass
 
 
 @register_webhook_handler(
     name="AddCreativeTaskForEstimation",
-    description="Таск с креативом добавлен в колонку для оценки креатива",
+    description="Карточка с креативом добавлен в колонку для оценки креатива",
 )
 class CreativeTaskForEstimation(BaseWebhookHandler):
     def get_target_sections_ids(self) -> set[str]:
@@ -31,7 +23,7 @@ class CreativeTaskForEstimation(BaseWebhookHandler):
                 section_id = event["parent"]["gid"]
                 if section_id in target_sections_ids:
                     task_id = event["resource"]["gid"]
-                    obj, created = Task.objects.get_or_create(
+                    _, created = Task.objects.get_or_create(
                         task_id=task_id,
                         defaults={"task_id": task_id},
                     )
