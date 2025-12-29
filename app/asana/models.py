@@ -1,7 +1,9 @@
+from __future__ import annotations
+
 from common.message_sender import UserTag
 from django.db import models
 
-from .constants import Position, AsanaResourceType
+from .constants import AsanaResourceType, Position
 from .utils import get_asana_profile_url_by_id
 
 
@@ -15,8 +17,6 @@ class AtlasUser(models.Model):
         max_length=32,
         choices=UserTag.choices(),
         blank=True,
-        null=True,
-        default=None,
     )
     position = models.CharField(
         blank=True,
@@ -25,7 +25,7 @@ class AtlasUser(models.Model):
         verbose_name="Позиция",
     )
 
-    def __str__(self):
+    def __str__(self) -> str:
         return self.name if self.name else self.email
 
     @property
@@ -44,10 +44,14 @@ class AsanaWebhook(models.Model):
     resource_name = models.CharField(max_length=254, blank=True)
     secret = models.CharField(max_length=100, blank=True)
     description = models.TextField(blank=True)
-    handlers = models.ManyToManyField(to="WebhookHandler", related_name="webhooks", blank=True)
+    handlers: models.ManyToManyField[WebhookHandler, AsanaWebhook] = models.ManyToManyField(
+        to="WebhookHandler",
+        related_name="webhooks",
+        blank=True,
+    )
     created = models.DateTimeField(auto_now_add=True)
 
-    def __str__(self):
+    def __str__(self) -> str:
         return f"{self.resource_type}:{self.resource_name}" if self.resource_name else self.name
 
 
@@ -67,9 +71,8 @@ class AsanaWebhookRequestData(models.Model):
     additional_data = models.JSONField(blank=True, default=dict)
     created = models.DateTimeField(auto_now_add=True)
 
-    @property
-    def events(self) -> list[dict]:
-        return self.payload["events"]
+    def __str__(self) -> str:
+        return f"<AsanaWebhookRequestData:{self.pk}>"
 
 
 class WebhookHandler(models.Model):
@@ -77,5 +80,5 @@ class WebhookHandler(models.Model):
     description = models.TextField(blank=True)
     created = models.DateTimeField(auto_now_add=True)
 
-    def __str__(self):
+    def __str__(self) -> str:
         return self.name
