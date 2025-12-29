@@ -7,3 +7,6 @@ class Webhook(models.Model):
     resource_type = models.CharField(max_length=100, blank=True)
     target = models.URLField(blank=True)
     description = models.CharField(max_length=254, blank=True)
+
+    def __str__(self) -> str:
+        return "<Webhook:{self.webhook_id}>"
