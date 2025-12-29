@@ -19,8 +19,8 @@ asana_user_repository = AsanaUserRepository(api_client=asana_api_client)
 
 
 @admin.register(AtlasUser)
-class AtlasUserAdmin(admin.ModelAdmin):
-    list_display = [
+class AtlasUserAdmin(admin.ModelAdmin[AtlasUser]):
+    list_display = (
         "user_id",
         "membership_id",
         "email",
@@ -29,14 +29,14 @@ class AtlasUserAdmin(admin.ModelAdmin):
         "position",
         "messenger_code",
         "asana_profile_link",
-    ]
-    list_display_links = ["email", "name"]
-    list_filter = ["position"]
-    search_fields = ["email", "name"]
-    actions = ["send_test_sms_for_user", "update_asana_users"]
+    )
+    list_display_links = ("email", "name")
+    list_filter = ("position",)
+    search_fields = ("email", "name")
+    actions = ("send_test_sms_for_user", "update_asana_users")
 
     @admin.display(description="Avatar")
-    def avatar_preview(self, obj) -> str:
+    def avatar_preview(self, obj: AtlasUser) -> str:
         if not obj.avatar_url:
             return ""
         return format_html(
@@ -45,7 +45,7 @@ class AtlasUserAdmin(admin.ModelAdmin):
         )
 
     @admin.display(description="Профиль")
-    def asana_profile_link(self, obj) -> str:
+    def asana_profile_link(self, obj: AtlasUser) -> str:
         profile_link = get_asana_profile_url_by_id(profile_id=obj.membership_id)
         return format_html(
             '<a href="{}" target="_blank">Открыть</a>',
@@ -53,7 +53,7 @@ class AtlasUserAdmin(admin.ModelAdmin):
         )
 
     @admin.action(description="Отправить тестовое смс в телеграм")
-    def send_test_sms_for_user(self, request: HttpRequest, queryset: QuerySet) -> None:
+    def send_test_sms_for_user(self, request: HttpRequest, queryset: QuerySet[AtlasUser]) -> None:
         errors_send_user = []
         success_send_count = 0
         for asana_user in queryset:
@@ -69,7 +69,7 @@ class AtlasUserAdmin(admin.ModelAdmin):
         self.message_user(request, f"Успешно отправлено {success_send_count} сообщений", level=messages.SUCCESS)
 
     @admin.action(description="Обновить пользователей асаны (глобальный)")
-    def update_asana_users(self, request: HttpRequest, queryset: QuerySet) -> None:
+    def update_asana_users(self, request: HttpRequest, queryset: QuerySet[AtlasUser]) -> None:
         _ = queryset
         try:
             result = asana_user_repository.update_all()
@@ -92,7 +92,7 @@ class WebhookHandlerAdmin(admin.ModelAdmin):
 
 
 @admin.register(AsanaWebhook)
-class AsanaWebhookAdmin(admin.ModelAdmin):
+class AsanaWebhookAdmin(admin.ModelAdmin[AsanaWebhook]):
     list_display = (
         "id",
         "name",
@@ -106,12 +106,12 @@ class AsanaWebhookAdmin(admin.ModelAdmin):
     list_filter = ("resource_type",)
     ordering = ("-created",)
 
-    def get_queryset(self, request) -> QuerySet[AsanaWebhook]:
+    def get_queryset(self, request: HttpRequest) -> QuerySet[AsanaWebhook]:
         qs = super().get_queryset(request)
         return qs.prefetch_related("handlers")
 
     @admin.display(description="handlers")
-    def handlers_list(self, obj) -> str:
+    def handlers_list(self, obj: AsanaWebhook) -> str:
         return ", ".join(obj.handlers.values_list("name", flat=True))
 
 
