@@ -20,7 +20,7 @@ class AsanaCommentPrettifier:
     def __init__(self, profile_urls_mention_map: dict[str, str]):
         self.profile_urls_mention_map = profile_urls_mention_map
 
-    def _replace_asana_profile_urls_on_mention(self, text) -> str:
+    def _replace_asana_profile_urls_on_mention(self, text: str) -> str:
         for profile_url, mention in self.profile_urls_mention_map.items():
             text = text.replace(profile_url, mention)
         return text
