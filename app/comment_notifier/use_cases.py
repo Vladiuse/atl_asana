@@ -6,7 +6,7 @@ from common import MessageSender
 from django.db import IntegrityError
 from message_sender.tasks import send_log_message_task
 
-from .exceptions import NoSenderClassInProject
+from .exceptions import NoSenderClassInProjectError
 from .models import AsanaComment, AsanaWebhookProject, ProjectNotifySender
 from .senders.registry import SENDERS_REGISTRY
 from .services import AsanaCommentNotifier, ProjectCommentsGenerator
@@ -17,7 +17,7 @@ class AsanaCommentNotifierUseCase:
     asana_api_client: AsanaApiClient
     message_sender: MessageSender
 
-    def execute(self, comment_id) -> None:
+    def execute(self, comment_id: str) -> None:
         logging.info("AsanaCommentNotifier comment_id: %s", comment_id)
         comment_model = AsanaComment.objects.get(comment_id=comment_id)
         project: AsanaWebhookProject = comment_model.project
@@ -26,7 +26,7 @@ class AsanaCommentNotifierUseCase:
 
             message = f"🛑 {self.__class__.__name__}\nSet {ProjectNotifySender.__name__} for project: {project}"
             send_log_message_task.delay(message=message)
-            raise NoSenderClassInProject(message)
+            raise NoSenderClassInProjectError(message)
         project_message_sender = SENDERS_REGISTRY[project.message_sender.name].sender
         comment_notifier = AsanaCommentNotifier(
             asana_api_client=self.asana_api_client,
@@ -40,7 +40,7 @@ class AsanaCommentNotifierUseCase:
 class FetchMissingProjectCommentsUseCase:
     asana_api_client: AsanaApiClient
 
-    def execute(self, send_messages: bool = True) -> dict:
+    def execute(self, *,send_messages: bool = True) -> dict:
         from .tasks import notify_new_asana_comments_tasks
 
         """
@@ -77,7 +77,7 @@ class FetchMissingProjectCommentsUseCase:
                     except IntegrityError as error:
                         logging.warning("IntegrityError save comment: %s", comment_data)
                         message = (
-                            f"⚠️ {self.__class__.__name__}\n" f"Cant save asana comment: {comment_data}\n" f"{error}"
+                            f"⚠️ {self.__class__.__name__}\nCant save asana comment: {comment_data}\n{error}"
                         )
                         send_log_message_task.delay(message=message)
                         errors_count += 1
