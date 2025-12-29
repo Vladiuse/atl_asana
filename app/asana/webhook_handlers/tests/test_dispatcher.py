@@ -2,17 +2,21 @@ import pytest
 
 from asana.constants import AsanaResourceType
 from asana.models import AsanaWebhook, AsanaWebhookRequestData, ProcessingStatus, WebhookHandler
-
-from ..abstract import BaseWebhookHandler, WebhookHandlerResult
-from ..dispatcher import WebhookDispatcher, WebhookDispatcherResult
-from ..registry import WEBHOOK_HANDLER_REGISTRY, WebhookHandlerInfo
+from asana.webhook_handlers.abstract import BaseWebhookHandler, WebhookHandlerResult
+from asana.webhook_handlers.dispatcher import WebhookDispatcher, WebhookDispatcherResult
+from asana.webhook_handlers.registry import WEBHOOK_HANDLER_REGISTRY, WebhookHandlerInfo
 
 
 class FakeBaseWebhookHandler(BaseWebhookHandler):
+    result = WebhookHandlerResult(
+        is_success=True,
+        is_target_event=True,
+    )
 
     def handle(self, webhook_data: AsanaWebhookRequestData) -> WebhookHandlerResult:
         _ = webhook_data
         return self.result
+
 
 class SuccessTargetHandler(FakeBaseWebhookHandler):
     name = "success_target"
@@ -20,6 +24,7 @@ class SuccessTargetHandler(FakeBaseWebhookHandler):
         is_success=True,
         is_target_event=True,
     )
+
 
 class SuccessNotTargetHandler(FakeBaseWebhookHandler):
     name = "success_not_target"
@@ -37,12 +42,14 @@ class ErrorHandler(FakeBaseWebhookHandler):
         error="error",
     )
 
+
 class RaiseErrorHandler(FakeBaseWebhookHandler):
     name = "raise_error_handler"
 
     def handle(self, webhook_data: AsanaWebhookRequestData) -> WebhookHandlerResult:
         _ = webhook_data
-        raise TypeError("boom")
+        msg = "boom"
+        raise TypeError(msg)
 
 
 TEST_HANDLERS = (SuccessTargetHandler, SuccessNotTargetHandler, ErrorHandler, RaiseErrorHandler)
@@ -60,7 +67,7 @@ def test_handler_register(monkeypatch: pytest.MonkeyPatch) -> None:
         monkeypatch.setitem(WEBHOOK_HANDLER_REGISTRY, handler_class.name, info)
 
 
-@pytest.mark.django_db()
+@pytest.mark.django_db
 class TestWebhookDispatcher:
     @pytest.fixture(autouse=True)
     def setup(self) -> None:
@@ -79,7 +86,7 @@ class TestWebhookDispatcher:
     def test_patch_work(self, subtests: pytest.Subtests):
         for _class in TEST_HANDLERS:
             with subtests.test(msg="x", _class=_class):
-                assert _class.name in self.dispatcher._get_registry_dict()
+                assert _class.name in self.dispatcher.get_registry_dict()
 
     def test_empty(self):
         webhook_data = AsanaWebhookRequestData.objects.create(payload={}, headers={}, webhook=self.webhook_x)
