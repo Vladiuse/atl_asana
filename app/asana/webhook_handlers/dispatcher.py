@@ -49,5 +49,5 @@ class WebhookDispatcher:
         return result
 
     # for tests only
-    def _get_registry_dict(self) -> dict:
+    def get_registry_dict(self) -> dict:
         return WEBHOOK_HANDLER_REGISTRY
