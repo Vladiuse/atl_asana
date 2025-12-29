@@ -1,5 +1,5 @@
-from common.exception import AppException
+from common.exception import AppExceptionError
 
 
-class NoSenderClassInProject(AppException):
-    """No set sender class on asana project"""
+class NoSenderClassInProjectError(AppExceptionError):
+    """No set sender class on asana project."""
