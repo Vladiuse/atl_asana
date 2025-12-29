@@ -1,0 +1,44 @@
+[tool.ruff]
+line-length = 119
+
+[tool.ruff.lint]
+fixable = ["ALL"]
+select = ["ALL"]
+ignore = [
+  "COM819",
+  "ANN101",
+  "ANN102",
+  "ANN204",
+  "D100",
+  "D101",
+  "D102",
+  "D103",
+  "D104",
+  "D105",
+  "D106",
+  "D107",
+  "FA102",
+  "RUF001", # ambiguous-unicode-character-string
+  "PERF203", # try-except-in-loop
+]
+
+[tool.ruff.lint.per-file-ignores]
+"**/views.py" = [
+    "ARG002",  # args
+]
+
+"**/test_*.py" = [
+    "ANN201",
+    "PT027", # self.assertRaises
+    "PLR2004", # Magic value used in comparison
+    "PT004",
+    "S101", # assert find
+]
+
+"**/scripts/*.py" = [
+    "T203", # pprint
+]
+
+[tool.ruff.format]
+quote-style = "double"
+indent-style = "space"
