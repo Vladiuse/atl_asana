@@ -2,19 +2,19 @@ import json
 import logging
 from functools import wraps
 from http import HTTPStatus
-from typing import Any, Callable, NoReturn
+from typing import Callable, NoReturn
 
 import requests
 from requests.exceptions import HTTPError, RequestException
 
-from .exception import AsanaApiClientError, AsanaNotFoundError, AsanaForbiddenError
+from .exception import AsanaApiClientError, AsanaForbiddenError, AsanaNotFoundError
 
 
 def asana_error_handler(func: Callable) -> Callable:
-    """Автоматическая обработка ошибок для методов AsanaApiClient"""
+    """Автоматическая обработка ошибок для методов AsanaApiClient."""
 
     @wraps(func)
-    def wrapper(self, *args, **kwargs) -> Any:  # noqa: ANN401
+    def wrapper(self, *args, **kwargs) -> Callable:  # noqa: ANN003, ANN001, ANN002
         try:
             return func(self, *args, **kwargs)
         except (RequestException, HTTPError, json.JSONDecodeError) as error:
@@ -25,9 +25,11 @@ def asana_error_handler(func: Callable) -> Callable:
 
 class AsanaApiClient:
     API_ENDPOINT = "https://app.asana.com/api/1.0/"
+    DEFAULT_REQUEST_TIMEOUT = 6
 
-    def __init__(self, api_key: str):
+    def __init__(self, api_key: str, timeout: int | None = None):
         self.api_key = api_key
+        self.timeout = timeout if timeout else self.DEFAULT_REQUEST_TIMEOUT
 
     @property
     def _auth_headers(self) -> dict:
@@ -52,7 +54,11 @@ class AsanaApiClient:
 
     @asana_error_handler
     def get_user(self, user_id: int) -> dict:
-        response = requests.get(f"{self.API_ENDPOINT}users/{user_id}", headers=self._auth_headers)
+        response = requests.get(
+            f"{self.API_ENDPOINT}users/{user_id}",
+            headers=self._auth_headers,
+            timeout=self.timeout,
+        )
         response.raise_for_status()
         return response.json()["data"]
 
@@ -61,6 +67,7 @@ class AsanaApiClient:
         response = requests.get(
             f"{self.API_ENDPOINT}workspace_memberships/{membership_id}",
             headers=self._auth_headers,
+            timeout=self.timeout,
         )
         response.raise_for_status()
         return response.json()["data"]
@@ -70,6 +77,7 @@ class AsanaApiClient:
         response = requests.get(
             f"{self.API_ENDPOINT}workspaces/{workspace_id}/workspace_memberships",
             headers=self._auth_headers,
+            timeout=self.timeout,
             params={"limit": 99},
         )
         response.raise_for_status()
@@ -80,6 +88,7 @@ class AsanaApiClient:
         response = requests.get(
             f"{self.API_ENDPOINT}stories/{comment_id}",
             headers=self._auth_headers,
+            timeout=self.timeout,
         )
         response.raise_for_status()
         return response.json()["data"]
@@ -92,6 +101,7 @@ class AsanaApiClient:
             f"{self.API_ENDPOINT}tasks/{task_id}/stories",
             headers=self._auth_headers,
             params={"opt_fields": opt_fields},
+            timeout=self.timeout,
         )
         response.raise_for_status()
         return response.json()["data"]
@@ -106,6 +116,7 @@ class AsanaApiClient:
         response = requests.get(
             f"{self.API_ENDPOINT}tasks/{task_id}",
             headers=self._auth_headers,
+            timeout=self.timeout,
         )
         response.raise_for_status()
         return response.json()["data"]
@@ -120,11 +131,12 @@ class AsanaApiClient:
             headers=self._auth_headers,
             json=data,
             params={"opt_fields": opt_fields},
+            timeout=self.timeout,
         )
         response.raise_for_status()
         return response.json()["data"]
 
-    def mark_task_completed(self, task_id: int) -> dict:
+    def mark_task_completed(self, task_id: str) -> dict:
         return self.update_task(task_id=task_id, data={"completed": True}, opt_fields=["completed", "name"])
 
     @asana_error_handler
@@ -132,6 +144,7 @@ class AsanaApiClient:
         response = requests.get(
             f"{self.API_ENDPOINT}users/{user_id}/workspace_memberships",
             headers=self._auth_headers,
+            timeout=self.timeout,
         )
         response.raise_for_status()
         return response.json()["data"]
@@ -142,6 +155,7 @@ class AsanaApiClient:
             f"{self.API_ENDPOINT}webhooks",
             headers=self._auth_headers,
             params={"workspace": workspace_id},
+            timeout=self.timeout,
         )
         response.raise_for_status()
         return response.json()["data"]
@@ -151,6 +165,7 @@ class AsanaApiClient:
         response = requests.get(
             f"{self.API_ENDPOINT}projects/{project_id}/sections",
             headers=self._auth_headers,
+            timeout=self.timeout,
         )
         response.raise_for_status()
         return response.json()["data"]
@@ -160,10 +175,12 @@ class AsanaApiClient:
         response = requests.get(
             f"{self.API_ENDPOINT}sections/{section_id}/tasks",
             headers=self._auth_headers,
+            timeout=self.timeout,
         )
         response.raise_for_status()
-        if "next_page" in response:
-            raise AsanaApiClientError("get_section_tasks have 'next_page' param in response")
+        if "next_page" in response.text:
+            msg = "get_section_tasks have 'next_page' param in response"
+            raise AsanaApiClientError(msg)
         return response.json()["data"]
 
     @asana_error_handler
@@ -174,6 +191,7 @@ class AsanaApiClient:
             f"{self.API_ENDPOINT}projects/{project_id}",
             headers=self._auth_headers,
             params={"opt_fields": opt_fields},
+            timeout=self.timeout,
         )
         response.raise_for_status()
         return response.json()["data"]
@@ -186,6 +204,7 @@ class AsanaApiClient:
             f"{self.API_ENDPOINT}sections/{section_id}",
             headers=self._auth_headers,
             params={"opt_fields": opt_fields},
+            timeout=self.timeout,
         )
         response.raise_for_status()
         return response.json()["data"]
