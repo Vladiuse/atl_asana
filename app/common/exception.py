@@ -1,10 +1,10 @@
-class AppException(Exception):
-    """Common application exception"""
+class AppExceptionError(Exception):
+    """Common application exception."""
 
 
-class MessageSenderError(AppException):
-    """MessageSenderError"""
+class MessageSenderError(AppExceptionError):
+    """MessageSenderError."""
 
 
-class TableSenderError(AppException):
-    """TableSenderError"""
+class TableSenderError(AppExceptionError):
+    """TableSenderError."""
