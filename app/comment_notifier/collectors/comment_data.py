@@ -11,7 +11,7 @@ from comment_notifier.models import AsanaComment
 from comment_notifier.utils import extract_user_profile_id_from_text
 
 from .dto import CommentDto
-from .exceptions import CommentDeleted
+from .exceptions import CommentDeletedError
 
 
 class CommentDataCollector:
@@ -24,7 +24,7 @@ class CommentDataCollector:
             task_data = self.asana_api_client.get_task(task_id=comment_model.task_id)
             comment_data = self.asana_api_client.get_comment(comment_id=comment_model.comment_id)
         except (AsanaForbiddenError, AsanaNotFoundError):
-            raise CommentDeleted(f"Cant get access to comment {comment_model.comment_id}")
+            raise CommentDeletedError(f"Cant get access to comment {comment_model.comment_id}")
         logging.info("Raw comment text: %s", comment_data["text"])
         comment_mentions_profile_ids = extract_user_profile_id_from_text(text=comment_data["text"])
         mention_users: list[AtlasUser] = []
