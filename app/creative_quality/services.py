@@ -18,9 +18,11 @@ class CreativeProjectSectionService:
     asana_api_client: AsanaApiClient
 
     def update_additional_info(self, creative_project_section: CreativeProjectSection) -> None:
-        """
+        """Update additional info.
+
         Raises:
              AsanaApiClientError: if cant get some data from asana
+
         """
         section_data = self.asana_api_client.get_section(section_id=creative_project_section.section_id)
         creative_project_section.section_name = section_data["name"]
@@ -43,14 +45,13 @@ class TaskService:
         bayer_code: str
         url: str
 
-    asana_api_client: AsanaApiClient
-
     def _get_task_dto(self, task_data: dict) -> TaskData:
-        """
+        """Get task dto.
+
         Raises:
              AsanaApiClientError
-        """
 
+        """
         assignee_id = "" if task_data["assignee"] is None else task_data["assignee"]["gid"]
         task_name = task_data["name"]
         url = task_data["permalink_url"]
@@ -83,9 +84,11 @@ class TaskService:
         return creative_task
 
     def mark_completed(self, task: Task) -> None:
-        """
+        """Mark task completed.
+
         Raises:
              AsanaApiClientError
+
         """
         try:
             self.asana_api_client.mark_task_completed(task_id=task.task_id)
@@ -136,7 +139,8 @@ class SendEstimationMessageService:
         try:
             bayer_code = creative.task.bayer_code
             if bayer_code == "":
-                raise ValueError(f"Empty baer code in creative: {creative}")
+                msg = f"Empty baer code in creative: {creative}"
+                raise ValueError(msg)
             user_tag = UserTag(bayer_code.lower())
             context = {
                 "task_name": creative.task.task_name,
