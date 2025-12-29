@@ -1,18 +1,19 @@
 from dataclasses import asdict, dataclass, field
+from typing import TypeAlias
 
-from common.exception import AppException
+from common.exception import AppExceptionError
 
 from asana.models import AsanaWebhookRequestData, ProcessingStatus
 from asana.webhook_handlers.abstract import WebhookHandlerResult
 from asana.webhook_handlers.registry import WEBHOOK_HANDLER_REGISTRY, WebhookHandlerInfo
 
-handlerName = str
+HandlerName: TypeAlias = str
 
 
 @dataclass
 class WebhookDispatcherResult:
-    handler_results: dict[handlerName, WebhookHandlerResult] = field(default_factory=dict)
-    errors: dict[handlerName, str] = field(default_factory=dict)
+    handler_results: dict[HandlerName, WebhookHandlerResult] = field(default_factory=dict)
+    errors: dict[HandlerName, str] = field(default_factory=dict)
 
 
 class WebhookDispatcher:
@@ -25,10 +26,11 @@ class WebhookDispatcher:
             webhook_data.save(update_fields=["status"])
             return result
         for handler in handlers:
-            handler_info: WebhookHandlerInfo = WEBHOOK_HANDLER_REGISTRY.get(handler.name)
+            handler_info: WebhookHandlerInfo | None = WEBHOOK_HANDLER_REGISTRY.get(handler.name)
             try:
                 if not handler_info:
-                    raise AppException(f"Cant find webhook handler with name '{handler.name}'")
+                    msg = f"Cant find webhook handler with name '{handler.name}'"
+                    raise AppExceptionError(msg)
                 handler_class = handler_info.webhook_handler_class
                 handler_result: WebhookHandlerResult = handler_class().handle(webhook_data=webhook_data)
                 result.handler_results[handler.name] = handler_result
