@@ -1,14 +1,16 @@
 from typing import TYPE_CHECKING
 
 from django.db import models
-from django.db.models import QuerySet
+
+if TYPE_CHECKING:
+    from django.db.models import QuerySet
 
 
 class ProjectNotifySender(models.Model):
     name = models.CharField(max_length=100, unique=True)
     description = models.CharField(max_length=254)
 
-    def __str__(self):
+    def __str__(self) -> str:
         return self.name
 
 
@@ -28,7 +30,7 @@ class AsanaWebhookProject(models.Model):
     if TYPE_CHECKING:
         ignored_sections: "QuerySet[ProjectIgnoredSection]"
 
-    def __str__(self):
+    def __str__(self) -> str:
         return self.project_name if self.project_name else self.name
 
 
@@ -43,9 +45,9 @@ class ProjectIgnoredSection(models.Model):
     section_name = models.CharField(max_length=254, blank=True)
 
     class Meta:
-        unique_together = ["project", "section_id"]
+        unique_together = ("project", "section_id")
 
-    def __str__(self):
+    def __str__(self) -> str:
         return self.section_name if self.section_name else f"{self.project}:{self.section_id}"
 
 
@@ -56,9 +58,8 @@ class AsanaWebhookRequestData(models.Model):
     payload = models.JSONField()
     is_target_event = models.BooleanField(null=True, default=None)
 
-    @property
-    def events(self) -> list[dict]:
-        return self.payload["events"]
+    def __str__(self) -> str:
+        return f"<{self.__class__.__name__}:{self.pk}>"
 
 
 class AsanaComment(models.Model):
@@ -79,6 +80,9 @@ class AsanaComment(models.Model):
     text = models.TextField(blank=True)
     send_result = models.JSONField(blank=True, default=dict)
     created = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self) -> str:
+        return f"<{self.__class__.__name__}:{self.pk}>"
 
     def mark_as_deleted(self) -> None:
         self.is_deleted = True
