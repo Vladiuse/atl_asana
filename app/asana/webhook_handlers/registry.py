@@ -20,7 +20,8 @@ def register_webhook_handler(
 ) -> Callable[[type[BaseWebhookHandler]], type[BaseWebhookHandler]]:
     def wrap(cls: type[BaseWebhookHandler]) -> type[BaseWebhookHandler]:
         if name in WEBHOOK_HANDLER_REGISTRY:
-            raise RuntimeError(f"Webhook handler name {name} already registered")
+            msg = f"Webhook handler name {name} already registered"
+            raise RuntimeError(msg)
         sender_info = WebhookHandlerInfo(
             name=name,
             description=description,
