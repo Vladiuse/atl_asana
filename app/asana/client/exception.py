@@ -1,9 +1,9 @@
-from common.exception import AppException
+from common.exception import AppExceptionError
 from requests import Response
 
 
-class AsanaApiClientError(AppException):
-    """Common client error"""
+class AsanaApiClientError(AppExceptionError):
+    """Common client error."""
 
     def __init__(self, message: str, response: Response | None = None) -> None:
         super().__init__(message)
@@ -11,8 +11,8 @@ class AsanaApiClientError(AppException):
 
 
 class AsanaNotFoundError(AsanaApiClientError):
-    """404 Not Found"""
+    """404 Not Found."""
 
 
 class AsanaForbiddenError(AsanaApiClientError):
-    """403 Forbidden"""
+    """403 Forbidden."""

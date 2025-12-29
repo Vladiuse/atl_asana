@@ -1,6 +1,6 @@
 import logging
 
-from common.exception import AppException
+from common.exception import AppExceptionError
 
 from asana.client import AsanaApiClient
 
@@ -54,7 +54,7 @@ class AsanaUserRepository:
                 break
         if atlas_user_membership_id is None:
             msg = f"Cant find Atlas membership for user: {user_id}"
-            raise AppException(msg)
+            raise AppExceptionError(msg)
         membership_data = self.api_client.get_workspace_membership(membership_id=atlas_user_membership_id)
         return self._create_user_by_data(membership_data=membership_data, user_data=user_data)
 
