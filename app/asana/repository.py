@@ -27,18 +27,22 @@ class AsanaUserRepository:
         )
 
     def _create_by_membership_id(self, membership_id: int) -> AtlasUser:
-        """
+        """Create user by membership_id.
+
         Raises:
              AsanaApiClientError: if cant get data from asana
+
         """
         membership_data = self.api_client.get_workspace_membership(membership_id=membership_id)
         user_data = self.api_client.get_user(user_id=membership_data["user"]["gid"])
         return self._create_user_by_data(membership_data=membership_data, user_data=user_data)
 
     def _create_by_user_id(self, user_id: int) -> AtlasUser:
-        """
+        """Create AtlasUser by id.
+
         Raises:
-                 AsanaApiClientError: if cant get data from asana
+            AsanaApiClientError: if cant get data from asana
+
         """
         user_data = self.api_client.get_user(user_id=user_id)
         atlas_user_membership_id = None
@@ -49,7 +53,8 @@ class AsanaUserRepository:
                 atlas_user_membership_id = membership_data["gid"]
                 break
         if atlas_user_membership_id is None:
-            raise AppException(f"Cant find Atlas membership for user: {user_id}")
+            msg = f"Cant find Atlas membership for user: {user_id}"
+            raise AppException(msg)
         membership_data = self.api_client.get_workspace_membership(membership_id=atlas_user_membership_id)
         return self._create_user_by_data(membership_data=membership_data, user_data=user_data)
 
@@ -59,12 +64,15 @@ class AsanaUserRepository:
         membership_id: int | None = None,
         user_id: int | None = None,
     ) -> AtlasUser:
-        """
+        """Get user by usr_id or membership_id.
+
         Raises:
              AsanaApiClientError: if cant get data from asana
+
         """
         if membership_id is None and user_id is None:
-            raise ValueError("Either membership_id or user_id must be provided")
+            msg = "Either membership_id or user_id must be provided"
+            raise ValueError(msg)
         try:
             if membership_id is not None:
                 user = AtlasUser.objects.get(membership_id=membership_id)
@@ -78,12 +86,15 @@ class AsanaUserRepository:
                 logging.info("Try load user from Asana by membership_id")
                 return self._create_by_membership_id(membership_id=membership_id)
             logging.info("Try load user from Asana by user_id")
+            assert user_id is not None
             return self._create_by_user_id(user_id=user_id)
 
-    def update_all(self) -> dict:
-        """
+    def update_all(self) -> dict[str, int]:
+        """Update all users.
+
         Raises:
              AsanaApiClientError: if cant get data from asana
+
         """
         atlas_asana_memberships = self.api_client.get_workspace_memberships_for_workspace(
             workspace_id=ATLAS_WORKSPACE_ID,
