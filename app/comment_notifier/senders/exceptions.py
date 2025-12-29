@@ -1,5 +1,5 @@
-from common.exception import AppException
+from common.exception import AppExceptionError
 
 
-class CantNotify(AppException):
-    """Some reason cant send message"""
+class CantNotifyError(AppExceptionError):
+    """Some reason cant send message."""
