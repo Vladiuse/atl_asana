@@ -8,10 +8,10 @@ from .models import ProjectIgnoredSection
 asana_api_client = AsanaApiClient(api_key=settings.ASANA_API_KEY)
 
 
-class ProjectIgnoredSectionForm(forms.ModelForm):
+class ProjectIgnoredSectionForm(forms.ModelForm):  # type: ignore[type-arg]
     class Meta:
         model = ProjectIgnoredSection
-        fields = "__all__"
+        fields = ("project", "section_id")
 
     def clean(self) -> None:
         """Clean form.
