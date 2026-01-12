@@ -1,10 +1,12 @@
+from typing import Any
+
 from common.models import Country
 from django import forms
 
 from .models import Creative, CreativeGeoData, CreativeGeoDataStatus
 
 
-class CreativeGeoDataForm(forms.ModelForm):
+class CreativeGeoDataForm(forms.ModelForm): # type: ignore[type-arg]
     country = forms.ModelChoiceField(
         queryset=Country.objects.all(),
         required=True,
@@ -40,13 +42,13 @@ class CreativeGeoDataForm(forms.ModelForm):
 
     class Meta:
         model = CreativeGeoData
-        fields = ["hook", "hold", "ctr", "comment", "country", "status"]
+        fields = ("hook", "hold", "ctr", "comment", "country", "status")
 
     def __init__(self, *args, creative: Creative, **kwargs):  # noqa: ANN002, ANN003
         self.creative = creative
         super().__init__(*args, **kwargs)
 
-    def clean(self) -> dict:
+    def clean(self) -> dict[str, Any]:
         cleaned_data = super().clean()
         country = cleaned_data.get("country")
 
@@ -59,6 +61,7 @@ class CreativeGeoDataForm(forms.ModelForm):
             .exclude(pk=self.instance.pk)
             .exists()
         ):
-            raise forms.ValidationError(f"Для этого креатива данные по {country} уже существуют.")
+            msg = f"Для этого креатива данные по {country} уже существуют."
+            raise forms.ValidationError(msg)
 
         return cleaned_data

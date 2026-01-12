@@ -1,3 +1,4 @@
+# mypy: disable-error-code=type-arg
 from asana.client import AsanaApiClient
 from celery import shared_task
 from celery.app.task import Task as CeleryTask

@@ -118,7 +118,7 @@ class CreativeService:
         except AsanaApiClientError:
             from .tasks import mark_asana_task_completed_task
 
-            mark_asana_task_completed_task.apply_async(
+            mark_asana_task_completed_task.apply_async(  # type: ignore[attr-defined]
                 kwargs={"task_pk": creative.task.pk},
                 countdown=3600,
             )
@@ -138,9 +138,6 @@ class SendEstimationMessageService:
     def send_reminder(self, creative: Creative) -> None:
         try:
             bayer_code = creative.task.bayer_code
-            if bayer_code == "":
-                msg = f"Empty baer code in creative: {creative}"
-                raise ValueError(msg)
             user_tag = UserTag(bayer_code.lower())
             context = {
                 "task_name": creative.task.task_name,
