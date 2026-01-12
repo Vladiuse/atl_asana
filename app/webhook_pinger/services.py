@@ -8,7 +8,7 @@ class AddNotExistWebhooks:
     def __init__(self, asana_api_client: AsanaApiClient):
         self.asana_api_client = asana_api_client
 
-    def execute(self) -> dict:
+    def execute(self) -> dict[str, int]:
         new_created_count = 0
         exist_webhooks_ids = set(Webhook.objects.values_list("webhook_id", flat=True))
         webhooks = self.asana_api_client.get_webhooks(workspace_id=ATLAS_WORKSPACE_ID)
