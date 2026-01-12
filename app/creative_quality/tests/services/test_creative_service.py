@@ -26,7 +26,7 @@ def patch_constance():
         yield
 
 
-@pytest.fixture()
+@pytest.fixture
 def creative_service() -> CreativeService:
     mock_asana = Mock(spec=AsanaApiClient)
     mock_task_service = Mock(spec=TaskService, asana_api_client=mock_asana)
@@ -35,7 +35,7 @@ def creative_service() -> CreativeService:
     return creative_service
 
 
-@pytest.fixture()
+@pytest.fixture
 def send_estimate_message_service() -> SendEstimationMessageService:
     return SendEstimationMessageService(
         message_sender=Mock(spec=MessageSender),
@@ -43,13 +43,13 @@ def send_estimate_message_service() -> SendEstimationMessageService:
     )
 
 
-@pytest.fixture()
+@pytest.fixture
 def creative() -> Creative:
     task = Task.objects.create(task_id="x", status=TaskStatus.CREATED)
     return Creative.objects.create(task=task)
 
 
-@pytest.fixture()
+@pytest.fixture
 def fixed_now(monkeypatch: pytest.MonkeyPatch) -> datetime:
     fixed = timezone.make_aware(datetime(2025, 1, 1, 12, 0, 0))
     monkeypatch.setattr(timezone, "now", lambda: fixed)

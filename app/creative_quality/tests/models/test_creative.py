@@ -7,14 +7,14 @@ from django.utils import timezone
 from creative_quality.models import Creative, CreativeStatus, Task
 
 
-@pytest.fixture()
+@pytest.fixture
 def fixed_now(monkeypatch: pytest.MonkeyPatch) -> datetime:
     fixed = timezone.make_aware(datetime(2025, 1, 1, 12, 0, 0))
     monkeypatch.setattr(timezone, "now", lambda: fixed)
     return fixed
 
 
-@pytest.fixture()
+@pytest.fixture
 def creative_model() -> Creative:
     task = Task.objects.create(task_id="x")
     return Creative.objects.create(task=task, status=CreativeStatus.WAITING)

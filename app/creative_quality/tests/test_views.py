@@ -9,19 +9,19 @@ from django.urls import reverse
 from creative_quality.models import Creative, CreativeGeoData, CreativeGeoDataStatus, Task
 
 
-@pytest.fixture()
+@pytest.fixture
 def creative_task() -> tuple[Creative, Task]:
     task = Task.objects.create(task_id="xxx")
     creative = Creative.objects.create(task=task)
     return creative, task
 
 
-@pytest.fixture()
+@pytest.fixture
 def country_by() -> Country:
     return Country.objects.create(name="Belarus", iso_code="by")
 
 
-@pytest.fixture()
+@pytest.fixture
 def country_ru() -> Country:
     return Country.objects.create(name="Russia", iso_code="ru")
 
