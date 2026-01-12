@@ -44,6 +44,7 @@ class TaskService:
         name: str
         bayer_code: str
         url: str
+        work_url: str
 
     def _get_task_dto(self, task_data: dict) -> TaskData:
         """Get task dto.
@@ -56,15 +57,21 @@ class TaskService:
         task_name = task_data["name"]
         url = task_data["permalink_url"]
         bayer_code = ""
+        work_url = ""
         for field in task_data.get("custom_fields", []):
             if field["name"] == config.DESIGN_TASK_BAYER_CUSTOM_FIELD_NAME:
                 bayer_code = field.get("text_value", "")
+                break
+        for field in task_data.get("custom_fields", []):
+            if field["name"] == config.DESIGN_TASK_LINK_ON_WORK_FIELD_NAME:
+                work_url = field.get("text_value", "")
                 break
         return self.TaskData(
             assignee_id=assignee_id,
             name=task_name,
             bayer_code=bayer_code,
             url=url,
+            work_url=work_url,
         )
 
     def update(self, creative_task: Task) -> Task:
@@ -75,6 +82,7 @@ class TaskService:
             creative_task.bayer_code = task_dto.bayer_code.strip().lower()
             creative_task.task_name = task_dto.name
             creative_task.url = task_dto.url
+            creative_task.work_url = task_dto.work_url
             creative_task.status = TaskStatus.CREATED
             creative_task.save()
         except (AsanaNotFoundError, AsanaForbiddenError):

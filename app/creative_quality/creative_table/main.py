@@ -2,7 +2,8 @@ from dataclasses import dataclass
 
 from constance import config
 from django.utils import timezone
-from gspread import Client
+from gspread import Client, Spreadsheet, Worksheet
+from gspread.exceptions import WorksheetNotFound
 from gspread.worksheet import JSONResponse
 
 """
@@ -40,11 +41,29 @@ class CreativeDto:
     task_url: str
     status: str
     comment: str
+    link_on_work: str
 
 
 class CreativeGoogleTable:
     def __init__(self, client: Client):
         self.client = client
+
+    def _get_header_row(self) -> list[str]:
+        return [
+            "Дата",
+            "Страна",
+            "Task",
+            "Url",
+            "Ссылка на работу",
+            "Исполнитель",
+            "Баер",
+            "Hook %",
+            "Hold %",
+            "CTR %",
+            "Статус",
+            "Комментарий",
+            "Прим. от дизайнера",
+        ]
 
     def _convert_creative_to_line(self, creative_dto: CreativeDto) -> list[str | int | float]:
         return [
@@ -52,6 +71,7 @@ class CreativeGoogleTable:
             creative_dto.country,
             creative_dto.task_name,
             creative_dto.task_url,
+            creative_dto.link_on_work,
             creative_dto.assignee,
             creative_dto.bayer_code,
             creative_dto.hook,
@@ -61,6 +81,38 @@ class CreativeGoogleTable:
             creative_dto.comment,
         ]
 
+    def _create_new_sheet(self, spreadsheet: Spreadsheet, name: str) -> Worksheet:
+        sheet = spreadsheet.add_worksheet(title=name, rows=100, cols=1)
+        header_row = self._get_header_row()
+        sheet.append_row(header_row)
+        sheet.format(
+            "A1:M1",
+            {
+                "backgroundColor": {"red": 0.7137, "green": 0.8431, "blue": 0.6588},
+                "textFormat": {"bold": True},
+            },
+        )
+        sheet.insert_row([], index=2)
+        sheet.format(
+            "A2:M2",
+            {
+                "backgroundColor": {"red": 1, "green": 1, "blue": 1},
+                "textFormat": {"bold": False},
+            },
+        )
+        return sheet
+
+    def _get_or_create_sheet(self) -> Worksheet:
+        sheet_name = timezone.now().strftime("%m.%y")
+        spreadsheet = self.client.open_by_key(config.CREATIVE_GOOGLE_TABLE_ID)
+        try:
+            sheet = spreadsheet.worksheet(
+                title=sheet_name,
+            )
+        except WorksheetNotFound:
+            sheet = self._create_new_sheet(spreadsheet=spreadsheet, name=sheet_name)
+        return sheet
+
     def add_creatives(self, creatives: list[CreativeDto]) -> JSONResponse:
         """Add line with data to table.
 
@@ -69,8 +121,6 @@ class CreativeGoogleTable:
 
         """
         data_to_send = [self._convert_creative_to_line(creative_dto=creative) for creative in creatives]
-        sheet = self.client.open_by_key(config.CREATIVE_GOOGLE_TABLE_ID).worksheet(
-            title=config.CREATIVE_TABLE_LIST_NAME,
-        )
+        sheet = self._get_or_create_sheet()
         json_response: JSONResponse = sheet.append_rows(values=data_to_send)
         return json_response

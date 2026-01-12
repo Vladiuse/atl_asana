@@ -29,11 +29,6 @@ CONSTANCE_CONFIG = {
         "Айди гугл таблицы для креативов",
         str,
     ),
-    "CREATIVE_TABLE_LIST_NAME": (
-        "Лист1",
-        "Название листа с креативами",
-        str,
-    ),
 }
 
 CONSTANCE_CONFIG_FIELDSETS = {
@@ -44,6 +39,5 @@ CONSTANCE_CONFIG_FIELDSETS = {
         "SEND_REMINDER_TRY_COUNT",
         "TASK_MAX_LOAD_FAILURES",
         "CREATIVE_GOOGLE_TABLE_ID",
-        "CREATIVE_TABLE_LIST_NAME",
     ),
 }

@@ -61,6 +61,7 @@ class SendCreativesToGoogleSheetUseCase:
             ctr=creative_geo_data.ctr,
             task_name=task.task_name,
             task_url=task.url,
+            link_on_work=task.work_url,
             status=creative_geo_data.status,
             comment=creative_geo_data.comment,
             country=creative_geo_data.country.iso_code,
@@ -68,7 +69,7 @@ class SendCreativesToGoogleSheetUseCase:
 
     def _get_client(self) -> Client:
         scopes = ["https://www.googleapis.com/auth/spreadsheets"]
-        credentials = Credentials.from_service_account_file(
+        credentials = Credentials.from_service_account_file(  # type: ignore[no-untyped-call]
             settings.GOOGLE_CREDENTIALS_PATH,
             scopes=scopes,
         )
@@ -103,13 +104,14 @@ class SendCreativesToGoogleSheetUseCase:
     def send_test_creative_to_table(self) -> dict:
         creative_dto = CreativeDto(
             country="XX",
-            assignee="assigne",
+            assignee="assignee",
             bayer_code="XXX",
             hold=1,
             hook=2,
             ctr=3,
             task_name="TASK NAME",
             task_url="url",
+            link_on_work="link_on_work",
             status="STATUS",
             comment="comment text",
         )
