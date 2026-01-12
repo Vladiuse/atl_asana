@@ -7,10 +7,11 @@ from .request_sender import RequestsSender
 
 class TableSender:
     URL = "https://script.google.com/macros/s/AKfycbyH5NQVsa2RLglVoJcQFPvBb4pSV7Er9jDpOntU_6QJN0H1b-5UANeJHCQqAGzL4FRRLg/exec"
-    AVAILABLE_URL = [
+    AVAILABLE_URL = (
         "add_new_asana_task",
         "add_task_tech",
-    ]
+    )
+    INCORRECT_HANDLER_ERROR = f"Incorrect handler, allowed {AVAILABLE_URL}"
 
     def __init__(self, request_sender: RequestsSender):
         self.request_sender = request_sender
@@ -33,7 +34,7 @@ class TableSender:
 
     def send_message(self, handler: str, data: dict) -> str:
         if handler not in self.AVAILABLE_URL:
-            raise TypeError(f"Incorrect handler, allowed {self.AVAILABLE_URL}")
+            raise TypeError(self.INCORRECT_HANDLER_ERROR)
         try:
             return self._send_message(handler=handler, data=data)
         except (HTTPError, RequestException) as error:
@@ -43,4 +44,4 @@ class TableSender:
                 )
             else:
                 msg = f"Не удалось отправить сообщение, {error}"
-            raise TableSenderError(msg)
+            raise TableSenderError(msg) from error
