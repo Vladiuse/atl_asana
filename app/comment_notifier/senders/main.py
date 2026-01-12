@@ -10,7 +10,7 @@ from comment_notifier.collectors.dto import CommentDto
 
 from .abstract import BaseCommentSender
 from .dto import CommentSendMessageResult
-from .exceptions import CantNotify
+from .exceptions import CantNotifyError
 from .registry import register_sender
 
 
@@ -35,7 +35,7 @@ class LogSender(BaseCommentSender):
         task_url = comment_dto.task_data["permalink_url"]
         task_name = comment_dto.task_data["name"]
         message = f"""
-            ℹ️ Log message 
+            ℹ️ Log message
             Task name: {task_name}
             Task url: {task_url}
             Comment:
@@ -55,7 +55,7 @@ class PersonalSender(BaseCommentSender):
         logging.info("Sender: %s", self.__class__.__name__)
         send_messages = []
         for asana_user in comment_dto.mention_users:
-            if asana_user.messenger_code is None:
+            if asana_user.messenger_code == "":
                 reason = f"User {asana_user.user_id} not have message tag to send message"
                 self._send_log_cant_notify(comment_dto=comment_dto, reason=reason)
             else:
@@ -81,16 +81,15 @@ class PersonalSender(BaseCommentSender):
 
 @register_sender(
     name="SourceProjectSender",
-    description="Баерам, менеджерам сообщение в личку, фармерам - в группу фарма, остальные позиции игнорируються",
+    description="Баерам, менеджерам сообщение в личку, фармерам - в группу фарма, остальные позиции игнорируются",
 )
 class SourceProjectSender(BaseCommentSender):
-    """
-    Send personal message for Buyer or manager, if farmer position - send sms to farmers chat.
-    """
+    """Send personal message for Buyer or manager, if farmer position - send sms to farmers chat."""
 
     def _get_notifier_func(self, asana_user: AtlasUser) -> Callable[[AtlasUser, CommentDto], dict | None]:
         if not all([asana_user.messenger_code, asana_user.position]):
-            raise CantNotify(f"User not have position on message code, user {asana_user.user_id}")
+            msg = f"User not have position on message code, user {asana_user.user_id}"
+            raise CantNotifyError(msg)
 
         registry: dict[Position, Callable[[AtlasUser, CommentDto], dict | None]] = {
             Position.FARMER: self._notify_farmer,
@@ -132,7 +131,7 @@ class SourceProjectSender(BaseCommentSender):
         )
 
     def _notify_not_target_position(self, asana_user: AtlasUser, comment_dto: CommentDto) -> None:
-        pass
+        _,_ = asana_user,comment_dto
 
     def notify(self, comment_dto: CommentDto) -> CommentSendMessageResult:
         logging.info("Sender: %s", self.__class__.__name__)
@@ -144,7 +143,7 @@ class SourceProjectSender(BaseCommentSender):
                 message_send_result = notifier_func(asana_user=asana_user, comment_dto=comment_dto)  # type: ignore[arg-type]
                 logging.info("message_send_result: %s", message_send_result)
                 send_messages.append(message_send_result)
-            except CantNotify as error:
+            except CantNotifyError as error:
                 self._send_log_cant_notify(comment_dto=comment_dto, reason=str(error))
         return CommentSendMessageResult(
             is_send=comment_dto.has_mention,
