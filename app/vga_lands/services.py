@@ -14,7 +14,7 @@ def is_task_complete(event: dict, target_section: str) -> bool:
 
 def completed_task_creator(asana_webhook_model: AsanaWebhookRequestData) -> list[CompletedTask]:
     records = []
-    for event in asana_webhook_model.events:
+    for event in asana_webhook_model.payload["events"]:
         if is_task_complete(event=event, target_section=asana_webhook_model.project.complete_section_id):
             completed_task = CompletedTask.objects.create(
                 webhook=asana_webhook_model,
