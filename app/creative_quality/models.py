@@ -61,6 +61,10 @@ class Task(models.Model):
         max_length=254,
         blank=True,
     )
+    work_url = models.CharField(
+        max_length=254,
+        blank=True,
+    )
     created = models.DateTimeField(
         auto_now_add=True,
     )
