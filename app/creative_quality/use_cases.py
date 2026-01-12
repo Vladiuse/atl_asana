@@ -16,9 +16,7 @@ class CreateCreativesForNewTasksUseCase:
         self.creative_service = creative_service
 
     def execute(self) -> dict:
-        """
-        Load task info and create Creative
-        """
+        """Load task info and create Creative."""
         new_tasks = Task.objects.needs_update()
         created_count = 0
         for task in new_tasks:
@@ -29,9 +27,7 @@ class CreateCreativesForNewTasksUseCase:
 
 
 class CreativesOverDueForEstimateUseCase:
-    """
-    Change status of Creative if due estimate time
-    """
+    """Change status of Creative if due estimate time."""
 
     def execute(self) -> dict:
         creatives = Creative.objects.overdue_for_estimate()
@@ -41,9 +37,7 @@ class CreativesOverDueForEstimateUseCase:
 
 
 class SendEstimationMessageUseCase:
-    """
-    Send estimation message if reach send time
-    """
+    """Send estimation message if reach send time."""
 
     def __init__(self, estimation_service: SendEstimationMessageService):
         self.estimation_service = estimation_service
@@ -74,16 +68,18 @@ class SendCreativesToGoogleSheetUseCase:
 
     def _get_client(self) -> Client:
         scopes = ["https://www.googleapis.com/auth/spreadsheets"]
-        creds = Credentials.from_service_account_file(
+        credentials = Credentials.from_service_account_file(
             settings.GOOGLE_CREDENTIALS_PATH,
             scopes=scopes,
         )
-        return gspread.authorize(credentials=creds)
+        return gspread.authorize(credentials=credentials)
 
     def execute(self) -> dict:
-        """
+        """Execute use case.
+
         Raises:
              gspread.GSpreadException
+
         """
         client = self._get_client()
         creatives_to_send = (
@@ -109,9 +105,9 @@ class SendCreativesToGoogleSheetUseCase:
             country="XX",
             assignee="assigne",
             bayer_code="XXX",
-            hold="1",
-            hook="2",
-            ctr="3",
+            hold=1,
+            hook=2,
+            ctr=3,
             task_name="TASK NAME",
             task_url="url",
             status="STATUS",
@@ -128,7 +124,7 @@ class FetchMissingTasksUseCase:
     def __init__(self, creative_project_section_service: CreativeProjectSectionService):
         self.creative_project_section_service = creative_project_section_service
 
-    def execute(self) -> dict:
+    def execute(self) -> dict[str, int]:
         sections = CreativeProjectSection.objects.all()
         new_found = []
         with_errors = []
