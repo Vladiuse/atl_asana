@@ -231,7 +231,7 @@ class LoadAdditionalInfoForProjectIgnoredSection:
 class LoadCommentsAdditionalInfo:
     asana_api_client: AsanaApiClient
 
-    def load(self, queryset: QuerySet[AsanaComment]) -> dict:
+    def load(self, queryset: QuerySet[AsanaComment]) -> dict[str, int]:
         """Load comment info.
 
         Raises:
