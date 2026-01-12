@@ -20,7 +20,7 @@ def creative_model() -> Creative:
     return Creative.objects.create(task=task, status=CreativeStatus.WAITING)
 
 
-@pytest.mark.django_db()
+@pytest.mark.django_db
 class TestCreative:
     @pytest.mark.parametrize(
         ("method_name", "status", "next_reminder_at"),

@@ -7,7 +7,7 @@ from creative_quality.models import CreativeProjectSection
 from creative_quality.services import CreativeProjectSectionService
 
 
-@pytest.mark.django_db()
+@pytest.mark.django_db
 class TestCreativeProjectSectionService:
 
     def test_correct_save(self):

@@ -9,7 +9,7 @@ from .tasks import process_asana_webhook_task
 
 
 class AsanaWebhookView(APIView):
-    def post(self, request: Request, webhook_name: str, format: str | None = None) -> Response:  # noqa: A002
+    def post(self, request: Request, webhook_name: str, format: str | None = None) -> Response:
         _ = format
         webhook = get_object_or_404(AsanaWebhook, name=webhook_name)
         header_secret = request.headers.get("X-Hook-Secret")

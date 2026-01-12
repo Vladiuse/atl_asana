@@ -17,7 +17,7 @@ test(x=a.some)
 
 class Test:
     def __str__(self) -> str:
-        return ""
+        return "1"
 
     @cached_property
     def test(self) -> None:

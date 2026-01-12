@@ -1,10 +1,8 @@
-from pprint import pprint
 import logging
-import json
-from django.conf import settings
+
 from asana.client import AsanaApiClient
-from asana.constants import ATLAS_WORKSPACE_ID
 from asana.repository import AsanaUserRepository
+from django.conf import settings
 
 asana_client = AsanaApiClient(api_key=settings.ASANA_API_KEY)
 repository = AsanaUserRepository(api_client=asana_client)

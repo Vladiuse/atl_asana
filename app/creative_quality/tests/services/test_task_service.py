@@ -70,7 +70,7 @@ def mock_asana_client() -> Mock:
     return Mock(spec=AsanaApiClient)
 
 
-@pytest.mark.django_db()
+@pytest.mark.django_db
 class TestTaskService:
     @pytest.mark.parametrize(("data", "expected"), GET_DTO_TEST_DATA)
     def test_get_task_dto(self, data: dict, expected: TaskService.TaskData, mock_asana_client: Mock):

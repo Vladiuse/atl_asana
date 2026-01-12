@@ -1,5 +1,4 @@
-"""
-ASGI config for atl_asana project.
+"""ASGI config for atl_asana project.
 
 It exposes the ASGI callable as a module-level variable named ``application``.
 

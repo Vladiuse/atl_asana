@@ -3,7 +3,7 @@ import pytest
 from creative_quality.models import Creative, CreativeStatus, Task, TaskStatus
 
 
-@pytest.mark.django_db()
+@pytest.mark.django_db
 class TestTask:
     @pytest.mark.parametrize(
         ("save", "load_failure_count", "status"),

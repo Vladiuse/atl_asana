@@ -18,25 +18,29 @@ ignore = [
   "D106",
   "D107",
   "FA102",
-  "RUF001", # ambiguous-unicode-character-string
+  "RUF001",  # ambiguous-unicode-character-string
   "PERF203", # try-except-in-loop
+  "LOG015", # using global logger
 ]
 
 [tool.ruff.lint.per-file-ignores]
+"**/migrations/*.py" = ["ALL"]
+"manage.py" = ["ALL"]
 "**/views.py" = [
-  "A002" # builtin-argument-shadowing
+  "A002", # builtin-argument-shadowing
 ]
 
 "**/test_*.py" = [
-    "ANN201",
-    "PT027", # self.assertRaises
-    "PLR2004", # Magic value used in comparison
-    "PT004",
-    "S101", # assert find
+  "ANN201",
+  "PT027",   # self.assertRaises
+  "PLR2004", # Magic value used in comparison
+  "PT004",
+  "S101",    # assert find
+  "SLF001",  # Private member accessed
 ]
 
 "**/scripts/*.py" = [
-    "T203", # pprint
+  "T203", # pprint
 ]
 
 [tool.ruff.format]

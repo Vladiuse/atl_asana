@@ -1,5 +1,4 @@
-"""
-WSGI config for atl_asana project.
+"""WSGI config for atl_asana project.
 
 It exposes the WSGI callable as a module-level variable named ``application``.
 

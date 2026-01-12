@@ -34,7 +34,7 @@ class CommentDataCollector:
                 asana_user = self.asana_users_repository.get(membership_id=profile_id)
                 mention_users.append(asana_user)
             except AsanaApiClientError as error:
-                logging.error("AsanaApiClientError: %s", error)
+                logging.exception("AsanaApiClientError: %s", error)
                 profile_url = get_asana_profile_url_by_id(profile_id=profile_id)
                 profile_url_not_found_in_db.append(profile_url)
         profile_urls_mention_map = get_user_profile_url_mention_map(asana_users=AtlasUser.objects.all())

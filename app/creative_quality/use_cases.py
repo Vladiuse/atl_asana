@@ -141,7 +141,8 @@ class FetchMissingTasksUseCase:
                     except IntegrityError:
                         with_errors.append(task_id)
         if any([new_found, with_errors]):
-            message = f"⚠️ {self.__class__.__name__}: Found new_found:{new_found} missing creatives tasks, errors: {with_errors}"
+            message = f"⚠️ {self.__class__.__name__}:\n"
+            f"Found new_found:{new_found} missing creatives tasks, errors: {with_errors}"
             send_log_message_task.delay(message=message)  # type: ignore[attr-defined]
         return {"new_found": new_found, "with_errors": with_errors}
 
@@ -165,7 +166,8 @@ class DataIntegrityCheckUseCase:
         creatives_qs = Creative.objects.filter(status=CreativeStatus.REMINDER_LIMIT_REACHED)
         if creatives_qs.exists():
             creatives_ids = creatives_qs.values_list("pk", flat=True)
-            message = f"⚠️ {self.__class__.__name__}: Found creatives with status {CreativeStatus.REMINDER_LIMIT_REACHED}: {creatives_ids}"
+            message = f"⚠️ {self.__class__.__name__}:\n"
+            f"Found creatives with status {CreativeStatus.REMINDER_LIMIT_REACHED}: {creatives_ids}"
             send_log_message_task.delay(message=message)  # type: ignore[attr-defined]
 
     def execute(self) -> None:

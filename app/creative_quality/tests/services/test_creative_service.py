@@ -56,7 +56,7 @@ def fixed_now(monkeypatch: pytest.MonkeyPatch) -> datetime:
     return fixed
 
 
-@pytest.mark.django_db()
+@pytest.mark.django_db
 class TestCreativeService:
     @pytest.mark.parametrize("task_status", list(TaskStatus))
     def test_create_creative(self, creative_service: CreativeService, task_status: TaskStatus):
@@ -76,7 +76,7 @@ class TestCreativeService:
         assert creative.mark_rated.called
 
 
-@pytest.mark.django_db()
+@pytest.mark.django_db
 class TestSendEstimationMessageService:
     VALID_USER_TAG = "adm"
 

@@ -26,7 +26,7 @@ def country_ru() -> Country:
     return Country.objects.create(name="Russia", iso_code="ru")
 
 
-@pytest.mark.django_db()
+@pytest.mark.django_db
 class TestCreativeView:
     def test_get(self, creative_task: tuple[Creative, Task], client: Client):
         creative, task = creative_task
@@ -52,7 +52,7 @@ class TestCreativeView:
         assert response.status_code == HTTPStatus.NOT_FOUND
 
 
-@pytest.mark.django_db()
+@pytest.mark.django_db
 class TestCreativeEstimateView:
     def test_post(self, creative_task: tuple[Creative, Task], client: Client):
         creative, task = creative_task
@@ -78,7 +78,7 @@ class TestCreativeEstimateView:
         assert response.status_code == HTTPStatus.NOT_FOUND
 
 
-@pytest.mark.django_db()
+@pytest.mark.django_db
 class TestCreativeGeoDataDetailView:
     def test_post(
         self,
@@ -101,13 +101,13 @@ class TestCreativeGeoDataDetailView:
         assert response.status_code == HTTPStatus.FOUND
         geo_data.refresh_from_db()
         assert geo_data.hold == 1
-        assert geo_data.hook == 2  # noqa: PLR2004
-        assert geo_data.ctr == 3  # noqa: PLR2004
+        assert geo_data.hook == 2
+        assert geo_data.ctr == 3
         assert geo_data.country == country_ru
         assert geo_data.status == CreativeGeoDataStatus.ZASHEL.value
 
 
-@pytest.mark.django_db()
+@pytest.mark.django_db
 class TestCreativeGeoDataCreateView:
     def test_post(self, creative_task: tuple[Creative, Task], client: Client, country_ru: Country):
         creative, task = creative_task
@@ -124,13 +124,13 @@ class TestCreativeGeoDataCreateView:
         assert creative.geo_data.count() == 1
         geo_data = CreativeGeoData.objects.get(creative=creative)
         assert geo_data.hold == 1
-        assert geo_data.hook == 2  # noqa: PLR2004
-        assert geo_data.ctr == 3  # noqa: PLR2004
+        assert geo_data.hook == 2
+        assert geo_data.ctr == 3
         assert geo_data.country == country_ru
         assert geo_data.status == CreativeGeoDataStatus.NE_ZASHEL.value
 
 
-@pytest.mark.django_db()
+@pytest.mark.django_db
 class TestCreativeGeoDataDeleteView:
     def test_delete(self, creative_task: tuple[Creative, Task], client: Client, country_by: Country):
         creative, task = creative_task

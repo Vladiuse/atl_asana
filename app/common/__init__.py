@@ -4,8 +4,8 @@ from .message_sender import MessageSender
 from .request_sender import RequestsSender
 
 __all__ = [
-    "TableSender",
+    "MessageRenderer",
     "MessageSender",
     "RequestsSender",
-    "MessageRenderer",
+    "TableSender",
 ]
