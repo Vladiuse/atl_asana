@@ -131,7 +131,7 @@ class SourceProjectSender(BaseCommentSender):
         )
 
     def _notify_not_target_position(self, asana_user: AtlasUser, comment_dto: CommentDto) -> None:
-        _,_ = asana_user,comment_dto
+        _, _ = asana_user, comment_dto
 
     def notify(self, comment_dto: CommentDto) -> CommentSendMessageResult:
         logging.info("Sender: %s", self.__class__.__name__)

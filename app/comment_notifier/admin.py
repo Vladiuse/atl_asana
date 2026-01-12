@@ -44,7 +44,7 @@ class AsanaProjectAdmin(admin.ModelAdmin):
         request: HttpRequest,
         obj: AsanaWebhookProject,
         form: forms.ModelForm,
-        change: bool, # noqa: FBT001
+        change: bool,  # noqa: FBT001
     ) -> None:
         super().save_model(request, obj, form, change)
         service = LoadAdditionalInfoForWebhookProject(asana_api_client=asana_client)

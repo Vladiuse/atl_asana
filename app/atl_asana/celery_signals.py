@@ -1,13 +1,12 @@
-# ruff: noqa
-# mypy: disable-error-code=type-arg
+# ruff: noqa: PLR0913, ANN001, ANN003, ARG001
 from celery.signals import task_failure
 from common import MessageSender, RequestsSender
 
 message_sender = MessageSender(request_sender=RequestsSender())
 
 
-@task_failure.connect
-def notify_in_telegram(
+@task_failure.connect  # type: ignore[misc]
+def notify_in_telegram(  # type: ignore[type-arg, no-untyped-def]]
     sender=None,
     task_id=None,
     exception=None,

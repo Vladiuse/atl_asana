@@ -6,8 +6,6 @@ fixable = ["ALL"]
 select = ["ALL"]
 ignore = [
   "COM819",
-  "ANN101",
-  "ANN102",
   "ANN204",
   "D100",
   "D101",
@@ -20,7 +18,7 @@ ignore = [
   "FA102",
   "RUF001",  # ambiguous-unicode-character-string
   "PERF203", # try-except-in-loop
-  "LOG015", # using global logger
+  "LOG015",  # using global logger
 ]
 
 [tool.ruff.lint.per-file-ignores]
@@ -37,6 +35,8 @@ ignore = [
   "PT004",
   "S101",    # assert find
   "SLF001",  # Private member accessed
+  "DTZ001",  # `datetime.datetime()` called without a `tzinfo` arg
+  "FBT001" # Boolean-typed positional argument in function definition
 ]
 
 "**/scripts/*.py" = [

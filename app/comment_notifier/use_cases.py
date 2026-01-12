@@ -28,7 +28,7 @@ class AsanaCommentNotifierUseCase:
             from message_sender.tasks import send_log_message_task
 
             message = f"🛑 {self.__class__.__name__}\nSet {ProjectNotifySender.__name__} for project: {project}"
-            send_log_message_task.delay(message=message) # type: ignore[attr-defined]
+            send_log_message_task.delay(message=message)  # type: ignore[attr-defined]
             raise NoSenderClassInProjectError(message)
         project_message_sender = SENDERS_REGISTRY[project.message_sender.name].sender
         comment_notifier = AsanaCommentNotifier(
@@ -43,7 +43,7 @@ class AsanaCommentNotifierUseCase:
 class FetchMissingProjectCommentsUseCase:
     asana_api_client: AsanaApiClient
 
-    def execute(self, *,send_messages: bool = True) -> dict[str, int]:
+    def execute(self, *, send_messages: bool = True) -> dict[str, int]:
         from .tasks import notify_new_asana_comments_tasks
 
         """
@@ -72,21 +72,19 @@ class FetchMissingProjectCommentsUseCase:
                         )
                         project_comments_count += 1
                         if send_messages:
-                            notify_new_asana_comments_tasks.apply_async( # type: ignore[attr-defined]
+                            notify_new_asana_comments_tasks.apply_async(  # type: ignore[attr-defined]
                                 args=[comment_data["comment_id"]],
                                 countdown=60,
                             )
                             missing_comments_found.append(comment_data["comment_id"])
                     except IntegrityError as error:
                         logging.warning("IntegrityError save comment: %s", comment_data)
-                        message = (
-                            f"⚠️ {self.__class__.__name__}\nCant save asana comment: {comment_data}\n{error}"
-                        )
-                        send_log_message_task.delay(message=message) # type: ignore[attr-defined]
+                        message = f"⚠️ {self.__class__.__name__}\nCant save asana comment: {comment_data}\n{error}"
+                        send_log_message_task.delay(message=message)  # type: ignore[attr-defined]
                         errors_count += 1
             use_case_result[str(project)] = project_comments_count
         if missing_comments_found:
             message = f"⚠️ Missing comments found: {missing_comments_found}"
-            send_log_message_task.delay(message=message) # type: ignore[attr-defined]
+            send_log_message_task.delay(message=message)  # type: ignore[attr-defined]
         use_case_result["errors_count"] = errors_count
         return use_case_result

@@ -4,7 +4,6 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("creative_quality", "0008_task_is_completed"),
     ]
@@ -64,9 +63,7 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name="task",
             name="assignee_id",
-            field=models.CharField(
-                blank=True, max_length=20, verbose_name="Исполнитель"
-            ),
+            field=models.CharField(blank=True, max_length=20, verbose_name="Исполнитель"),
         ),
         migrations.AlterField(
             model_name="task",

@@ -4,7 +4,6 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("creative_quality", "0009_creative_next_reminder_at_and_more"),
     ]

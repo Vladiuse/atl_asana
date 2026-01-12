@@ -17,7 +17,7 @@ logging.basicConfig(level=logging.INFO)
 
 
 @admin.register(Task)
-class TaskAdmin(admin.ModelAdmin):
+class TaskAdmin(admin.ModelAdmin):  # type: ignore[type-arg]
     list_display = (
         "task_id",
         "task_name",
@@ -40,7 +40,7 @@ class TaskAdmin(admin.ModelAdmin):
 
 
 @admin.register(Creative)
-class CreativeAdmin(admin.ModelAdmin):
+class CreativeAdmin(admin.ModelAdmin):  # type: ignore[type-arg]
     list_display = (
         "id",
         "task",
@@ -64,14 +64,16 @@ class CreativeGeoDataAdmin(admin.ModelAdmin):
     list_display = ("creative", "status", "country", "hook", "hold", "ctr", "short_comment", "created")
     ordering = ("creative",)
 
+    @admin.display(description="Comment")
     def short_comment(self, obj: CreativeGeoData) -> str:
-        return (obj.comment[:50] + "...") if obj.comment and len(obj.comment) > 50 else obj.comment
-
-    short_comment.short_description = "Comment"
+        comment_max_length = 50
+        if obj.comment and len(obj.comment) > comment_max_length:
+            return obj.comment[:comment_max_length] + "..."
+        return obj.comment
 
 
 @admin.register(CreativeProjectSection)
-class CreativeProjectSectionAdmin(admin.ModelAdmin):
+class CreativeProjectSectionAdmin(admin.ModelAdmin):  # type: ignore[type-arg]
     list_display = ("section_id", "section_name", "project_name", "created")
     search_fields = ("section_id", "section_name", "project_name")
     list_filter = ("project_name",)
@@ -82,8 +84,8 @@ class CreativeProjectSectionAdmin(admin.ModelAdmin):
         self,
         request: HttpRequest,
         obj: CreativeProjectSection,
-        form: forms.ModelForm,
-        change: bool,
+        form: forms.ModelForm,  # type: ignore[type-arg]
+        change: bool,  # noqa: FBT001
     ) -> None:
         super().save_model(request, obj, form, change)
         service = CreativeProjectSectionService(asana_api_client=asana_client)
@@ -92,7 +94,7 @@ class CreativeProjectSectionAdmin(admin.ModelAdmin):
         except AsanaApiClientError:
             self.message_user(
                 request,
-                message=f"Не удаллось обновить данные по секции: {obj}",
+                message=f"Не удалось обновить данные по секции: {obj}",
                 level=messages.ERROR,
             )
 
@@ -107,7 +109,7 @@ class CreativeProjectSectionAdmin(admin.ModelAdmin):
             except AsanaApiClientError:
                 self.message_user(
                     request,
-                    message=f"Не удаллось обновить данные по секции: {section}",
+                    message=f"Не удалось обновить данные по секции: {section}",
                     level=messages.ERROR,
                 )
-        self.message_user(request, message=f"Обновленно секций: {success_updated}")
+        self.message_user(request, message=f"Обновлено секций: {success_updated}")

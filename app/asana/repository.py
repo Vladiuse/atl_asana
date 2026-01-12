@@ -80,14 +80,15 @@ class AsanaUserRepository:
             else:
                 user = AtlasUser.objects.get(user_id=user_id)
                 logging.info("Get user from DB by user_id")
-            return user
         except AtlasUser.DoesNotExist:
             if membership_id is not None:
                 logging.info("Try load user from Asana by membership_id")
                 return self._create_by_membership_id(membership_id=membership_id)
             logging.info("Try load user from Asana by user_id")
-            assert user_id is not None
+            assert user_id is not None  # noqa: S101
             return self._create_by_user_id(user_id=user_id)
+        else:
+            return user
 
     def update_all(self) -> dict[str, int]:
         """Update all users.

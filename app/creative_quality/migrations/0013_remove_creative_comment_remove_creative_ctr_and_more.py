@@ -5,7 +5,6 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("creative_quality", "0012_rename_crt_creative_ctr"),
     ]

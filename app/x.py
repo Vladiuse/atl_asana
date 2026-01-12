@@ -22,4 +22,3 @@ class Test:
     @cached_property
     def test(self) -> None:
         pass
-

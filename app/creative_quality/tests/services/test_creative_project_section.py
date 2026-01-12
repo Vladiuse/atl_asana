@@ -9,7 +9,6 @@ from creative_quality.services import CreativeProjectSectionService
 
 @pytest.mark.django_db
 class TestCreativeProjectSectionService:
-
     def test_correct_save(self):
         mock_sana = Mock(spec=AsanaApiClient)
         mock_sana.get_section.return_value = {

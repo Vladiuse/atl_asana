@@ -6,7 +6,7 @@ from django import forms
 from .models import Creative, CreativeGeoData, CreativeGeoDataStatus
 
 
-class CreativeGeoDataForm(forms.ModelForm): # type: ignore[type-arg]
+class CreativeGeoDataForm(forms.ModelForm):  # type: ignore[type-arg]
     country = forms.ModelChoiceField(
         queryset=Country.objects.all(),
         required=True,

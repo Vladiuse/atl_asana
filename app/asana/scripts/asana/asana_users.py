@@ -11,4 +11,4 @@ logging.basicConfig(level=logging.INFO)
 
 def run() -> None:
     repository.update_all()
-    # repository.create_by_membership_id(membership_id=1210393628043137)
+

@@ -6,6 +6,6 @@ from asana.webhook_handlers.synchronizer import WebhookHandlerRegistrySynchroniz
 class Command(BaseCommand):
     help = "Synchronize webhook handlers registry with database"
 
-    def handle(self, *args, **options) -> None:  # noqa: ARG002
+    def handle(self, *args, **options) -> None:  # noqa: ANN002, ANN003, ARG002
         result = WebhookHandlerRegistrySynchronizer().synchronize()
         self.stdout.write(f"Webhook handlers sync result: {result}")

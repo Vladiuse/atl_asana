@@ -103,7 +103,6 @@ def get_sections(project_id):
     print(res.status_code)
     pprint(res.json())
 
-
     # {
     #     "data": [
     #         {"gid": "1210393628043122", "name": "Общий пул работ, подготовка", "resource_type": "section"},
@@ -133,12 +132,15 @@ def change_webhook():
             data = res.json()
             json.dump(data, file, indent=4)
 
+
 def get_task(task_id: int):
     url = f"https://app.asana.com/api/1.0/tasks/{task_id}"
-    res = requests.get(url, headers=headers,)
+    res = requests.get(
+        url,
+        headers=headers,
+    )
     print(res.status_code)
     pprint(res.json())
-
 
 
 def send_post_to_table():
@@ -154,6 +156,7 @@ def send_post_to_table():
     except:
         print(res.text)
 
+
 def get_story(story_id: int):
     url = f"https://app.asana.com/api/1.0/stories/{story_id}"
     res = requests.get(url, headers=headers)
@@ -167,15 +170,17 @@ def get_workspace_users(workspace: int):
     print(res.status_code)
     print(res.text)
 
+
 def get_workspace(workspace: int):
     url = f"https://app.asana.com/api/1.0/workspaces/{workspace}"
     res = requests.get(url, headers=headers)
     print(res.status_code)
     print(res.text)
 
+
 def get_user(user: int):
     url = f"https://app.asana.com/api/1.0/users/{user}"
-    params={
+    params = {
         "opt_fields": ["photo"],
     }
     res = requests.get(url, headers=headers)

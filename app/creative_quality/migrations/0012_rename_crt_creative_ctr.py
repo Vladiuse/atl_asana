@@ -4,7 +4,6 @@ from django.db import migrations
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("creative_quality", "0011_creative_gsheet_sent"),
     ]

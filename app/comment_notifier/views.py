@@ -12,7 +12,7 @@ from .tasks import process_asana_new_comments_task
 
 
 class AsanaWebhookView(APIView):
-    def post(self, request: Request, project_name: str, format: bool | None=None) -> Response:
+    def post(self, request: Request, project_name: str, format: bool | None = None) -> Response:
         _ = format
         project = get_object_or_404(AsanaWebhookProject, name=project_name)
         header_secret = request.headers.get("X-Hook-Secret")
@@ -29,7 +29,7 @@ class AsanaWebhookView(APIView):
             payload=dict(request.data),
             project=project,
         )
-        process_asana_new_comments_task.delay(asana_webhook_id=webhook.pk) # type: ignore[attr-defined]
+        process_asana_new_comments_task.delay(asana_webhook_id=webhook.pk)  # type: ignore[attr-defined]
         data = {
             "success": True,
             "method": request.method,
@@ -51,12 +51,12 @@ class AsanaWebhookView(APIView):
         return response
 
 
-class AsanaWebhookRequestDataView(ModelViewSet): # type: ignore[type-arg]
+class AsanaWebhookRequestDataView(ModelViewSet):  # type: ignore[type-arg]
     queryset = AsanaWebhookRequestData.objects.order_by("-pk")
     serializer_class = AsanaWebhookRequestDataSerializer
 
     @action(detail=True)
-    def headers(self, request: Request, pk: int) -> Response: # type: ignore[override]
+    def headers(self, request: Request, pk: int) -> Response:  # type: ignore[override]
         _ = pk
         _ = request
         asana_webhook = self.get_object()
