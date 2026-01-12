@@ -5,6 +5,7 @@ from django.db import models
 
 from .constants import AsanaResourceType, Position
 from .utils import get_asana_profile_url_by_id
+from .constants import ATLAS_WORKSPACE_ID
 
 
 class AtlasUser(models.Model):
@@ -34,7 +35,7 @@ class AtlasUser(models.Model):
 
     @property
     def profile_url(self) -> str:
-        return get_asana_profile_url_by_id(profile_id=self.membership_id)
+        return get_asana_profile_url_by_id(profile_id=self.membership_id, workspace_id=ATLAS_WORKSPACE_ID)
 
 
 class AsanaWebhook(models.Model):
