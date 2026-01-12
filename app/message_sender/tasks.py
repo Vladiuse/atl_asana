@@ -1,3 +1,4 @@
+# mypy: disable-error-code=type-arg
 from celery import Task, shared_task
 from common import MessageSender, RequestsSender
 from common.message_sender import UserTag
