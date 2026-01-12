@@ -1,6 +1,7 @@
 from django.shortcuts import get_object_or_404
 from rest_framework import status
 from rest_framework.decorators import action
+from rest_framework.request import Request
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework.viewsets import ModelViewSet
@@ -11,7 +12,8 @@ from .tasks import process_asana_new_comments_task
 
 
 class AsanaWebhookView(APIView):
-    def post(self, request, project_name, format=None):
+    def post(self, request: Request, project_name: str, format: bool | None=None) -> Response:
+        _ = format
         project = get_object_or_404(AsanaWebhookProject, name=project_name)
         header_secret = request.headers.get("X-Hook-Secret")
         if header_secret and project.secret == "":
@@ -27,7 +29,7 @@ class AsanaWebhookView(APIView):
             payload=dict(request.data),
             project=project,
         )
-        process_asana_new_comments_task.delay(asana_webhook_id=webhook.pk)
+        process_asana_new_comments_task.delay(asana_webhook_id=webhook.pk) # type: ignore[attr-defined]
         data = {
             "success": True,
             "method": request.method,
@@ -49,16 +51,20 @@ class AsanaWebhookView(APIView):
         return response
 
 
-class AsanaWebhookRequestDataView(ModelViewSet):
+class AsanaWebhookRequestDataView(ModelViewSet): # type: ignore[type-arg]
     queryset = AsanaWebhookRequestData.objects.order_by("-pk")
     serializer_class = AsanaWebhookRequestDataSerializer
 
     @action(detail=True)
-    def headers(self, request, pk):
+    def headers(self, request: Request, pk: int) -> Response: # type: ignore[override]
+        _ = pk
+        _ = request
         asana_webhook = self.get_object()
         return Response(data=asana_webhook.headers)
 
     @action(detail=True)
-    def payload(self, request, pk):
+    def payload(self, request: Request, pk: int) -> Response:
+        _ = pk
+        _ = request
         asana_webhook = self.get_object()
         return Response(data=asana_webhook.payload)
