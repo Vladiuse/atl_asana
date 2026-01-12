@@ -1,6 +1,5 @@
 import re
 
-
 USER_PROFILE_LINK_PATTERN = re.compile(r"https://app\.asana\.com/\d+/profile/(\d+)")
 
 
