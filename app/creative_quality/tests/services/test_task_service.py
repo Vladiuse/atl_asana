@@ -13,7 +13,7 @@ FIELD_NAME = "TEST_FIELD"
 
 @pytest.fixture(autouse=True)
 def patch_constance():
-    with override_config(DESIGN_TASK_BAER_CUSTOM_FIELD_NAME=FIELD_NAME):
+    with override_config(DESIGN_TASK_BAYER_CUSTOM_FIELD_NAME=FIELD_NAME):
         yield
 
 

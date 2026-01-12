@@ -57,7 +57,7 @@ class TaskService:
         url = task_data["permalink_url"]
         bayer_code = ""
         for field in task_data.get("custom_fields", []):
-            if field["name"] == config.DESIGN_TASK_BAER_CUSTOM_FIELD_NAME:
+            if field["name"] == config.DESIGN_TASK_BAYER_CUSTOM_FIELD_NAME:
                 bayer_code = field.get("text_value", "")
                 break
         return self.TaskData(
