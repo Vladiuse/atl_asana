@@ -2,7 +2,7 @@ from enum import Enum
 
 from django.db import models
 
-ATLAS_WORKSPACE_ID = 1167322787740055
+ATLAS_WORKSPACE_ID = "1167322787740055"
 
 
 class AtlasProject(Enum):
