@@ -67,13 +67,13 @@ class MessageSender:
     DOMAIN_HANDLER = "domain_check"
     KVA_USER = "kva_test"
     FARM_GROUP = "asana_farm_comments"
-    ALLOWED_HANDLERS = [DOMAIN_HANDLER, KVA_USER, FARM_GROUP]
+    ALLOWED_HANDLERS = (DOMAIN_HANDLER, KVA_USER, FARM_GROUP)
 
     def __init__(self, request_sender: RequestsSender):
         self.request_sender = request_sender
 
     @property
-    def _auth_headers(self) -> dict:
+    def _auth_headers(self) -> dict[str, str]:
         return {"Authorization": f"Bearer {self.API_KEY}"}
 
     @retry(
@@ -95,7 +95,8 @@ class MessageSender:
 
     def send_message(self, handler: str, message: str) -> str:
         if handler not in self.ALLOWED_HANDLERS:
-            raise TypeError(f"Incorrect handler, allowed {self.ALLOWED_HANDLERS}")
+            msg = f"Incorrect handler, allowed {self.ALLOWED_HANDLERS}"
+            raise TypeError(msg)
         try:
             return self._send_message(handler=handler, message=message)
         except (HTTPError, RequestException) as error:
@@ -105,7 +106,7 @@ class MessageSender:
                 )
             else:
                 msg = f"Не удалось отправить сообщение, {error}"
-            raise MessageSenderError(msg)
+            raise MessageSenderError(msg) from error
 
     def send_message_to_user(self, message: str, user_tags: list[UserTag]) -> dict:
         data = {
@@ -120,9 +121,8 @@ class MessageSender:
         )
         data = json.loads(response)
         if len(data["users"]) != len(user_tags):
-            raise MessageSenderError(
-                f"Число тегов юзеров и отправленных сообщений не совпадает. {user_tags}, ответ {data}",
-            )
+            msg = f"Число тегов юзеров и отправленных сообщений не совпадает. {user_tags}, ответ {data}"
+            raise MessageSenderError(msg)
         return data
 
     def send_log_message(self, message: str) -> str:
