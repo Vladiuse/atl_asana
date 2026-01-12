@@ -24,7 +24,7 @@ ignore = [
 
 [tool.ruff.lint.per-file-ignores]
 "**/views.py" = [
-    "ARG002",  # args
+  "A002" # builtin-argument-shadowing
 ]
 
 "**/test_*.py" = [
