@@ -140,7 +140,7 @@ class ProjectCommentsGenerator:
         """
         ignored_sections_ids = [ignored_section.section_id for ignored_section in project.ignored_sections.all()]
         sections = self.asana_api_client.get_project_sections(project_id=project.project_id)
-        return [section_data["gid"] for section_data in sections if section_data["gid"] not in ignored_sections_ids]
+        return [section_data for section_data in sections if section_data["gid"] not in ignored_sections_ids]
 
     def generate(self, project: AsanaWebhookProject) -> Generator[dict, None, None]:
         """Return comments from project sections.
