@@ -1,8 +1,8 @@
 from dataclasses import dataclass
 
 
-@dataclass
-class User:
+@dataclass(frozen=True)
+class UserData:
     name: str
     email: str | None
     role: str
