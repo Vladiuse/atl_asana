@@ -2,12 +2,12 @@ import logging
 
 from asana.client import AsanaApiClient
 from asana.client.exception import AsanaApiClientError, AsanaForbiddenError, AsanaNotFoundError
+from asana.constants import ATLAS_WORKSPACE_ID
 from asana.models import AtlasUser
 from asana.repository import AsanaUserRepository
 from asana.services import AsanaCommentPrettifier, get_user_profile_url_mention_map
 from asana.utils import get_asana_profile_url_by_id
 
-from app.asana.constants import ATLAS_WORKSPACE_ID
 from comment_notifier.models import AsanaComment
 from comment_notifier.utils import extract_user_profile_id_from_text
 

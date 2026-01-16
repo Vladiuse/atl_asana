@@ -6,9 +6,9 @@ from django.db.models import QuerySet
 from django.http import HttpRequest
 from django.utils.html import format_html
 
-from app.asana.constants import ATLAS_WORKSPACE_ID
 from asana.client import AsanaApiClient
 from asana.client.exception import AsanaApiClientError
+from asana.constants import ATLAS_WORKSPACE_ID
 from asana.repository import AsanaUserRepository
 from asana.utils import get_asana_profile_url_by_id
 
