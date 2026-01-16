@@ -7,7 +7,7 @@ import requests
 from requests.exceptions import HTTPError, RequestException
 
 from .exceptions import MessageSenderError
-from .models import User
+from .models import UserData
 
 ReturnType = TypeVar("ReturnType")
 
@@ -123,7 +123,7 @@ class MessageSender:
     def send_log_message(self, message: str) -> dict[str, str | list[str]]:
         return self.send_message(handler=Handlers.KVA_USER, message=message)
 
-    def users(self) -> list[User]:
+    def users(self) -> list[UserData]:
         url = f"{self.base_url}/users"
         response = self.session.get(url)
         response.raise_for_status()
@@ -133,7 +133,7 @@ class MessageSender:
             raise MessageSenderError(message=msg, response=response)
         users = []
         for user_data in response_data:
-            user = User(
+            user = UserData(
                 name=user_data["name"],
                 email=user_data.get("email"),
                 role=user_data["role"],
