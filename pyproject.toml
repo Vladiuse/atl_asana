@@ -19,6 +19,8 @@ ignore = [
   "RUF001",  # ambiguous-unicode-character-string
   "PERF203", # try-except-in-loop
   "LOG015",  # using global logger
+  "D203",    # incorrect-blank-line-before-class
+  "D213",    # multi-line-summary-second-line
 ]
 
 [tool.ruff.lint.per-file-ignores]
@@ -36,7 +38,7 @@ ignore = [
   "S101",    # assert find
   "SLF001",  # Private member accessed
   "DTZ001",  # `datetime.datetime()` called without a `tzinfo` arg
-  "FBT001" # Boolean-typed positional argument in function definition
+  "FBT001",  # Boolean-typed positional argument in function definition
 ]
 
 "**/scripts/*.py" = [
