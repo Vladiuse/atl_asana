@@ -6,6 +6,7 @@ from django.db.models import QuerySet
 from django.http import HttpRequest
 from django.utils.html import format_html
 
+from app.asana.constants import ATLAS_WORKSPACE_ID
 from asana.client import AsanaApiClient
 from asana.client.exception import AsanaApiClientError
 from asana.repository import AsanaUserRepository
@@ -46,7 +47,7 @@ class AtlasUserAdmin(admin.ModelAdmin):
 
     @admin.display(description="Профиль")
     def asana_profile_link(self, obj: AtlasUser) -> str:
-        profile_link = get_asana_profile_url_by_id(profile_id=obj.membership_id)
+        profile_link = get_asana_profile_url_by_id(profile_id=obj.membership_id, workspace_id=ATLAS_WORKSPACE_ID)
         return format_html(
             '<a href="{}" target="_blank">Открыть</a>',
             profile_link,
