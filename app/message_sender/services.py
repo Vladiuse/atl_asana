@@ -9,14 +9,14 @@ class UserService:
         self.message_sender_client = message_sender_client
 
     def update_all_users(self) -> dict[str, int]:
-        users = self.message_sender_client.users()  # list[UserDTO] или аналог
+        users = self.message_sender_client.users()
         created_count = 0
         telegrams = [user.telegram for user in users]
         with transaction.atomic():
             deleted_count, deleted_details = AtlasUser.objects.exclude(telegram__in=telegrams).delete()
             for user in users:
                 obj, created = AtlasUser.objects.update_or_create(
-                    telegram=user.telegram,  # неизменяемое поле, фильтр поиска
+                    telegram=user.telegram,
                     defaults={
                         "name": user.name,
                         "email": user.email or "",
