@@ -31,7 +31,6 @@ ignore = [
 ]
 
 "**/test_*.py" = [
-  "ANN201",
   "PT027",   # self.assertRaises
   "PLR2004", # Magic value used in comparison
   "PT004",
