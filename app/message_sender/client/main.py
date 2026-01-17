@@ -6,7 +6,7 @@ from typing import Any, Callable, NoReturn, TypeVar
 import requests
 from requests.exceptions import HTTPError, RequestException
 
-from .exceptions import MessageSenderError
+from .exceptions import AtlasMessageSenderError
 from .models import UserData
 
 ReturnType = TypeVar("ReturnType")
@@ -46,13 +46,13 @@ class AtlasMessageSender:
 
     def _handle_error(self, handler_name: str, error: Exception) -> NoReturn:
         if isinstance(error, HTTPError):
-            msg = f"{MessageSenderError.__class__.__name__} {handler_name}: {error.response.text}"
-            raise MessageSenderError(msg, response=error.response) from error
+            msg = f"{AtlasMessageSenderError.__class__.__name__} {handler_name}: {error.response.text}"
+            raise AtlasMessageSenderError(msg, response=error.response) from error
         if isinstance(error, json.JSONDecodeError):
-            msg = f"{MessageSenderError.__class__.__name__} {handler_name}: Ошибка разбора JSON ответа"
+            msg = f"{AtlasMessageSenderError.__class__.__name__} {handler_name}: Ошибка разбора JSON ответа"
         else:
-            msg = f"{MessageSenderError.__class__.__name__} {handler_name}: Ошибка запроса клиента, {error}"
-        raise MessageSenderError(msg, response=None) from error
+            msg = f"{AtlasMessageSenderError.__class__.__name__} {handler_name}: Ошибка запроса клиента, {error}"
+        raise AtlasMessageSenderError(msg, response=None) from error
 
     @cached_property
     def base_url(self) -> str:
@@ -102,7 +102,7 @@ class AtlasMessageSender:
         response_data = json.loads(response.text)
         if require_all and len(response_data["users"]) != len(user_tags):
             msg = f"Число тегов юзеров и отправленных сообщений не совпадает. {user_tags}, ответ {data}"
-            raise MessageSenderError(msg)
+            raise AtlasMessageSenderError(msg)
         return response_data
 
     def send_message_to_user(
@@ -130,7 +130,7 @@ class AtlasMessageSender:
         response_data = response.json().get("result", {}).get("users")
         if response_data is None:
             msg = "Not found users data in response"
-            raise MessageSenderError(message=msg, response=response)
+            raise AtlasMessageSenderError(message=msg, response=response)
         users = []
         for user_data in response_data:
             user = UserData(

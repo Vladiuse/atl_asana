@@ -1,7 +1,7 @@
 from requests import Response
 
 
-class MessageSenderError(Exception):
+class AtlasMessageSenderError(Exception):
     """Common client error."""
 
     def __init__(self, message: str, response: Response | None = None) -> None:
