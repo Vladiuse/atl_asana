@@ -1,12 +1,16 @@
 # ruff: noqa: PLR0913, ANN001, ANN003, ARG001
 from celery.signals import task_failure
-from common import MessageSender, RequestsSender
+from django.conf import settings
+from message_sender.client import MessageSender
 
-message_sender = MessageSender(request_sender=RequestsSender())
+message_sender = MessageSender(
+    host=settings.MESSAGE_SENDER_HOST,
+    api_key=settings.DOMAIN_MESSAGE_API_KEY,
+)
 
 
 @task_failure.connect  # type: ignore[misc]
-def notify_in_telegram(  # type: ignore[type-arg, no-untyped-def]]
+def notify_in_telegram(  # type: ignore[no-untyped-def]
     sender=None,
     task_id=None,
     exception=None,
