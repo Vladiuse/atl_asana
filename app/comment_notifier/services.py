@@ -8,10 +8,10 @@ from asana.client import AsanaApiClient
 from asana.client.exception import AsanaApiClientError
 from asana.models import AtlasUser
 from asana.services import AsanaCommentPrettifier, get_user_profile_url_mention_map
-from common import MessageSender
 from common.utils import normalize_multiline
 from django.db import transaction
 from django.db.models import Q, QuerySet
+from message_sender.client import AtlasMessageSender
 
 from .collectors.comment_data import CommentDataCollector
 from .collectors.dto import CommentDto
@@ -76,7 +76,7 @@ class AsanaCommentNotifier:
     def __init__(
         self,
         asana_api_client: AsanaApiClient,
-        message_sender: MessageSender,
+        message_sender: AtlasMessageSender,
         comment_notifier: BaseCommentSender,
     ):
         self.asana_api_client = asana_api_client

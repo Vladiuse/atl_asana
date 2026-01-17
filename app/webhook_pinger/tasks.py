@@ -1,12 +1,15 @@
 # mypy: disable-error-code=type-arg
 from asana.client import AsanaApiClient
 from celery import Task, shared_task
-from common import MessageSender, RequestsSender
 from django.conf import settings
+from message_sender.client import AtlasMessageSender
 
 from .use_cases import PingWebhooksUseCase
 
-message_sender = MessageSender(request_sender=RequestsSender())
+message_sender = AtlasMessageSender(
+    host=settings.MESSAGE_SENDER_HOST,
+    api_key=settings.DOMAIN_MESSAGE_API_KEY,
+)
 asana_client = AsanaApiClient(api_key=settings.ASANA_API_KEY)
 
 
@@ -14,7 +17,7 @@ asana_client = AsanaApiClient(api_key=settings.ASANA_API_KEY)
 def ping_asana_webhook(self: Task) -> dict | None:
     use_case = PingWebhooksUseCase(
         asana_api_client=asana_client,
-        message_sender=MessageSender(request_sender=RequestsSender()),
+        message_sender=message_sender,
     )
     try:
         return use_case.execute()

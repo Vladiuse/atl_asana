@@ -1,14 +1,16 @@
+from collections.abc import Generator
 from datetime import datetime, timedelta
+from typing import Any
 from unittest.mock import Mock
 
 import pytest
 from asana.client import AsanaApiClient
-from common import MessageRenderer, MessageSender
-from common.exception import MessageSenderError
-from common.message_sender import UserTag
+from common import MessageRenderer
 from constance import config
 from constance.test import override_config
 from django.utils import timezone
+from message_sender.client import AtlasMessageSender
+from message_sender.client.exceptions import AtlasMessageSenderError
 
 from creative_quality.models import Creative, Task, TaskStatus
 from creative_quality.services import (
@@ -21,7 +23,7 @@ SEND_REMINDER_TRY_COUNT = 3
 
 
 @pytest.fixture(autouse=True)
-def patch_constance():
+def patch_constance() -> Generator[Any, Any, Any]:
     with override_config(SEND_REMINDER_TRY_COUNT=SEND_REMINDER_TRY_COUNT):
         yield
 
@@ -38,7 +40,7 @@ def creative_service() -> CreativeService:
 @pytest.fixture
 def send_estimate_message_service() -> SendEstimationMessageService:
     return SendEstimationMessageService(
-        message_sender=Mock(spec=MessageSender),
+        message_sender=Mock(spec=AtlasMessageSender),
         message_renderer=MessageRenderer(),
     )
 
@@ -59,7 +61,7 @@ def fixed_now(monkeypatch: pytest.MonkeyPatch) -> datetime:
 @pytest.mark.django_db
 class TestCreativeService:
     @pytest.mark.parametrize("task_status", list(TaskStatus))
-    def test_create_creative(self, creative_service: CreativeService, task_status: TaskStatus):
+    def test_create_creative(self, creative_service: CreativeService, task_status: TaskStatus) -> None:
         task = Task.objects.create(task_id="x", status=task_status)
         creative_service.task_service.update.return_value = task
         creative_service.create_creative(creative_task=task)
@@ -70,7 +72,7 @@ class TestCreativeService:
             assert Creative.objects.count() == 0
             assert not Creative.objects.filter(task=task).exists()
 
-    def test_estimate_creative(self, creative_service: CreativeService):
+    def test_estimate_creative(self, creative_service: CreativeService) -> None:
         creative = Mock(spec=Creative)
         creative_service.end_estimate(creative=creative)
         assert creative.mark_rated.called
@@ -88,7 +90,7 @@ class TestSendEstimationMessageService:
         fixed_now: datetime,
         reminder_failure_count_start_value: int,
         bayer_code: str,
-    ):
+    ) -> None:
         creative = Mock(spec=Creative)
         creative.task.bayer_code = bayer_code
         creative.reminder_failure_count = reminder_failure_count_start_value
@@ -110,11 +112,11 @@ class TestSendEstimationMessageService:
         send_estimate_message_service: SendEstimationMessageService,
         fixed_now: datetime,
         reminder_failure_count_start_value: int,
-    ):
+    ) -> None:
         creative = Mock(spec=Creative)
         creative.task.bayer_code = self.VALID_USER_TAG
         creative.reminder_fail_reason = ""
-        send_estimate_message_service.message_sender.send_message_to_user.side_effect = MessageSenderError("boom")
+        send_estimate_message_service.message_sender.send_message_to_user.side_effect = AtlasMessageSenderError("boom")
         creative.reminder_failure_count = reminder_failure_count_start_value
         send_estimate_message_service.send_reminder(creative=creative)
         if reminder_failure_count_start_value == 0:
@@ -133,7 +135,7 @@ class TestSendEstimationMessageService:
         send_estimate_message_service: SendEstimationMessageService,
         fixed_now: datetime,
         reminder_success_count_start_value: int,
-    ):
+    ) -> None:
         creative = Mock(spec=Creative)
         creative.task.bayer_code = self.VALID_USER_TAG
         creative.reminder_fail_reason = ""
@@ -149,7 +151,7 @@ class TestSendEstimationMessageService:
         creative.save.assert_called()
         send_estimate_message_service.message_sender.send_message_to_user.assert_called()
 
-    def test_message(self, send_estimate_message_service: SendEstimationMessageService):
+    def test_message(self, send_estimate_message_service: SendEstimationMessageService) -> None:
         task_name = "TASK_NAME"
         url = "https://URL.com"
         send_estimate_message_service._get_estimation_url = Mock(return_value=url)
@@ -160,6 +162,6 @@ class TestSendEstimationMessageService:
         send_estimate_message_service.send_reminder(creative=creative)
         send_estimate_message_service.message_sender.send_message_to_user.assert_called_once()
         _, kwargs = send_estimate_message_service.message_sender.send_message_to_user.call_args
-        assert kwargs["user_tags"] == [UserTag(self.VALID_USER_TAG)]
+        assert kwargs["user_tags"] == [self.VALID_USER_TAG]
         assert task_name in kwargs["message"]
         assert url in kwargs["message"]

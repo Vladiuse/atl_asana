@@ -3,8 +3,6 @@ from typing import Callable
 
 from asana.constants import Position
 from asana.models import AtlasUser
-from common import MessageSender
-from common.message_sender import UserTag
 
 from comment_notifier.collectors.dto import CommentDto
 
@@ -69,7 +67,7 @@ class PersonalSender(BaseCommentSender):
                     """
                 message = self._normalize_message(message)
                 send_result = self.message_sender.send_message_to_user(
-                    user_tags=[UserTag(asana_user.messenger_code)],
+                    user_tag=asana_user.messenger_code,
                     message=message,
                 )
                 send_messages.append(send_result)
@@ -93,8 +91,8 @@ class SourceProjectSender(BaseCommentSender):
 
         registry: dict[Position, Callable[[AtlasUser, CommentDto], dict | None]] = {
             Position.FARMER: self._notify_farmer,
-            Position.MANAGER: self._notify_baer_or_manager,
-            Position.BUYER: self._notify_baer_or_manager,
+            Position.MANAGER: self._notify_bayer_or_manager,
+            Position.BUYER: self._notify_bayer_or_manager,
         }
 
         return registry.get(asana_user.position, self._notify_not_target_position)
@@ -115,7 +113,7 @@ class SourceProjectSender(BaseCommentSender):
             message=message,
         )
 
-    def _notify_baer_or_manager(self, asana_user: AtlasUser, comment_dto: CommentDto) -> dict:
+    def _notify_bayer_or_manager(self, asana_user: AtlasUser, comment_dto: CommentDto) -> dict:
         task_name = comment_dto.task_data["name"]
         task_url = comment_dto.task_data["permalink_url"]
         message = f"""
@@ -126,7 +124,7 @@ class SourceProjectSender(BaseCommentSender):
         """
         message = self._normalize_message(message)
         return self.message_sender.send_message_to_user(
-            user_tags=[UserTag(asana_user.messenger_code)],
+            user_tag=asana_user.messenger_code,
             message=message,
         )
 

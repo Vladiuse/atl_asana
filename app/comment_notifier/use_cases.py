@@ -2,8 +2,8 @@ import logging
 from dataclasses import dataclass
 
 from asana.client import AsanaApiClient
-from common import MessageSender
 from django.db import IntegrityError
+from message_sender.client import AtlasMessageSender
 from message_sender.tasks import send_log_message_task
 
 from .exceptions import NoSenderClassInProjectError
@@ -15,7 +15,7 @@ from .services import AsanaCommentNotifier, ProjectCommentsGenerator
 @dataclass
 class AsanaCommentNotifierUseCase:
     asana_api_client: AsanaApiClient
-    message_sender: MessageSender
+    message_sender: AtlasMessageSender
 
     def execute(self, comment_id: str) -> None:
         logging.info("AsanaCommentNotifier comment_id: %s", comment_id)

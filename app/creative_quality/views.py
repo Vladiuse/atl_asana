@@ -1,5 +1,4 @@
 from asana.client import AsanaApiClient
-from common import MessageSender, RequestsSender
 from django.conf import settings
 from django.http import HttpRequest, HttpResponse
 from django.shortcuts import get_object_or_404, redirect, render
@@ -11,7 +10,6 @@ from .forms import CreativeGeoDataForm
 from .services import CreativeService
 
 asana_api_client = AsanaApiClient(api_key=settings.ASANA_API_KEY)
-message_sender = MessageSender(request_sender=RequestsSender())
 
 
 class CreativeDetailView(View):

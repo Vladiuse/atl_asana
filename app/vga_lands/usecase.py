@@ -1,15 +1,15 @@
-from common import MessageSender, RequestsSender, TableSender
+from common import RequestsSender, TableSender
 from common.exception import TableSenderError
+from message_sender.tasks import send_log_message_task
 
 from .models import AsanaWebhookRequestData, CompletedTask
 from .services import completed_task_creator
 
-message_sender = MessageSender(request_sender=RequestsSender())
 table_sender = TableSender(request_sender=RequestsSender())
 
 
 class ProcessAsanaWebhookUseCase:
-    def execute(self, asana_webhook: AsanaWebhookRequestData) -> list:
+    def execute(self, asana_webhook: AsanaWebhookRequestData) -> list[CompletedTask]:
         created: list[CompletedTask] = completed_task_creator(asana_webhook_model=asana_webhook)
         asana_webhook.is_target_event = len(created) != 0
         asana_webhook.save()
@@ -24,10 +24,9 @@ class ProcessAsanaWebhookUseCase:
                 completed_task.is_send_in_table = True
                 completed_task.save()
             except TableSenderError as error:
-                message_sender.send_message(handler="kva_test", message=str(error))
                 completed_task.is_send_in_table = False
                 completed_task.error_text = str(error)
                 completed_task.save()
                 message = f"Error add task {completed_task.task_id}: {error}"
-                message_sender.send_message(handler="kva_test", message=message)
+                send_log_message_task.delay(message=message)  # type: ignore[attr-defined]
         return created

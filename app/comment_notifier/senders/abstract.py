@@ -1,7 +1,7 @@
 from abc import ABC, abstractmethod
 
-from common import MessageSender
 from common.utils import normalize_multiline
+from message_sender.client import AtlasMessageSender
 
 from comment_notifier.collectors.dto import CommentDto
 
@@ -9,14 +9,14 @@ from .dto import CommentSendMessageResult
 
 
 class BaseCommentSender(ABC):
-    def __init__(self, message_sender: MessageSender):
+    def __init__(self, message_sender: AtlasMessageSender):
         self.message_sender = message_sender
 
     @abstractmethod
     def notify(self, comment_dto: CommentDto) -> CommentSendMessageResult:
         pass
 
-    def _send_log_cant_notify(self, comment_dto: CommentDto, reason: str) -> str:
+    def _send_log_cant_notify(self, comment_dto: CommentDto, reason: str) -> dict[str, str | list[str]]:
         task_url = comment_dto.task_data["permalink_url"]
         message = f"""
               ⚠️ Cant send message
@@ -29,3 +29,4 @@ class BaseCommentSender(ABC):
 
     def _normalize_message(self, message: str) -> str:
         return normalize_multiline(message)
+

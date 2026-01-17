@@ -2,8 +2,9 @@
 from asana.client import AsanaApiClient
 from celery import shared_task
 from celery.app.task import Task as CeleryTask
-from common import MessageRenderer, MessageSender, RequestsSender
+from common import MessageRenderer
 from django.conf import settings
+from message_sender.client import AtlasMessageSender
 
 from .models import Task
 from .services import CreativeProjectSectionService, CreativeService, SendEstimationMessageService, TaskService
@@ -17,7 +18,10 @@ from .use_cases import (
 )
 
 asana_api_client = AsanaApiClient(api_key=settings.ASANA_API_KEY)
-message_sender = MessageSender(request_sender=RequestsSender())
+message_sender = AtlasMessageSender(
+    host=settings.MESSAGE_SENDER_HOST,
+    api_key=settings.DOMAIN_MESSAGE_API_KEY,
+)
 message_renderer = MessageRenderer()
 
 

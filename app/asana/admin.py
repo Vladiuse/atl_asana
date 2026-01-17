@@ -1,10 +1,9 @@
-from common import RequestsSender
-from common.message_sender import MessageSender, UserTag
 from django.conf import settings
 from django.contrib import admin, messages
 from django.db.models import QuerySet
 from django.http import HttpRequest
 from django.utils.html import format_html
+from message_sender.client import AtlasMessageSender
 
 from asana.client import AsanaApiClient
 from asana.client.exception import AsanaApiClientError
@@ -14,13 +13,16 @@ from asana.utils import get_asana_profile_url_by_id
 
 from .models import AsanaWebhook, AsanaWebhookRequestData, AtlasUser, WebhookHandler
 
-message_sender = MessageSender(request_sender=RequestsSender())
+message_sender = AtlasMessageSender(
+    host=settings.MESSAGE_SENDER_HOST,
+    api_key=settings.DOMAIN_MESSAGE_API_KEY,
+)
 asana_api_client = AsanaApiClient(api_key=settings.ASANA_API_KEY)
 asana_user_repository = AsanaUserRepository(api_client=asana_api_client)
 
 
 @admin.register(AtlasUser)
-class AtlasUserAdmin(admin.ModelAdmin):
+class AtlasUserAdmin(admin.ModelAdmin):  # type: ignore[type-arg]
     list_display = (
         "user_id",
         "membership_id",
@@ -60,7 +62,7 @@ class AtlasUserAdmin(admin.ModelAdmin):
         for asana_user in queryset:
             try:
                 message = f"Test message for {asana_user.user_comment_mention}"
-                message_sender.send_message_to_user(message=message, user_tags=[UserTag(asana_user.messenger_code)])
+                message_sender.send_message_to_user(message=message, user_tag=asana_user.messenger_code)
                 success_send_count += 1
             except ValueError:
                 errors_send_user.append(asana_user)
@@ -80,20 +82,22 @@ class AtlasUserAdmin(admin.ModelAdmin):
 
 
 @admin.register(WebhookHandler)
-class WebhookHandlerAdmin(admin.ModelAdmin):
+class WebhookHandlerAdmin(admin.ModelAdmin):  # type: ignore[type-arg]
     list_display = ("id", "name", "description", "created")
     ordering = ("-created",)
     readonly_fields = ("name", "description")
 
-    def has_add_permission(self, request: HttpRequest, obj: WebhookHandler | None = None) -> bool:  # noqa: ARG002
+    def has_add_permission(self, request: HttpRequest, obj: WebhookHandler | None = None) -> bool:
+        _ = request, obj
         return False
 
-    def has_delete_permission(self, request: HttpRequest, obj: WebhookHandler | None = None) -> bool:  # noqa: ARG002
+    def has_delete_permission(self, request: HttpRequest, obj: WebhookHandler | None = None) -> bool:
+        _ = request, obj
         return False
 
 
 @admin.register(AsanaWebhook)
-class AsanaWebhookAdmin(admin.ModelAdmin):
+class AsanaWebhookAdmin(admin.ModelAdmin):  # type: ignore[type-arg]
     list_display = (
         "id",
         "name",
@@ -117,7 +121,7 @@ class AsanaWebhookAdmin(admin.ModelAdmin):
 
 
 @admin.register(AsanaWebhookRequestData)
-class AsanaWebhookRequestDataAdmin(admin.ModelAdmin):
+class AsanaWebhookRequestDataAdmin(admin.ModelAdmin):  # type: ignore[type-arg]
     list_display = (
         "id",
         "webhook",

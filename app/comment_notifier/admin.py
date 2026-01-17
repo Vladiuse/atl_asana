@@ -3,7 +3,6 @@ import logging
 from asana.client import AsanaApiClient
 from asana.client.exception import AsanaApiClientError
 from asana.repository import AsanaUserRepository
-from common import MessageSender, RequestsSender
 from django import forms
 from django.conf import settings
 from django.contrib import admin, messages
@@ -11,6 +10,7 @@ from django.db.models import QuerySet
 from django.http import HttpRequest
 from django.utils.html import format_html
 from django.utils.text import Truncator
+from message_sender.client import AtlasMessageSender
 
 from comment_notifier.services import LoadCommentsAdditionalInfo
 from comment_notifier.use_cases import AsanaCommentNotifierUseCase
@@ -29,12 +29,15 @@ from .tasks import fetch_comment_tasks_urls_task, fetch_missing_project_comments
 asana_client = AsanaApiClient(api_key=settings.ASANA_API_KEY)
 logging.basicConfig(level=logging.INFO)
 
-message_sender = MessageSender(request_sender=RequestsSender())
+message_sender = AtlasMessageSender(
+    host=settings.MESSAGE_SENDER_HOST,
+    api_key=settings.DOMAIN_MESSAGE_API_KEY,
+)
 repository = AsanaUserRepository(api_client=asana_client)
 
 
 @admin.register(AsanaWebhookProject)
-class AsanaProjectAdmin(admin.ModelAdmin):
+class AsanaProjectAdmin(admin.ModelAdmin):  # type: ignore[type-arg]
     list_display = ("name", "secret", "project_name", "project_url_short", "message_sender")
     list_display_links = ("name",)
     actions = ("update_project_data",)
@@ -79,7 +82,7 @@ class AsanaProjectAdmin(admin.ModelAdmin):
 
 
 @admin.register(ProjectIgnoredSection)
-class ProjectIgnoredSectionAdmin(admin.ModelAdmin):
+class ProjectIgnoredSectionAdmin(admin.ModelAdmin):  # type: ignore[type-arg]
     list_display = ("project", "section_name", "section_id")
     list_display_links = ("section_id", "section_name")
     readonly_fields = ("section_name",)
@@ -122,7 +125,7 @@ class ProjectIgnoredSectionAdmin(admin.ModelAdmin):
 
 
 @admin.register(AsanaWebhookRequestData)
-class AsanaWebhookRequestDataAdmin(admin.ModelAdmin):
+class AsanaWebhookRequestDataAdmin(admin.ModelAdmin):  # type: ignore[type-arg]
     list_display = ("id", "__str__", "is_target_event", "project__name", "created")
     list_display_links = ("id", "__str__")
     list_filter = (
@@ -132,7 +135,7 @@ class AsanaWebhookRequestDataAdmin(admin.ModelAdmin):
 
 
 @admin.register(AsanaComment)
-class AsanaCommentAdmin(admin.ModelAdmin):
+class AsanaCommentAdmin(admin.ModelAdmin):  # type: ignore[type-arg]
     list_display = (
         "id",
         "task_id",
@@ -171,7 +174,7 @@ class AsanaCommentAdmin(admin.ModelAdmin):
     @admin.action(description="Создать ссылки на таски (глобальный)")
     def fetch_task_urls(self, request: HttpRequest, queryset: QuerySet[AsanaComment]) -> None:
         _ = queryset
-        result = fetch_comment_tasks_urls_task.delay()
+        result = fetch_comment_tasks_urls_task.delay()  # type: ignore[attr-defined]
         self.message_user(request, message=f"Задача запущена: {result.id}")
 
     @admin.action(description="Пометить комментарии как отправленные")
@@ -182,7 +185,7 @@ class AsanaCommentAdmin(admin.ModelAdmin):
     @admin.action(description="Найти пропущенные комментарии без отправки смс (глобальный)")
     def fetch_missing_project_comments(self, request: HttpRequest, queryset: QuerySet[AsanaComment]) -> None:
         _ = queryset
-        result = fetch_missing_project_comments_task.delay(send_messages=False)
+        result = fetch_missing_project_comments_task.delay(send_messages=False)  # type: ignore[attr-defined]
         self.message_user(request, message=f"Задача запущена: {result.id}")
 
     @admin.action(description="Пометить как не отправленные")
@@ -231,7 +234,7 @@ class AsanaCommentAdmin(admin.ModelAdmin):
 
 
 @admin.register(ProjectNotifySender)
-class ProjectNotifySenderAdmin(admin.ModelAdmin):
+class ProjectNotifySenderAdmin(admin.ModelAdmin):  # type: ignore[type-arg]
     list_display = ("name", "description")
     list_display_links = ("name",)
     readonly_fields = ("name", "description")

@@ -2,8 +2,8 @@ from dataclasses import asdict
 
 from asana.client import AsanaApiClient
 from celery import Task, shared_task
-from common import MessageSender, RequestsSender
 from django.conf import settings
+from message_sender.client import AtlasMessageSender
 
 from .models import AsanaComment, AsanaWebhookRequestData
 from .services import LoadCommentsAdditionalInfo, ProcessAsanaNewCommentEvent
@@ -13,7 +13,10 @@ from .use_cases import (
 )
 
 asana_api_client = AsanaApiClient(api_key=settings.ASANA_API_KEY)
-message_sender = MessageSender(request_sender=RequestsSender())
+message_sender = AtlasMessageSender(
+    host=settings.MESSAGE_SENDER_HOST,
+    api_key=settings.DOMAIN_MESSAGE_API_KEY,
+)
 
 
 @shared_task(bind=True, max_retries=2, default_retry_delay=60 * 5)

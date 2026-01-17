@@ -4,11 +4,11 @@ from datetime import timedelta
 from asana.client import AsanaApiClient
 from asana.client.exception import AsanaApiClientError, AsanaForbiddenError, AsanaNotFoundError
 from common import MessageRenderer
-from common.exception import MessageSenderError
-from common.message_sender import MessageSender, UserTag
 from constance import config
 from django.conf import settings
 from django.utils import timezone
+from message_sender.client import AtlasMessageSender
+from message_sender.client.exceptions import AtlasMessageSenderError
 
 from .models import Creative, CreativeProjectSection, Task, TaskStatus
 
@@ -139,26 +139,26 @@ class SendEstimationMessageService:
     Estimate Link: {{estimate_url}}<br>
     """
 
-    def __init__(self, message_sender: MessageSender, message_renderer: MessageRenderer):
+    def __init__(self, message_sender: AtlasMessageSender, message_renderer: MessageRenderer):
         self.message_sender = message_sender
         self.message_renderer = message_renderer
 
     def send_reminder(self, creative: Creative) -> None:
         try:
             bayer_code = creative.task.bayer_code
-            user_tag = UserTag(bayer_code.lower())
+            user_tag = bayer_code.lower()
             context = {
                 "task_name": creative.task.task_name,
                 "estimate_url": self._get_estimation_url(creative=creative),
             }
             message = self.message_renderer.render(template=self.message, context=context)
-            self.message_sender.send_message_to_user(message=message, user_tags=[user_tag])
+            self.message_sender.send_message_to_user(message=message, user_tag=user_tag)
             creative.reminder_success_count += 1
             if creative.reminder_success_count >= config.SEND_REMINDER_TRY_COUNT:
                 creative.mark_reminder_limit_reached(save=False)
             else:
                 creative.next_reminder_at = timezone.now() + timedelta(hours=config.NEXT_SUCCESS_REMINDER_DELTA)
-        except (ValueError, MessageSenderError) as error:
+        except AtlasMessageSenderError as error:
             creative.reminder_failure_count += 1
             if creative.reminder_failure_count >= config.SEND_REMINDER_TRY_COUNT:
                 creative.mark_reminder_limit_reached(save=False)

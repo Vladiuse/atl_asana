@@ -1,10 +1,14 @@
 from celery import shared_task
-from common import MessageSender, RequestsSender
+from django.conf import settings
+from message_sender.client import AtlasMessageSender
 
 from .models import AsanaWebhookRequestData
 from .usecase import ProcessAsanaWebhookUseCase
 
-message_sender = MessageSender(request_sender=RequestsSender())
+message_sender = AtlasMessageSender(
+    host=settings.MESSAGE_SENDER_HOST,
+    api_key=settings.DOMAIN_MESSAGE_API_KEY,
+)
 
 
 @shared_task
