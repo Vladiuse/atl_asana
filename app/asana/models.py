@@ -1,11 +1,9 @@
 from __future__ import annotations
 
-from common.message_sender import UserTag
 from django.db import models
 
-from .constants import AsanaResourceType, Position
+from .constants import ATLAS_WORKSPACE_ID, AsanaResourceType, Position
 from .utils import get_asana_profile_url_by_id
-from .constants import ATLAS_WORKSPACE_ID
 
 
 class AtlasUser(models.Model):
@@ -16,7 +14,6 @@ class AtlasUser(models.Model):
     avatar_url = models.URLField(blank=True, max_length=254)
     messenger_code = models.CharField(
         max_length=32,
-        choices=UserTag.choices(),
         blank=True,
     )
     position = models.CharField(
