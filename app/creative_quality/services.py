@@ -1,5 +1,6 @@
 from dataclasses import dataclass
 from datetime import timedelta
+from typing import Any
 
 from asana.client import AsanaApiClient
 from asana.client.exception import AsanaApiClientError, AsanaForbiddenError, AsanaNotFoundError
@@ -46,7 +47,7 @@ class TaskService:
         url: str
         work_url: str
 
-    def _get_task_dto(self, task_data: dict) -> TaskData:
+    def _get_task_dto(self, task_data: dict[str, Any]) -> TaskData:
         """Get task dto.
 
         Raises:

@@ -1,9 +1,11 @@
+from typing import Any
+
 from .models import AsanaWebhookRequestData, CompletedTask
 
 SECTION_COMPLETE_ID = "1210393628043136"
 
 
-def is_task_complete(event: dict, target_section: str) -> bool:
+def is_task_complete(event: dict[str, Any], target_section: str) -> bool:
     return (
         event.get("action") == "added"
         and event.get("resource", {}).get("resource_type") == "task"

@@ -9,7 +9,7 @@ message_sender = AtlasMessageSender(
 )
 
 
-@task_failure.connect  # type: ignore[misc]
+@task_failure.connect  # type: ignore[untyped-decorator]
 def notify_in_telegram(  # type: ignore[no-untyped-def]
     sender=None,
     task_id=None,

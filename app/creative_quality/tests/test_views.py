@@ -28,7 +28,7 @@ def country_ru() -> Country:
 
 @pytest.mark.django_db
 class TestCreativeView:
-    def test_get(self, creative_task: tuple[Creative, Task], client: Client):
+    def test_get(self, creative_task: tuple[Creative, Task], client: Client) -> None:
         creative, task = creative_task
         url = reverse(
             "creative_quality:creative_detail",
@@ -40,7 +40,7 @@ class TestCreativeView:
         response = client.get(url)
         assert response.status_code == HTTPStatus.OK
 
-    def test_not_found(self, client: Client):
+    def test_not_found(self, client: Client) -> None:
         url = reverse(
             "creative_quality:creative_detail",
             kwargs={
@@ -54,7 +54,7 @@ class TestCreativeView:
 
 @pytest.mark.django_db
 class TestCreativeEstimateView:
-    def test_post(self, creative_task: tuple[Creative, Task], client: Client):
+    def test_post(self, creative_task: tuple[Creative, Task], client: Client) -> None:
         creative, task = creative_task
         url = reverse(
             "creative_quality:creative_mark_estimate",
@@ -67,7 +67,7 @@ class TestCreativeEstimateView:
             assert response.status_code == HTTPStatus.FOUND
             mock.assert_called_once()
 
-    def test_not_found(self, client: Client):
+    def test_not_found(self, client: Client) -> None:
         url = reverse(
             "creative_quality:creative_mark_estimate",
             kwargs={
@@ -86,7 +86,7 @@ class TestCreativeGeoDataDetailView:
         client: Client,
         country_by: Country,
         country_ru: Country,
-    ):
+    ) -> None:
         creative, task = creative_task
         geo_data = CreativeGeoData.objects.create(creative=creative, hold=0, hook=0, ctr=0, country=country_by)
         data = {
@@ -109,7 +109,7 @@ class TestCreativeGeoDataDetailView:
 
 @pytest.mark.django_db
 class TestCreativeGeoDataCreateView:
-    def test_post(self, creative_task: tuple[Creative, Task], client: Client, country_ru: Country):
+    def test_post(self, creative_task: tuple[Creative, Task], client: Client, country_ru: Country) -> None:
         creative, task = creative_task
         data = {
             "hold": 1,
@@ -132,7 +132,7 @@ class TestCreativeGeoDataCreateView:
 
 @pytest.mark.django_db
 class TestCreativeGeoDataDeleteView:
-    def test_delete(self, creative_task: tuple[Creative, Task], client: Client, country_by: Country):
+    def test_delete(self, creative_task: tuple[Creative, Task], client: Client, country_by: Country) -> None:
         creative, task = creative_task
         geo_data = CreativeGeoData.objects.create(creative=creative, hold=0, hook=0, ctr=0, country=country_by)
         url = reverse("creative_quality:creative_geo_data_delete", kwargs={"geo_data_pk": geo_data.pk})

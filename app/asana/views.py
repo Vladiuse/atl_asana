@@ -26,7 +26,7 @@ class AsanaWebhookView(APIView):
             payload=dict(request.data),
             webhook=webhook,
         )
-        process_asana_webhook_task.delay(asana_webhook_data_id=asana_webhook_data.pk)
+        process_asana_webhook_task.delay(asana_webhook_data_id=asana_webhook_data.pk)  # type: ignore[attr-defined]
         data = {
             "success": True,
             "method": request.method,

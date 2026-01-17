@@ -1,3 +1,5 @@
+from typing import Any
+
 import gspread
 from django.conf import settings
 from django.db import IntegrityError
@@ -15,7 +17,7 @@ class CreateCreativesForNewTasksUseCase:
     def __init__(self, creative_service: CreativeService):
         self.creative_service = creative_service
 
-    def execute(self) -> dict:
+    def execute(self) -> dict[str, int]:
         """Load task info and create Creative."""
         new_tasks = Task.objects.needs_update()
         created_count = 0
@@ -29,7 +31,7 @@ class CreateCreativesForNewTasksUseCase:
 class CreativesOverDueForEstimateUseCase:
     """Change status of Creative if due estimate time."""
 
-    def execute(self) -> dict:
+    def execute(self) -> dict[str, int]:
         creatives = Creative.objects.overdue_for_estimate()
         for creative in creatives:
             creative.mark_need_estimate()
@@ -42,7 +44,7 @@ class SendEstimationMessageUseCase:
     def __init__(self, estimation_service: SendEstimationMessageService):
         self.estimation_service = estimation_service
 
-    def execute(self) -> dict:
+    def execute(self) -> dict[str, int]:
         creatives = Creative.objects.need_send_estimate_message().select_related("task")
         for creative in creatives:
             self.estimation_service.send_reminder(creative=creative)
@@ -75,7 +77,7 @@ class SendCreativesToGoogleSheetUseCase:
         )
         return gspread.authorize(credentials=credentials)
 
-    def execute(self) -> dict:
+    def execute(self) -> dict[str, Any]:
         """Execute use case.
 
         Raises:
@@ -88,7 +90,7 @@ class SendCreativesToGoogleSheetUseCase:
             .select_related("task")
             .prefetch_related("geo_data", "geo_data__country")
         )
-        send_result: list[dict] = []
+        send_result: list[dict[Any, Any]] = []
         for creative in creatives_to_send:
             creatives_geo_data_dto = [
                 self._convert_creative_to_dto(creative_geo_data=creative_geo_data)
@@ -101,7 +103,7 @@ class SendCreativesToGoogleSheetUseCase:
             creative.save()
         return {"creatives_to_send": len(creatives_to_send), "send_result": send_result}
 
-    def send_test_creative_to_table(self) -> dict:
+    def send_test_creative_to_table(self) -> dict[str, Any]:
         creative_dto = CreativeDto(
             country="XX",
             assignee="assignee",
@@ -126,7 +128,7 @@ class FetchMissingTasksUseCase:
     def __init__(self, creative_project_section_service: CreativeProjectSectionService):
         self.creative_project_section_service = creative_project_section_service
 
-    def execute(self) -> dict[str, int]:
+    def execute(self) -> dict[str, int | list[str]]:
         sections = CreativeProjectSection.objects.all()
         new_found = []
         with_errors = []

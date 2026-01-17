@@ -46,7 +46,7 @@ class AsanaProjectAdmin(admin.ModelAdmin):  # type: ignore[type-arg]
         self,
         request: HttpRequest,
         obj: AsanaWebhookProject,
-        form: forms.ModelForm,
+        form: forms.ModelForm,  # type: ignore[type-arg]
         change: bool,  # noqa: FBT001
     ) -> None:
         super().save_model(request, obj, form, change)

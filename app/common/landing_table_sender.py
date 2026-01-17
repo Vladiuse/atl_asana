@@ -1,3 +1,5 @@
+from typing import Any
+
 from requests.exceptions import HTTPError, RequestException
 from retry import retry
 
@@ -21,7 +23,7 @@ class TableSender:
         delay=5,
         tries=2,
     )
-    def _send_message(self, handler: str, data: dict) -> str:
+    def _send_message(self, handler: str, data: dict[Any, Any]) -> str:
         data = {
             "url": handler,
             "data": data,
@@ -32,7 +34,7 @@ class TableSender:
             json=data,
         )
 
-    def send_message(self, handler: str, data: dict) -> str:
+    def send_message(self, handler: str, data: dict[Any, Any]) -> str:
         if handler not in self.AVAILABLE_URL:
             raise TypeError(self.INCORRECT_HANDLER_ERROR)
         try:

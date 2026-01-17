@@ -44,14 +44,15 @@ class CreativeGeoDataForm(forms.ModelForm):  # type: ignore[type-arg]
         model = CreativeGeoData
         fields = ("hook", "hold", "ctr", "comment", "country", "status")
 
-    def __init__(self, *args, creative: Creative, **kwargs):  # noqa: ANN002, ANN003
+    def __init__(self, *args: Any, creative: Creative, **kwargs: Any):  # noqa: ANN401
         self.creative = creative
         super().__init__(*args, **kwargs)
 
     def clean(self) -> dict[str, Any]:
         cleaned_data = super().clean()
+        if cleaned_data is None:
+            cleaned_data = {}
         country = cleaned_data.get("country")
-
         if (
             country
             and CreativeGeoData.objects.filter(

@@ -2,7 +2,7 @@ import logging
 from collections.abc import Generator
 from dataclasses import asdict, dataclass
 from time import sleep
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 
 from asana.client import AsanaApiClient
 from asana.client.exception import AsanaApiClientError
@@ -42,7 +42,7 @@ class ProcessAsanaNewCommentEvent:
         created_comments_count: int
         comments: list["ProcessAsanaNewCommentEvent.AsanaNewCommentEvent"]
 
-    def _event_to_comment_dto(self, events_data: dict) -> list[AsanaNewCommentEvent]:
+    def _event_to_comment_dto(self, events_data: dict[str, Any]) -> list[AsanaNewCommentEvent]:
         result = []
         for event in events_data["events"]:
             if event["resource"]["resource_subtype"] == "comment_added" and event["user"] is not None:
@@ -131,7 +131,7 @@ class ProjectCommentsGenerator:
     def __init__(self, asana_api_client: AsanaApiClient):
         self.asana_api_client = asana_api_client
 
-    def _get_project_active_sections(self, project: AsanaWebhookProject) -> list[dict]:
+    def _get_project_active_sections(self, project: AsanaWebhookProject) -> list[dict[str, Any]]:
         """Get project active sections.
 
         Raises:
@@ -142,7 +142,7 @@ class ProjectCommentsGenerator:
         sections = self.asana_api_client.get_project_sections(project_id=project.project_id)
         return [section_data for section_data in sections if section_data["gid"] not in ignored_sections_ids]
 
-    def generate(self, project: AsanaWebhookProject) -> Generator[dict, None, None]:
+    def generate(self, project: AsanaWebhookProject) -> Generator[dict[str, Any], None, None]:
         """Return comments from project sections.
 
         Raises:

@@ -1,4 +1,5 @@
 import logging
+from typing import Any
 
 import requests
 from requests.exceptions import HTTPError, RequestException
@@ -17,7 +18,7 @@ requests_logger.propagate = False
 
 
 class RequestsSender:
-    def request(self, **kwargs) -> str:
+    def request(self, **kwargs: Any) -> str:  # noqa: ANN401
         url = kwargs.get("url")
         method = kwargs.get("method", "GET")
         logging.debug("Req %s url:%s", method, url)

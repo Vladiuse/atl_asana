@@ -12,13 +12,13 @@ asana_client = AsanaApiClient(api_key=settings.ASANA_API_KEY)
 
 
 @admin.register(Webhook)
-class WebhookAdmin(admin.ModelAdmin):
+class WebhookAdmin(admin.ModelAdmin):  # type: ignore[type-arg]
     list_display = ("id", "webhook_id", "resource_name", "resource_type", "target", "description")
     list_display_links = ("id", "webhook_id")
     actions = ("add_new_webhooks",)
 
     @admin.action(description="Добавить новые вебхуки из асаны")
-    def add_new_webhooks(self, request: HttpRequest, queryset: QuerySet) -> None:
+    def add_new_webhooks(self, request: HttpRequest, queryset: QuerySet[Webhook]) -> None:
         _ = queryset
         try:
             result = AddNotExistWebhooks(asana_api_client=asana_client).execute()

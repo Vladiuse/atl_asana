@@ -83,12 +83,12 @@ class TestWebhookDispatcher:
             resource_type=AsanaResourceType.PROJECT,
         )
 
-    def test_patch_work(self, subtests: pytest.Subtests):
+    def test_patch_work(self, subtests: pytest.Subtests) -> None:
         for _class in TEST_HANDLERS:
             with subtests.test(msg="x", _class=_class):
                 assert _class.name in self.dispatcher.get_registry_dict()
 
-    def test_empty(self):
+    def test_empty(self) -> None:
         webhook_data = AsanaWebhookRequestData.objects.create(payload={}, headers={}, webhook=self.webhook_x)
         result = self.dispatcher.dispatch(webhook_data=webhook_data)
         expected = WebhookDispatcherResult()
@@ -97,7 +97,7 @@ class TestWebhookDispatcher:
         assert webhook_data.status == ProcessingStatus.NO_HANDLERS
         assert webhook_data.additional_data == {}
 
-    def test_one_handler(self):
+    def test_one_handler(self) -> None:
         webhook_handler = WebhookHandler.objects.create(name=SuccessTargetHandler.name)
         self.webhook_x.handlers.add(webhook_handler)
         webhook_data = AsanaWebhookRequestData.objects.create(payload={}, headers={}, webhook=self.webhook_x)
@@ -108,7 +108,7 @@ class TestWebhookDispatcher:
         assert webhook_data.status == ProcessingStatus.SUCCESS
         assert webhook_data.additional_data != {}
 
-    def test_two_handlers(self):
+    def test_two_handlers(self) -> None:
         webhook_handler_1 = WebhookHandler.objects.create(name=SuccessTargetHandler.name)
         webhook_handler_2 = WebhookHandler.objects.create(name=ErrorHandler.name)
         self.webhook_x.handlers.add(webhook_handler_1, webhook_handler_2)
@@ -121,7 +121,7 @@ class TestWebhookDispatcher:
         assert webhook_data.status == ProcessingStatus.SUCCESS
         assert webhook_data.additional_data != {}
 
-    def test_raise_error(self):
+    def test_raise_error(self) -> None:
         webhook_handler_1 = WebhookHandler.objects.create(name=RaiseErrorHandler.name)
         self.webhook_x.handlers.add(webhook_handler_1)
         webhook_data = AsanaWebhookRequestData.objects.create(payload={}, headers={}, webhook=self.webhook_x)
@@ -133,7 +133,7 @@ class TestWebhookDispatcher:
         assert webhook_data.status == ProcessingStatus.FAILED
         assert webhook_data.additional_data != {}
 
-    def test_error_with_success(self):
+    def test_error_with_success(self) -> None:
         webhook_handler_1 = WebhookHandler.objects.create(name=SuccessTargetHandler.name)
         webhook_handler_2 = WebhookHandler.objects.create(name=RaiseErrorHandler.name)
         self.webhook_x.handlers.add(webhook_handler_1, webhook_handler_2)
@@ -145,7 +145,7 @@ class TestWebhookDispatcher:
         assert webhook_data.status == ProcessingStatus.PARTIAL
         assert webhook_data.additional_data != {}
 
-    def test_handler_not_exist_in_registry(self):
+    def test_handler_not_exist_in_registry(self) -> None:
         webhook_handler_1 = WebhookHandler.objects.create(name="xxx")
         self.webhook_x.handlers.add(webhook_handler_1)
         webhook_data = AsanaWebhookRequestData.objects.create(payload={}, headers={}, webhook=self.webhook_x)

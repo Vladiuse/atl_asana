@@ -1,3 +1,5 @@
+from typing import Any
+
 from creative_quality.models import CreativeProjectSection, Task
 
 from asana.models import AsanaWebhookRequestData
@@ -31,7 +33,7 @@ class CreativeTaskForEstimation(BaseWebhookHandler):
                         is_created = True
         return WebhookHandlerResult(is_success=True, is_target_event=is_created)
 
-    def _is_target_event(self, event_data: dict) -> bool:
+    def _is_target_event(self, event_data: dict[str, Any]) -> bool:
         # is task moved to section
         return (
             event_data.get("action") == "added"

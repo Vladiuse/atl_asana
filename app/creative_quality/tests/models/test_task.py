@@ -19,7 +19,7 @@ class TestTask:
         assert task.status == status
         assert task.load_failure_count == load_failure_count
 
-    def test_mark_deleted(self):
+    def test_mark_deleted(self) -> None:
         task = Task.objects.create(task_id="123", status=TaskStatus.PENDING, load_failure_count=0)
         creative = Creative.objects.create(task=task)
         task.mark_deleted()

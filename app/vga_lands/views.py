@@ -56,15 +56,13 @@ class AsanaWebhookRequestDataView(ModelViewSet):  # type: ignore[type-arg]
     serializer_class = AsanaWebhookRequestDataSerializer
 
     @action(detail=True)
-    def headers(self, request: Request, pk: int) -> Response:
-        _ = request
-        _ = pk
+    def headers(self, request: Request, pk: int) -> Response:  # type: ignore[override]
+        _ = request, pk
         asana_webhook = self.get_object()
         return Response(data=asana_webhook.headers)
 
     @action(detail=True)
     def payload(self, request: Request, pk: int) -> Response:
-        _ = request
-        _ = pk
+        _ = request, pk
         asana_webhook = self.get_object()
         return Response(data=asana_webhook.payload)

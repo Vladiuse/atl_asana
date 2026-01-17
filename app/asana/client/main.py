@@ -2,19 +2,20 @@ import json
 import logging
 from functools import wraps
 from http import HTTPStatus
-from typing import Callable, NoReturn
+from typing import Any, Callable, NoReturn, TypeVar
 
 import requests
 from requests.exceptions import HTTPError, RequestException
 
 from .exception import AsanaApiClientError, AsanaForbiddenError, AsanaNotFoundError
 
+ReturnType = TypeVar("ReturnType")
 
-def asana_error_handler(func: Callable) -> Callable:
+
+def asana_error_handler(func: Callable[..., ReturnType]) -> Callable[..., ReturnType]:
     """Автоматическая обработка ошибок для методов AsanaApiClient."""
-
     @wraps(func)
-    def wrapper(self, *args, **kwargs) -> Callable:  # noqa: ANN003, ANN001, ANN002
+    def wrapper(self: "AsanaApiClient", *args: Any, **kwargs: Any) -> Any:  # noqa: ANN401
         try:
             return func(self, *args, **kwargs)
         except (RequestException, HTTPError, json.JSONDecodeError) as error:
@@ -32,7 +33,7 @@ class AsanaApiClient:
         self.timeout = timeout if timeout else self.DEFAULT_REQUEST_TIMEOUT
 
     @property
-    def _auth_headers(self) -> dict:
+    def _auth_headers(self) -> dict[str, str]:
         return {"Authorization": f"Bearer {self.api_key}"}
 
     def _handle_error(self, handler_name: str, error: Exception) -> NoReturn:
@@ -53,7 +54,7 @@ class AsanaApiClient:
         raise AsanaApiClientError(msg, response=response) from error
 
     @asana_error_handler
-    def get_user(self, user_id: int) -> dict:
+    def get_user(self, user_id: int) -> dict[str, Any]:
         response = requests.get(
             f"{self.API_ENDPOINT}users/{user_id}",
             headers=self._auth_headers,
@@ -63,7 +64,7 @@ class AsanaApiClient:
         return response.json()["data"]
 
     @asana_error_handler
-    def get_workspace_membership(self, membership_id: int) -> dict:
+    def get_workspace_membership(self, membership_id: int) -> dict[str, Any]:
         response = requests.get(
             f"{self.API_ENDPOINT}workspace_memberships/{membership_id}",
             headers=self._auth_headers,
@@ -73,7 +74,7 @@ class AsanaApiClient:
         return response.json()["data"]
 
     @asana_error_handler
-    def get_workspace_memberships_for_workspace(self, workspace_id: int) -> list:
+    def get_workspace_memberships_for_workspace(self, workspace_id: int) -> list[dict[str, Any]]:
         response = requests.get(
             f"{self.API_ENDPOINT}workspaces/{workspace_id}/workspace_memberships",
             headers=self._auth_headers,
@@ -84,7 +85,7 @@ class AsanaApiClient:
         return response.json()["data"]
 
     @asana_error_handler
-    def get_comment(self, comment_id: int) -> dict:
+    def get_comment(self, comment_id: int) -> dict[str, Any]:
         response = requests.get(
             f"{self.API_ENDPOINT}stories/{comment_id}",
             headers=self._auth_headers,
@@ -94,7 +95,7 @@ class AsanaApiClient:
         return response.json()["data"]
 
     @asana_error_handler
-    def get_stories_from_task(self, task_id: int, opt_fields: list[str] | None = None) -> list:
+    def get_stories_from_task(self, task_id: int, opt_fields: list[str] | None = None) -> list[dict[str, Any]]:
         if opt_fields is None:
             opt_fields = []
         response = requests.get(
@@ -107,12 +108,12 @@ class AsanaApiClient:
         return response.json()["data"]
 
     @asana_error_handler
-    def get_comments_from_task(self, task_id: int, opt_fields: list[str] | None = None) -> list:
+    def get_comments_from_task(self, task_id: int, opt_fields: list[str] | None = None) -> list[dict[str, Any]]:
         stories = self.get_stories_from_task(task_id=task_id, opt_fields=opt_fields)
         return [story for story in stories if story["resource_subtype"] == "comment_added"]
 
     @asana_error_handler
-    def get_task(self, task_id: int) -> dict:
+    def get_task(self, task_id: int) -> dict[str, Any]:
         response = requests.get(
             f"{self.API_ENDPOINT}tasks/{task_id}",
             headers=self._auth_headers,
@@ -122,7 +123,7 @@ class AsanaApiClient:
         return response.json()["data"]
 
     @asana_error_handler
-    def update_task(self, task_id: int, data: dict, opt_fields: list[str] | None = None) -> dict:
+    def update_task(self, task_id: int, data: dict[str, Any], opt_fields: list[str] | None = None) -> dict[str, Any]:
         if opt_fields is None:
             opt_fields = []
         data = {"data": data}
@@ -136,11 +137,11 @@ class AsanaApiClient:
         response.raise_for_status()
         return response.json()["data"]
 
-    def mark_task_completed(self, task_id: str) -> dict:
+    def mark_task_completed(self, task_id: str) -> dict[str, Any]:
         return self.update_task(task_id=task_id, data={"completed": True}, opt_fields=["completed", "name"])
 
     @asana_error_handler
-    def get_workspace_memberships_for_user(self, user_id: int) -> list:
+    def get_workspace_memberships_for_user(self, user_id: int) -> list[dict[str, Any]]:
         response = requests.get(
             f"{self.API_ENDPOINT}users/{user_id}/workspace_memberships",
             headers=self._auth_headers,
@@ -150,7 +151,7 @@ class AsanaApiClient:
         return response.json()["data"]
 
     @asana_error_handler
-    def get_webhooks(self, workspace_id: int) -> list:
+    def get_webhooks(self, workspace_id: int) -> list[dict[str, Any]]:
         response = requests.get(
             f"{self.API_ENDPOINT}webhooks",
             headers=self._auth_headers,
@@ -161,7 +162,7 @@ class AsanaApiClient:
         return response.json()["data"]
 
     @asana_error_handler
-    def get_project_sections(self, project_id: int) -> list:
+    def get_project_sections(self, project_id: int) -> list[dict[str, Any]]:
         response = requests.get(
             f"{self.API_ENDPOINT}projects/{project_id}/sections",
             headers=self._auth_headers,
@@ -171,7 +172,7 @@ class AsanaApiClient:
         return response.json()["data"]
 
     @asana_error_handler
-    def get_section_tasks(self, section_id: int) -> list:
+    def get_section_tasks(self, section_id: int) -> list[dict[str, Any]]:
         response = requests.get(
             f"{self.API_ENDPOINT}sections/{section_id}/tasks",
             headers=self._auth_headers,
@@ -184,7 +185,7 @@ class AsanaApiClient:
         return response.json()["data"]
 
     @asana_error_handler
-    def get_project(self, project_id: int, opt_fields: list[str] | None = None) -> dict:
+    def get_project(self, project_id: int, opt_fields: list[str] | None = None) -> dict[str, Any]:
         if opt_fields is None:
             opt_fields = []
         response = requests.get(
@@ -197,7 +198,7 @@ class AsanaApiClient:
         return response.json()["data"]
 
     @asana_error_handler
-    def get_section(self, section_id: int, opt_fields: list[str] | None = None) -> dict:
+    def get_section(self, section_id: int, opt_fields: list[str] | None = None) -> dict[str, Any]:
         if opt_fields is None:
             opt_fields = []
         response = requests.get(

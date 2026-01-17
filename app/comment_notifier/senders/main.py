@@ -3,11 +3,11 @@ from typing import Callable
 
 from asana.constants import Position
 from asana.models import AtlasUser
+from message_sender.client import Handlers
 
 from comment_notifier.collectors.dto import CommentDto
 
 from .abstract import BaseCommentSender
-from .dto import CommentSendMessageResult
 from .exceptions import CantNotifyError
 from .registry import register_sender
 
@@ -17,10 +17,9 @@ from .registry import register_sender
     description="Не отправляет сообщения",
 )
 class SilentSender(BaseCommentSender):
-    def notify(self, comment_dto: CommentDto) -> CommentSendMessageResult:
+    def notify(self, comment_dto: CommentDto) -> None:
         logging.info("Sender: %s", self.__class__.__name__)
         _ = comment_dto
-        return CommentSendMessageResult(is_send=False, messages=[])
 
 
 @register_sender(
@@ -28,7 +27,7 @@ class SilentSender(BaseCommentSender):
     description="Отправка дебаг сообщения",
 )
 class LogSender(BaseCommentSender):
-    def notify(self, comment_dto: CommentDto) -> CommentSendMessageResult:
+    def notify(self, comment_dto: CommentDto) -> None:
         logging.info("Sender: %s", self.__class__.__name__)
         task_url = comment_dto.task_data["permalink_url"]
         task_name = comment_dto.task_data["name"]
@@ -40,8 +39,7 @@ class LogSender(BaseCommentSender):
             {comment_dto.pretty_comment_text}
             """
         message = self._normalize_message(message)
-        result = self.message_sender.send_log_message(message=message)
-        return CommentSendMessageResult(is_send=False, messages=[result])
+        self.message_sender.send_log_message(message=message)
 
 
 @register_sender(
@@ -49,9 +47,8 @@ class LogSender(BaseCommentSender):
     description="Отправка сообщения в личку упомянутого пользователя",
 )
 class PersonalSender(BaseCommentSender):
-    def notify(self, comment_dto: CommentDto) -> CommentSendMessageResult:
+    def notify(self, comment_dto: CommentDto) -> None:
         logging.info("Sender: %s", self.__class__.__name__)
-        send_messages = []
         for asana_user in comment_dto.mention_users:
             if asana_user.messenger_code == "":
                 reason = f"User {asana_user.user_id} not have message tag to send message"
@@ -66,15 +63,10 @@ class PersonalSender(BaseCommentSender):
                     {comment_dto.pretty_comment_text}
                     """
                 message = self._normalize_message(message)
-                send_result = self.message_sender.send_message_to_user(
+                self.message_sender.send_message_to_user(
                     user_tag=asana_user.messenger_code,
                     message=message,
                 )
-                send_messages.append(send_result)
-        return CommentSendMessageResult(
-            is_send=bool(send_messages),
-            messages=send_messages,
-        )
 
 
 @register_sender(
@@ -84,20 +76,20 @@ class PersonalSender(BaseCommentSender):
 class SourceProjectSender(BaseCommentSender):
     """Send personal message for Buyer or manager, if farmer position - send sms to farmers chat."""
 
-    def _get_notifier_func(self, asana_user: AtlasUser) -> Callable[[AtlasUser, CommentDto], dict | None]:
+    def _get_notifier_func(self, asana_user: AtlasUser) -> Callable[[AtlasUser, CommentDto], None]:
         if not all([asana_user.messenger_code, asana_user.position]):
             msg = f"User not have position on message code, user {asana_user.user_id}"
             raise CantNotifyError(msg)
 
-        registry: dict[Position, Callable[[AtlasUser, CommentDto], dict | None]] = {
+        registry: dict[Position, Callable[[AtlasUser, CommentDto], None]] = {
             Position.FARMER: self._notify_farmer,
             Position.MANAGER: self._notify_bayer_or_manager,
             Position.BUYER: self._notify_bayer_or_manager,
         }
 
-        return registry.get(asana_user.position, self._notify_not_target_position)
+        return registry.get(Position(asana_user.position), self._notify_not_target_position)
 
-    def _notify_farmer(self, asana_user: AtlasUser, comment_dto: CommentDto) -> str:
+    def _notify_farmer(self, asana_user: AtlasUser, comment_dto: CommentDto) -> None:
         _ = asana_user
         task_url = comment_dto.task_data["permalink_url"]
         task_name = comment_dto.task_data["name"]
@@ -108,12 +100,12 @@ class SourceProjectSender(BaseCommentSender):
             {comment_dto.pretty_comment_text}
             """
         message = self._normalize_message(message)
-        return self.message_sender.send_message(
-            handler=MessageSender.FARM_GROUP,
+        self.message_sender.send_message(
+            handler=Handlers.FARM_GROUP,
             message=message,
         )
 
-    def _notify_bayer_or_manager(self, asana_user: AtlasUser, comment_dto: CommentDto) -> dict:
+    def _notify_bayer_or_manager(self, asana_user: AtlasUser, comment_dto: CommentDto) -> None:
         task_name = comment_dto.task_data["name"]
         task_url = comment_dto.task_data["permalink_url"]
         message = f"""
@@ -123,7 +115,7 @@ class SourceProjectSender(BaseCommentSender):
             {comment_dto.pretty_comment_text}
         """
         message = self._normalize_message(message)
-        return self.message_sender.send_message_to_user(
+        self.message_sender.send_message_to_user(
             user_tag=asana_user.messenger_code,
             message=message,
         )
@@ -131,19 +123,13 @@ class SourceProjectSender(BaseCommentSender):
     def _notify_not_target_position(self, asana_user: AtlasUser, comment_dto: CommentDto) -> None:
         _, _ = asana_user, comment_dto
 
-    def notify(self, comment_dto: CommentDto) -> CommentSendMessageResult:
+    def notify(self, comment_dto: CommentDto) -> None:
         logging.info("Sender: %s", self.__class__.__name__)
-        send_messages = []
         for asana_user in comment_dto.mention_users:
             try:
                 notifier_func = self._get_notifier_func(asana_user=asana_user)
                 logging.info("Notify func: %s", notifier_func.__name__)
-                message_send_result = notifier_func(asana_user=asana_user, comment_dto=comment_dto)  # type: ignore[arg-type]
+                message_send_result = notifier_func(asana_user, comment_dto)
                 logging.info("message_send_result: %s", message_send_result)
-                send_messages.append(message_send_result)
             except CantNotifyError as error:
                 self._send_log_cant_notify(comment_dto=comment_dto, reason=str(error))
-        return CommentSendMessageResult(
-            is_send=comment_dto.has_mention,
-            messages=send_messages,
-        )

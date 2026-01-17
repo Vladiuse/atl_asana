@@ -5,15 +5,13 @@ from message_sender.client import AtlasMessageSender
 
 from comment_notifier.collectors.dto import CommentDto
 
-from .dto import CommentSendMessageResult
-
 
 class BaseCommentSender(ABC):
     def __init__(self, message_sender: AtlasMessageSender):
         self.message_sender = message_sender
 
     @abstractmethod
-    def notify(self, comment_dto: CommentDto) -> CommentSendMessageResult:
+    def notify(self, comment_dto: CommentDto) -> None:
         pass
 
     def _send_log_cant_notify(self, comment_dto: CommentDto, reason: str) -> dict[str, str | list[str]]:

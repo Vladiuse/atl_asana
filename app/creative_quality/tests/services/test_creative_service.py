@@ -1,7 +1,7 @@
 from collections.abc import Generator
 from datetime import datetime, timedelta
 from typing import Any
-from unittest.mock import Mock
+from unittest.mock import Mock, patch
 
 import pytest
 from asana.client import AsanaApiClient
@@ -63,7 +63,7 @@ class TestCreativeService:
     @pytest.mark.parametrize("task_status", list(TaskStatus))
     def test_create_creative(self, creative_service: CreativeService, task_status: TaskStatus) -> None:
         task = Task.objects.create(task_id="x", status=task_status)
-        creative_service.task_service.update.return_value = task
+        creative_service.task_service.update.return_value = task  # type: ignore[attr-defined]
         creative_service.create_creative(creative_task=task)
         if task_status == TaskStatus.CREATED:
             assert Creative.objects.count() == 1
@@ -104,7 +104,7 @@ class TestSendEstimationMessageService:
         assert creative.reminder_failure_count == reminder_failure_count_start_value + 1
         assert creative.reminder_fail_reason != ""
         creative.save.assert_called()
-        send_estimate_message_service.message_sender.send_message_to_user.assert_not_called()
+        send_estimate_message_service.message_sender.send_message_to_user.assert_not_called()  # type: ignore[attr-defined]
 
     @pytest.mark.parametrize("reminder_failure_count_start_value", [0, SEND_REMINDER_TRY_COUNT])
     def test_error_send_message(
@@ -116,7 +116,7 @@ class TestSendEstimationMessageService:
         creative = Mock(spec=Creative)
         creative.task.bayer_code = self.VALID_USER_TAG
         creative.reminder_fail_reason = ""
-        send_estimate_message_service.message_sender.send_message_to_user.side_effect = AtlasMessageSenderError("boom")
+        send_estimate_message_service.message_sender.send_message_to_user.side_effect = AtlasMessageSenderError("boom")  # type: ignore[attr-defined]
         creative.reminder_failure_count = reminder_failure_count_start_value
         send_estimate_message_service.send_reminder(creative=creative)
         if reminder_failure_count_start_value == 0:
@@ -127,7 +127,7 @@ class TestSendEstimationMessageService:
         assert creative.reminder_failure_count == reminder_failure_count_start_value + 1
         assert creative.reminder_fail_reason == "boom"
         creative.save.assert_called()
-        send_estimate_message_service.message_sender.send_message_to_user.assert_called()
+        send_estimate_message_service.message_sender.send_message_to_user.assert_called()  # type: ignore[attr-defined]
 
     @pytest.mark.parametrize("reminder_success_count_start_value", [0, SEND_REMINDER_TRY_COUNT])
     def test_send_success(
@@ -149,19 +149,19 @@ class TestSendEstimationMessageService:
         assert creative.reminder_success_count == reminder_success_count_start_value + 1
         assert creative.reminder_fail_reason == ""
         creative.save.assert_called()
-        send_estimate_message_service.message_sender.send_message_to_user.assert_called()
+        send_estimate_message_service.message_sender.send_message_to_user.assert_called()  # type: ignore[attr-defined]
 
     def test_message(self, send_estimate_message_service: SendEstimationMessageService) -> None:
         task_name = "TASK_NAME"
         url = "https://URL.com"
-        send_estimate_message_service._get_estimation_url = Mock(return_value=url)
-        creative = Mock(spec=Creative)
-        creative.task.bayer_code = self.VALID_USER_TAG
-        creative.task.task_name = task_name
-        creative.reminder_success_count = 0
-        send_estimate_message_service.send_reminder(creative=creative)
-        send_estimate_message_service.message_sender.send_message_to_user.assert_called_once()
-        _, kwargs = send_estimate_message_service.message_sender.send_message_to_user.call_args
+        with patch.object(send_estimate_message_service, "_get_estimation_url", return_value=url):
+            creative = Mock(spec=Creative)
+            creative.task.bayer_code = self.VALID_USER_TAG
+            creative.task.task_name = task_name
+            creative.reminder_success_count = 0
+            send_estimate_message_service.send_reminder(creative=creative)
+        send_estimate_message_service.message_sender.send_message_to_user.assert_called_once()  # type: ignore[attr-defined]
+        _, kwargs = send_estimate_message_service.message_sender.send_message_to_user.call_args  # type: ignore[attr-defined]
         assert kwargs["user_tags"] == [self.VALID_USER_TAG]
         assert task_name in kwargs["message"]
         assert url in kwargs["message"]

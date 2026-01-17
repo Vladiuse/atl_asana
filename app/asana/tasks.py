@@ -1,4 +1,5 @@
 from dataclasses import asdict
+from typing import Any
 
 from celery import Task, shared_task
 from django.conf import settings
@@ -15,7 +16,10 @@ asana_user_repository = AsanaUserRepository(api_client=asana_api_client)
 
 
 @shared_task(bind=True, max_retries=1, default_retry_delay=60 * 3)
-def process_asana_webhook_task(self: Task, asana_webhook_data_id: int) -> dict | None:
+def process_asana_webhook_task(
+    self: Task,  # type: ignore[type-arg]
+    asana_webhook_data_id: int,
+) -> dict[str, Any] | None:
     try:
         webhook_data = AsanaWebhookRequestData.objects.get(pk=asana_webhook_data_id)
         dispatcher = WebhookDispatcher()
@@ -27,6 +31,6 @@ def process_asana_webhook_task(self: Task, asana_webhook_data_id: int) -> dict |
 
 
 @shared_task
-def fetch_new_asana_users() -> dict:
+def fetch_new_asana_users() -> dict[str, Any]:
     use_case = FetchNewAsanaUsers(asana_users_repository=asana_user_repository)
     return use_case.execute()

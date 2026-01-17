@@ -1,4 +1,5 @@
 import logging
+from typing import Any
 
 from common.exception import AppExceptionError
 
@@ -12,7 +13,7 @@ class AsanaUserRepository:
     def __init__(self, api_client: AsanaApiClient):
         self.api_client = api_client
 
-    def _create_user_by_data(self, *, membership_data: dict, user_data: dict) -> AtlasUser:
+    def _create_user_by_data(self, *, membership_data: dict[str, Any], user_data: dict[str, Any]) -> AtlasUser:
         user_id = user_data["gid"]
         membership_id = membership_data["gid"]
         name = membership_data["user"]["name"]
@@ -26,7 +27,7 @@ class AsanaUserRepository:
             email=email,
         )
 
-    def _create_by_membership_id(self, membership_id: int) -> AtlasUser:
+    def _create_by_membership_id(self, membership_id: str) -> AtlasUser:
         """Create user by membership_id.
 
         Raises:
@@ -37,7 +38,7 @@ class AsanaUserRepository:
         user_data = self.api_client.get_user(user_id=membership_data["user"]["gid"])
         return self._create_user_by_data(membership_data=membership_data, user_data=user_data)
 
-    def _create_by_user_id(self, user_id: int) -> AtlasUser:
+    def _create_by_user_id(self, user_id: str) -> AtlasUser:
         """Create AtlasUser by id.
 
         Raises:
@@ -61,8 +62,8 @@ class AsanaUserRepository:
     def get(
         self,
         *,
-        membership_id: int | None = None,
-        user_id: int | None = None,
+        membership_id: str | None = None,
+        user_id: str | None = None,
     ) -> AtlasUser:
         """Get user by usr_id or membership_id.
 

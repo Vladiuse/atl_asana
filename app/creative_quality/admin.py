@@ -60,7 +60,7 @@ class CreativeAdmin(admin.ModelAdmin):  # type: ignore[type-arg]
 
 
 @admin.register(CreativeGeoData)
-class CreativeGeoDataAdmin(admin.ModelAdmin):
+class CreativeGeoDataAdmin(admin.ModelAdmin):  # type: ignore[type-arg]
     list_display = ("creative", "status", "country", "hook", "hold", "ctr", "short_comment", "created")
     ordering = ("creative",)
 
@@ -99,7 +99,7 @@ class CreativeProjectSectionAdmin(admin.ModelAdmin):  # type: ignore[type-arg]
             )
 
     @admin.action(description="Обновить доп. данные по секциям")
-    def update_additional_section_data(self, request: HttpRequest, queryset: QuerySet) -> None:
+    def update_additional_section_data(self, request: HttpRequest, queryset: QuerySet[CreativeProjectSection]) -> None:
         service = CreativeProjectSectionService(asana_api_client=asana_client)
         success_updated = 0
         for section in queryset:

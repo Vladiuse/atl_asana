@@ -1,3 +1,5 @@
+from typing import Any
+
 from django.db import models
 
 
@@ -8,6 +10,6 @@ class Country(models.Model):
     def __str__(self) -> str:
         return self.name
 
-    def save(self, **kwargs) -> None:  # noqa: ANN003
+    def save(self, **kwargs: Any) -> None:  # noqa: ANN401
         self.iso_code = self.iso_code.upper()
         super().save(**kwargs)
