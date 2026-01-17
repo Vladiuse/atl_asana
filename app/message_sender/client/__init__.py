@@ -1,6 +1,6 @@
-from .main import Handlers, MessageSender
+from .main import Handlers, AtlasMessageSender
 
 __all__ = [
     "Handlers",
-    "MessageSender",
+    "AtlasMessageSender",
 ]

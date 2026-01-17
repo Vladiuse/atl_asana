@@ -16,7 +16,7 @@ REQUEST_TIMEOUT = 6
 
 def error_handler(func: Callable[..., ReturnType]) -> Callable[..., ReturnType]:
     @wraps(func)
-    def wrapper(self: MessageSender, *args: Any, **kwargs: Any) -> Any:  # noqa: ANN401
+    def wrapper(self: AtlasMessageSender, *args: Any, **kwargs: Any) -> Any:  # noqa: ANN401
         try:
             return func(self, *args, **kwargs)
         except (RequestException, HTTPError, json.JSONDecodeError) as error:
@@ -31,7 +31,7 @@ class Handlers(Enum):
     FARM_GROUP = "asana_farm_comments"
 
 
-class MessageSender:
+class AtlasMessageSender:
     def __init__(self, host: str, api_key: str):
         self.host = host
         self.api_key = api_key

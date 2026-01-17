@@ -1,9 +1,9 @@
 # ruff: noqa: PLR0913, ANN001, ANN003, ARG001
 from celery.signals import task_failure
 from django.conf import settings
-from message_sender.client import MessageSender
+from message_sender.client import AtlasMessageSender
 
-message_sender = MessageSender(
+message_sender = AtlasMessageSender(
     host=settings.MESSAGE_SENDER_HOST,
     api_key=settings.DOMAIN_MESSAGE_API_KEY,
 )

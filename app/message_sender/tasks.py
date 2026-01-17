@@ -2,9 +2,9 @@
 from celery import Task, shared_task
 from django.conf import settings
 
-from message_sender.client import Handlers, MessageSender
+from message_sender.client import Handlers, AtlasMessageSender
 
-message_sender = MessageSender(
+message_sender = AtlasMessageSender(
     host=settings.MESSAGE_SENDER_HOST,
     api_key=settings.DOMAIN_MESSAGE_API_KEY,
 )

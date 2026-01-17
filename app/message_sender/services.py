@@ -1,11 +1,11 @@
 from django.db import transaction
 
-from .client import MessageSender
+from .client import AtlasMessageSender
 from .models import AtlasUser
 
 
 class UserService:
-    def __init__(self, message_sender_client: MessageSender):
+    def __init__(self, message_sender_client: AtlasMessageSender):
         self.message_sender_client = message_sender_client
 
     def update_all_users(self) -> dict[str, int]:

@@ -1,9 +1,9 @@
 from django.conf import settings
 
-from message_sender.client import MessageSender
+from message_sender.client import AtlasMessageSender
 from message_sender.services import UserService
 
-client = MessageSender(
+client = AtlasMessageSender(
     host=settings.MESSAGE_SENDER_HOST,
     api_key=settings.DOMAIN_MESSAGE_API_KEY,
 )
