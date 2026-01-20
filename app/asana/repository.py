@@ -103,6 +103,11 @@ class AsanaUserRepository:
         )
         logging.info("Memberships in asana: %s", len(atlas_asana_memberships))
         exist_memberships_in_db = [str(i) for i in AtlasAsanaUser.objects.values_list("membership_id", flat=True)]
+        actual_memberships_ids = [membership_data["gid"] for membership_data in atlas_asana_memberships]
+        deleted_count, deleted_by_model = (
+            AtlasAsanaUser.objects.exclude(membership_id__in=actual_memberships_ids).delete()
+        )
+        logging.info("Deleted: %s", deleted_count)
         logging.info("Memberships in DB: %s", len(exist_memberships_in_db))
         new_created = 0
         for membership_data in atlas_asana_memberships:
@@ -113,4 +118,4 @@ class AsanaUserRepository:
                 self._create_user_by_data(membership_data=membership_data, user_data=user_data)
                 new_created += 1
         logging.info("New created: %s", new_created)
-        return {"new_created": new_created}
+        return {"new_created": new_created, "deleted_count": deleted_count}
