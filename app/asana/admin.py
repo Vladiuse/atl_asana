@@ -24,6 +24,7 @@ asana_user_repository = AsanaUserRepository(api_client=asana_api_client)
 @admin.register(AtlasAsanaUser)
 class AtlasUserAdmin(admin.ModelAdmin):  # type: ignore[type-arg]
     list_display = (
+        "owner",
         "user_id",
         "membership_id",
         "email",
