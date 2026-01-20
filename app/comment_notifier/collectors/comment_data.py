@@ -3,7 +3,7 @@ import logging
 from asana.client import AsanaApiClient
 from asana.client.exception import AsanaApiClientError, AsanaForbiddenError, AsanaNotFoundError
 from asana.constants import ATLAS_WORKSPACE_ID
-from asana.models import AtlasUser
+from asana.models import AtlasAsanaUser
 from asana.repository import AsanaUserRepository
 from asana.services import AsanaCommentPrettifier, get_user_profile_url_mention_map
 from asana.utils import get_asana_profile_url_by_id
@@ -29,7 +29,7 @@ class CommentDataCollector:
             raise CommentDeletedError(msg) from error
         logging.info("Raw comment text: %s", comment_data["text"])
         comment_mentions_profile_ids = extract_user_profile_id_from_text(text=comment_data["text"])
-        mention_users: list[AtlasUser] = []
+        mention_users: list[AtlasAsanaUser] = []
         profile_url_not_found_in_db: list[str] = []
         for profile_id in comment_mentions_profile_ids:
             try:
@@ -39,7 +39,7 @@ class CommentDataCollector:
                 logging.exception("AsanaApiClientError")
                 profile_url = get_asana_profile_url_by_id(profile_id=profile_id, workspace_id=ATLAS_WORKSPACE_ID)
                 profile_url_not_found_in_db.append(profile_url)
-        profile_urls_mention_map = get_user_profile_url_mention_map(asana_users=AtlasUser.objects.all())
+        profile_urls_mention_map = get_user_profile_url_mention_map(asana_users=AtlasAsanaUser.objects.all())
         asana_comment_prettifier = AsanaCommentPrettifier(profile_urls_mention_map=profile_urls_mention_map)
         pretty_comment_text = asana_comment_prettifier.prettify(comment_text=comment_data["text"])
         return CommentDto(

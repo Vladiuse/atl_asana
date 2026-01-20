@@ -2,10 +2,10 @@ import re
 
 from django.db.models import QuerySet
 
-from .models import AtlasUser
+from .models import AtlasAsanaUser
 
 
-def get_user_profile_url_mention_map(asana_users: QuerySet[AtlasUser] | list[AtlasUser]) -> dict[str, str]:
+def get_user_profile_url_mention_map(asana_users: QuerySet[AtlasAsanaUser] | list[AtlasAsanaUser]) -> dict[str, str]:
     result = {}
     for user in asana_users:
         result.update(

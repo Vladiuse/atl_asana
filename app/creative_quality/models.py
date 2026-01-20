@@ -1,4 +1,4 @@
-from asana.models import AtlasUser
+from asana.models import AtlasAsanaUser
 from common.models import Country
 from constance import config
 from django.db import models, transaction
@@ -78,10 +78,10 @@ class Task(models.Model):
     def get_assignee_display(self) -> str:
         value = self.assignee_id
         try:
-            name = AtlasUser.objects.get(user_id=self.assignee_id).name
+            name = AtlasAsanaUser.objects.get(user_id=self.assignee_id).name
             if name:
                 value = name
-        except AtlasUser.DoesNotExist:
+        except AtlasAsanaUser.DoesNotExist:
             pass
         return value
 

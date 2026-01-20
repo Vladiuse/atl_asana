@@ -1,7 +1,7 @@
 from dataclasses import dataclass
 from typing import Any
 
-from asana.models import AtlasUser
+from asana.models import AtlasAsanaUser
 
 from comment_notifier.models import AsanaComment
 
@@ -13,7 +13,7 @@ class CommentDto:
     task_data: dict[str, Any]
     pretty_comment_text: str
     mentions_profile_ids: list[str]
-    mention_users: list[AtlasUser]
+    mention_users: list[AtlasAsanaUser]
     profile_url_not_found_in_db: list[str]
 
     @property

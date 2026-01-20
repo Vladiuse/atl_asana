@@ -6,7 +6,7 @@ from .constants import ATLAS_WORKSPACE_ID, AsanaResourceType, Position
 from .utils import get_asana_profile_url_by_id
 
 
-class AtlasUser(models.Model):
+class AtlasAsanaUser(models.Model):
     user_id = models.CharField(unique=True)
     membership_id = models.CharField(unique=True)
     email = models.EmailField(blank=True)

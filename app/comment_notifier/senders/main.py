@@ -2,7 +2,7 @@ import logging
 from typing import Callable
 
 from asana.constants import Position
-from asana.models import AtlasUser
+from asana.models import AtlasAsanaUser
 from message_sender.client import Handlers
 
 from comment_notifier.collectors.dto import CommentDto
@@ -76,12 +76,12 @@ class PersonalSender(BaseCommentSender):
 class SourceProjectSender(BaseCommentSender):
     """Send personal message for Buyer or manager, if farmer position - send sms to farmers chat."""
 
-    def _get_notifier_func(self, asana_user: AtlasUser) -> Callable[[AtlasUser, CommentDto], None]:
+    def _get_notifier_func(self, asana_user: AtlasAsanaUser) -> Callable[[AtlasAsanaUser, CommentDto], None]:
         if not all([asana_user.messenger_code, asana_user.position]):
             msg = f"User not have position on message code, user {asana_user.user_id}"
             raise CantNotifyError(msg)
 
-        registry: dict[Position, Callable[[AtlasUser, CommentDto], None]] = {
+        registry: dict[Position, Callable[[AtlasAsanaUser, CommentDto], None]] = {
             Position.FARMER: self._notify_farmer,
             Position.MANAGER: self._notify_bayer_or_manager,
             Position.BUYER: self._notify_bayer_or_manager,
@@ -89,7 +89,7 @@ class SourceProjectSender(BaseCommentSender):
 
         return registry.get(Position(asana_user.position), self._notify_not_target_position)
 
-    def _notify_farmer(self, asana_user: AtlasUser, comment_dto: CommentDto) -> None:
+    def _notify_farmer(self, asana_user: AtlasAsanaUser, comment_dto: CommentDto) -> None:
         _ = asana_user
         task_url = comment_dto.task_data["permalink_url"]
         task_name = comment_dto.task_data["name"]
@@ -105,7 +105,7 @@ class SourceProjectSender(BaseCommentSender):
             message=message,
         )
 
-    def _notify_bayer_or_manager(self, asana_user: AtlasUser, comment_dto: CommentDto) -> None:
+    def _notify_bayer_or_manager(self, asana_user: AtlasAsanaUser, comment_dto: CommentDto) -> None:
         task_name = comment_dto.task_data["name"]
         task_url = comment_dto.task_data["permalink_url"]
         message = f"""
@@ -120,7 +120,7 @@ class SourceProjectSender(BaseCommentSender):
             message=message,
         )
 
-    def _notify_not_target_position(self, asana_user: AtlasUser, comment_dto: CommentDto) -> None:
+    def _notify_not_target_position(self, asana_user: AtlasAsanaUser, comment_dto: CommentDto) -> None:
         _, _ = asana_user, comment_dto
 
     def notify(self, comment_dto: CommentDto) -> None:

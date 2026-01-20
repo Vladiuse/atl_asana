@@ -6,7 +6,7 @@ from typing import TYPE_CHECKING, Any
 
 from asana.client import AsanaApiClient
 from asana.client.exception import AsanaApiClientError
-from asana.models import AtlasUser
+from asana.models import AtlasAsanaUser
 from asana.services import AsanaCommentPrettifier, get_user_profile_url_mention_map
 from common.utils import normalize_multiline
 from django.db import transaction
@@ -242,7 +242,7 @@ class LoadCommentsAdditionalInfo:
             Q(text="") | Q(task_url=""),
             is_deleted=False,
         )
-        asana_users = AtlasUser.objects.all()
+        asana_users = AtlasAsanaUser.objects.all()
         profile_url_mention_map = get_user_profile_url_mention_map(asana_users=asana_users)
         asana_comment_prettifier = AsanaCommentPrettifier(profile_urls_mention_map=profile_url_mention_map)
         additional_info_comment_loader = LoadAdditionalInfoForComment(

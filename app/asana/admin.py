@@ -11,7 +11,7 @@ from asana.constants import ATLAS_WORKSPACE_ID
 from asana.repository import AsanaUserRepository
 from asana.utils import get_asana_profile_url_by_id
 
-from .models import AsanaWebhook, AsanaWebhookRequestData, AtlasUser, WebhookHandler
+from .models import AsanaWebhook, AsanaWebhookRequestData, AtlasAsanaUser, WebhookHandler
 
 message_sender = AtlasMessageSender(
     host=settings.MESSAGE_SENDER_HOST,
@@ -21,7 +21,7 @@ asana_api_client = AsanaApiClient(api_key=settings.ASANA_API_KEY)
 asana_user_repository = AsanaUserRepository(api_client=asana_api_client)
 
 
-@admin.register(AtlasUser)
+@admin.register(AtlasAsanaUser)
 class AtlasUserAdmin(admin.ModelAdmin):  # type: ignore[type-arg]
     list_display = (
         "user_id",
@@ -39,7 +39,7 @@ class AtlasUserAdmin(admin.ModelAdmin):  # type: ignore[type-arg]
     actions = ("send_test_sms_for_user", "update_asana_users")
 
     @admin.display(description="Avatar")
-    def avatar_preview(self, obj: AtlasUser) -> str:
+    def avatar_preview(self, obj: AtlasAsanaUser) -> str:
         if not obj.avatar_url:
             return ""
         return format_html(
@@ -48,7 +48,7 @@ class AtlasUserAdmin(admin.ModelAdmin):  # type: ignore[type-arg]
         )
 
     @admin.display(description="Профиль")
-    def asana_profile_link(self, obj: AtlasUser) -> str:
+    def asana_profile_link(self, obj: AtlasAsanaUser) -> str:
         profile_link = get_asana_profile_url_by_id(profile_id=obj.membership_id, workspace_id=ATLAS_WORKSPACE_ID)
         return format_html(
             '<a href="{}" target="_blank">Открыть</a>',
@@ -56,7 +56,7 @@ class AtlasUserAdmin(admin.ModelAdmin):  # type: ignore[type-arg]
         )
 
     @admin.action(description="Отправить тестовое смс в телеграм")
-    def send_test_sms_for_user(self, request: HttpRequest, queryset: QuerySet[AtlasUser]) -> None:
+    def send_test_sms_for_user(self, request: HttpRequest, queryset: QuerySet[AtlasAsanaUser]) -> None:
         errors_send_user = []
         success_send_count = 0
         for asana_user in queryset:
@@ -72,7 +72,7 @@ class AtlasUserAdmin(admin.ModelAdmin):  # type: ignore[type-arg]
         self.message_user(request, f"Успешно отправлено {success_send_count} сообщений", level=messages.SUCCESS)
 
     @admin.action(description="Обновить пользователей асаны (глобальный)")
-    def update_asana_users(self, request: HttpRequest, queryset: QuerySet[AtlasUser]) -> None:
+    def update_asana_users(self, request: HttpRequest, queryset: QuerySet[AtlasAsanaUser]) -> None:
         _ = queryset
         try:
             result = asana_user_repository.update_all()
