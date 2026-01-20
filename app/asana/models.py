@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from django.db import models
+from message_sender.models import AtlasUser
 
 from .constants import ATLAS_WORKSPACE_ID, AsanaResourceType, Position
 from .utils import get_asana_profile_url_by_id
@@ -14,6 +15,12 @@ class AtlasAsanaUser(models.Model):
     avatar_url = models.URLField(blank=True, max_length=254)
     messenger_code = models.CharField(
         max_length=32,
+        blank=True,
+    )
+    owner = models.ForeignKey(
+        to=AtlasUser,
+        on_delete=models.SET_NULL,
+        null=True,
         blank=True,
     )
     position = models.CharField(
