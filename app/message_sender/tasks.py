@@ -35,7 +35,7 @@ def send_message_task(self: Task, handler: Handlers, message: str) -> None:
     except Exception as error:  # noqa: BLE001
         self.retry(exc=error)
 
-
+@shared_task
 def update_messenger_users() -> dict[str, int]:
     service = UserService(message_sender_client=message_sender)
     return service.update_all_users()
