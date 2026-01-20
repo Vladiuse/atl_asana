@@ -34,9 +34,10 @@ class AtlasUserAdmin(admin.ModelAdmin):  # type: ignore[type-arg]
     )
     list_filter = ("role",)
     ordering = ("name",)
+    actions = ("update_messenger_users",)
 
     @admin.action(description="Обновить пользователей")
-    def create_mailganer_list(self, request: HttpRequest, queryset: QuerySet[AtlasUser]) -> None:
+    def update_messenger_users(self, request: HttpRequest, queryset: QuerySet[AtlasUser]) -> None:
         _ = queryset
         service = UserService(message_sender_client=message_sender)
         result = service.update_all_users()
