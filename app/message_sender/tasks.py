@@ -2,7 +2,8 @@
 from celery import Task, shared_task
 from django.conf import settings
 
-from message_sender.client import Handlers, AtlasMessageSender
+from message_sender.client import AtlasMessageSender, Handlers
+from message_sender.services import UserService
 
 message_sender = AtlasMessageSender(
     host=settings.MESSAGE_SENDER_HOST,
@@ -33,3 +34,8 @@ def send_message_task(self: Task, handler: Handlers, message: str) -> None:
         message_sender.send_message(handler=handler, message=message)
     except Exception as error:  # noqa: BLE001
         self.retry(exc=error)
+
+
+def update_messenger_users() -> dict[str, int]:
+    service = UserService(message_sender_client=message_sender)
+    return service.update_all_users()
