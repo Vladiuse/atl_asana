@@ -51,7 +51,7 @@ class PersonalSender(BaseCommentSender):
     def notify(self, comment_dto: CommentDto) -> None:
         logging.info("Sender: %s", self.__class__.__name__)
         for asana_user in comment_dto.mention_users:
-            if asana_user.owner is None or asana_user.owner.tag is None:
+            if asana_user.owner is None or not asana_user.owner.tag:
                 reason = f"User {asana_user.user_id} not have message tag to send message"
                 self._send_log_cant_notify(comment_dto=comment_dto, reason=reason)
             else:
