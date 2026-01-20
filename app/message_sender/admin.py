@@ -1,6 +1,17 @@
-from django.contrib import admin
+from django.conf import settings
+from django.contrib import admin, messages
+from django.db.models import QuerySet
+from django.http import HttpRequest
+
+from message_sender.client import AtlasMessageSender
+from message_sender.services import UserService
 
 from .models import AtlasUser
+
+message_sender = AtlasMessageSender(
+    host=settings.MESSAGE_SENDER_HOST,
+    api_key=settings.DOMAIN_MESSAGE_API_KEY,
+)
 
 
 @admin.register(AtlasUser)
@@ -23,3 +34,11 @@ class AtlasUserAdmin(admin.ModelAdmin):  # type: ignore[type-arg]
     )
     list_filter = ("role",)
     ordering = ("name",)
+
+    @admin.action(description="Обновить пользователей")
+    def create_mailganer_list(self, request: HttpRequest, queryset: QuerySet[AtlasUser]) -> None:
+        _ = queryset
+        service = UserService(message_sender_client=message_sender)
+        result = service.update_all_users()
+        message = str(result)
+        self.message_user(request, message, level=messages.ERROR)
