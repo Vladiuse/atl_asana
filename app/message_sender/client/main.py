@@ -29,6 +29,9 @@ class Handlers(Enum):
     DOMAIN_HANDLER = "domain_check"
     KVA_USER = "kva_test"
     FARM_GROUP = "asana_farm_comments"
+    SMS_SERVICE_BALANCE = "p1sms_balance"
+    OFFER_AWAKEN = "offer_reawake"
+    ONBOARDING = "onboarding"
 
 
 class AtlasMessageSender:
