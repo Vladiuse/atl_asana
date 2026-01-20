@@ -1,8 +1,8 @@
 import logging
 from collections.abc import Generator
-from dataclasses import asdict, dataclass
+from dataclasses import dataclass
 from time import sleep
-from typing import TYPE_CHECKING, Any
+from typing import Any
 
 from asana.client import AsanaApiClient
 from asana.client.exception import AsanaApiClientError
@@ -25,9 +25,6 @@ from .models import (
 )
 from .senders import BaseCommentSender
 from .senders.registry import SENDERS_REGISTRY
-
-if TYPE_CHECKING:
-    from .senders.dto import CommentSendMessageResult
 
 
 class ProcessAsanaNewCommentEvent:
@@ -81,7 +78,7 @@ class AsanaCommentNotifier:
     ):
         self.asana_api_client = asana_api_client
         self.message_sender = message_sender
-        self.comment_notifier = comment_notifier
+        self.comment_notifier: BaseCommentSender = comment_notifier
 
     def _notify_profiles_not_found(self, comment_dto: CommentDto) -> None:
         task_url = comment_dto.task_data["permalink_url"]
@@ -111,10 +108,9 @@ class AsanaCommentNotifier:
             return
         if len(comment_dto.profile_url_not_found_in_db) > 0:
             self._notify_profiles_not_found(comment_dto=comment_dto)
-        send_result: CommentSendMessageResult = self.comment_notifier.notify(comment_dto=comment_dto)
+        self.comment_notifier.notify(comment_dto=comment_dto)
         comment_model.has_mention = comment_dto.has_mention
-        comment_model.is_notified = send_result.is_send
-        comment_model.send_result = asdict(send_result)
+        comment_model.is_notified = True
         comment_model.task_url = comment_dto.task_data["permalink_url"]
         comment_model.text = comment_dto.pretty_comment_text
         comment_model.save()
