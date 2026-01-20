@@ -95,6 +95,8 @@ class TestSendEstimationMessageService:
         creative.task.bayer_code = bayer_code
         creative.reminder_failure_count = reminder_failure_count_start_value
         creative.reminder_fail_reason = ""
+        creative.reminder_success_count = 0
+        send_estimate_message_service.message_sender.send_message_to_user.side_effect = AtlasMessageSenderError("boom")  # type: ignore[attr-defined]
         send_estimate_message_service.send_reminder(creative=creative)
         if reminder_failure_count_start_value == 0:
             creative.mark_reminder_limit_reached.assert_not_called()
@@ -104,7 +106,7 @@ class TestSendEstimationMessageService:
         assert creative.reminder_failure_count == reminder_failure_count_start_value + 1
         assert creative.reminder_fail_reason != ""
         creative.save.assert_called()
-        send_estimate_message_service.message_sender.send_message_to_user.assert_not_called()  # type: ignore[attr-defined]
+        send_estimate_message_service.message_sender.send_message_to_user.assert_called()  # type: ignore[attr-defined]
 
     @pytest.mark.parametrize("reminder_failure_count_start_value", [0, SEND_REMINDER_TRY_COUNT])
     def test_error_send_message(
@@ -162,6 +164,6 @@ class TestSendEstimationMessageService:
             send_estimate_message_service.send_reminder(creative=creative)
         send_estimate_message_service.message_sender.send_message_to_user.assert_called_once()  # type: ignore[attr-defined]
         _, kwargs = send_estimate_message_service.message_sender.send_message_to_user.call_args  # type: ignore[attr-defined]
-        assert kwargs["user_tags"] == [self.VALID_USER_TAG]
+        assert kwargs["user_tag"] == self.VALID_USER_TAG
         assert task_name in kwargs["message"]
         assert url in kwargs["message"]

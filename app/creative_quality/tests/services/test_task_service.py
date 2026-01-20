@@ -11,11 +11,15 @@ from creative_quality.models import Task
 from creative_quality.services import TaskService
 
 FIELD_NAME = "TEST_FIELD"
+WORK_URL_FIELD_NAME = "WORK_URL"
 
 
 @pytest.fixture(autouse=True)
 def patch_constance() -> Generator[Any, Any]:
-    with override_config(DESIGN_TASK_BAYER_CUSTOM_FIELD_NAME=FIELD_NAME):
+    with override_config(
+        DESIGN_TASK_BAYER_CUSTOM_FIELD_NAME=FIELD_NAME,
+        DESIGN_TASK_LINK_ON_WORK_FIELD_NAME=WORK_URL_FIELD_NAME,
+    ):
         yield
 
 
@@ -28,6 +32,7 @@ GET_DTO_TEST_DATA = [
             "custom_fields": [
                 {"name": FIELD_NAME, "text_value": "XXX"},
                 {"name": "NAME", "text_value": "YYY"},
+                {"name": WORK_URL_FIELD_NAME, "text_value": "ZZZ"},
             ],
         },
         TaskService.TaskData(
@@ -35,7 +40,7 @@ GET_DTO_TEST_DATA = [
             name="NAME",
             url="URL",
             bayer_code="XXX",
-            work_url="work_url",
+            work_url="ZZZ",
         ),
     ),
     (
@@ -45,6 +50,7 @@ GET_DTO_TEST_DATA = [
             "permalink_url": "URL",
             "custom_fields": [
                 {"name": "NAME", "text_value": "YYY"},
+                {"name": WORK_URL_FIELD_NAME, "text_value": "ZZZ"},
             ],
         },
         TaskService.TaskData(
@@ -52,7 +58,7 @@ GET_DTO_TEST_DATA = [
             name="NAME",
             url="URL",
             bayer_code="",
-            work_url="work_url",
+            work_url="ZZZ",
         ),
     ),
     (

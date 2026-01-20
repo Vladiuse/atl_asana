@@ -41,10 +41,9 @@ class TestCreative:
     ) -> None:
         method = getattr(creative_model, method_name)
         method()
-        creative_model.next_reminder_at = next_reminder_at
         assert creative_model.status == status
         if next_reminder_at is not None:
-            assert creative_model.next_reminder_at == fixed_now
+            assert creative_model.next_reminder_at == fixed_now, f"actual: {creative_model.next_reminder_at}"
         else:
             assert creative_model.next_reminder_at is None
 
