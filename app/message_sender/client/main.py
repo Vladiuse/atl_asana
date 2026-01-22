@@ -63,6 +63,13 @@ class AtlasMessageSender:
         raise AtlasMessageSenderError(msg, response=None) from error
 
     def _validate_user_tag(self, user_tag: str) -> None:
+        """Validate user tag value.
+
+        Raises:
+            TypeError: If user_tag is not a string.
+            ValueError: If user_tag is an empty string.
+
+        """
         if not isinstance(user_tag, str):
             raise TypeError("Incorrect tag type, must be str")
         if user_tag == "":
@@ -127,6 +134,13 @@ class AtlasMessageSender:
         *,
         require_all: bool = True,
     ) -> dict[str, str | list[str]]:
+        """Send message to user by user tag.
+
+        Raises:
+            TypeError: Propagated from _validate_user_tag.
+            ValueError: Propagated from _validate_user_tag.
+
+        """
         self._validate_user_tag(user_tag=user_tag)
         return self.send_message_to_users(
             message=message,
@@ -138,9 +152,9 @@ class AtlasMessageSender:
     def send_log_message(self, message: str) -> dict[str, str | list[str]]:
         return self.send_message(handler=Handlers.KVA_USER, message=message)
 
-    def users(self) -> list[UserData]:
+    def users(self, timeout: int = REQUEST_TIMEOUT) -> list[UserData]:
         url = f"{self.base_url}/users"
-        response = self.session.get(url)
+        response = self.session.get(url, timeout=timeout)
         response.raise_for_status()
         response_data = response.json().get("result", {}).get("users")
         if response_data is None:
