@@ -179,5 +179,6 @@ trackers_data.json
 
 #my
 app/static/
+/app/_temp/
 service_account.json
 **/scripts/**/x.py

@@ -1,5 +1,6 @@
 [tool.ruff]
 line-length = 119
+exclude = ["_temp"]
 
 [tool.ruff.lint]
 fixable = ["ALL"]
