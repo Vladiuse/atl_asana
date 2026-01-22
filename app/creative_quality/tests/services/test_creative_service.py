@@ -82,7 +82,7 @@ class TestCreativeService:
 class TestSendEstimationMessageService:
     VALID_USER_TAG = "adm"
 
-    @pytest.mark.parametrize("bayer_code", ["", "123"])
+    @pytest.mark.parametrize("bayer_code", ["xxx", "yyy"])
     @pytest.mark.parametrize("reminder_failure_count_start_value", [0, SEND_REMINDER_TRY_COUNT])
     def test_incorrect_bayer_code(
         self,
