@@ -145,20 +145,15 @@ class SendEstimationMessageService:
         self.message_renderer = message_renderer
 
     def send_reminder(self, creative: Creative) -> None:
+        bayer_code = creative.task.bayer_code
+        user_tag = bayer_code.lower()
+        context = {
+            "task_name": creative.task.task_name,
+            "estimate_url": self._get_estimation_url(creative=creative),
+        }
+        message = self.message_renderer.render(template=self.message, context=context)
         try:
-            bayer_code = creative.task.bayer_code
-            user_tag = bayer_code.lower()
-            context = {
-                "task_name": creative.task.task_name,
-                "estimate_url": self._get_estimation_url(creative=creative),
-            }
-            message = self.message_renderer.render(template=self.message, context=context)
             self.message_sender.send_message_to_user(message=message, user_tag=user_tag)
-            creative.reminder_success_count += 1
-            if creative.reminder_success_count >= config.SEND_REMINDER_TRY_COUNT:
-                creative.mark_reminder_limit_reached(save=False)
-            else:
-                creative.next_reminder_at = timezone.now() + timedelta(hours=config.NEXT_SUCCESS_REMINDER_DELTA)
         except AtlasMessageSenderError as error:
             creative.reminder_failure_count += 1
             if creative.reminder_failure_count >= config.SEND_REMINDER_TRY_COUNT:
@@ -166,6 +161,12 @@ class SendEstimationMessageService:
             else:
                 creative.next_reminder_at = timezone.now() + timedelta(hours=config.FAILURE_RETRY_INTERVAL)
             creative.reminder_fail_reason = str(error)
+        else:
+            creative.reminder_success_count += 1
+            if creative.reminder_success_count >= config.SEND_REMINDER_TRY_COUNT:
+                creative.mark_reminder_limit_reached(save=False)
+            else:
+                creative.next_reminder_at = timezone.now() + timedelta(hours=config.NEXT_SUCCESS_REMINDER_DELTA)
         creative.save()
 
     def _get_estimation_url(self, creative: Creative) -> str:
