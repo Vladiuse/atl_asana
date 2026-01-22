@@ -34,6 +34,11 @@ class Handlers(Enum):
     ONBOARDING = "onboarding"
 
 
+class UserTag(Enum):
+    ADMIN = "adm"
+    KVA = "kva_tech"
+
+
 class AtlasMessageSender:
     def __init__(self, host: str, api_key: str):
         self.host = host
@@ -56,6 +61,12 @@ class AtlasMessageSender:
         else:
             msg = f"{AtlasMessageSenderError.__class__.__name__} {handler_name}: Ошибка запроса клиента, {error}"
         raise AtlasMessageSenderError(msg, response=None) from error
+
+    def _validate_user_tag(self, user_tag: str) -> None:
+        if not isinstance(user_tag, str):
+            raise TypeError("Incorrect tag type, must be str")
+        if user_tag == "":
+            raise ValueError("Tag cant be blank")
 
     @cached_property
     def base_url(self) -> str:
@@ -116,6 +127,7 @@ class AtlasMessageSender:
         *,
         require_all: bool = True,
     ) -> dict[str, str | list[str]]:
+        self._validate_user_tag(user_tag=user_tag)
         return self.send_message_to_users(
             message=message,
             user_tags=[user_tag],
