@@ -68,7 +68,9 @@ class Task(models.Model):
     created = models.DateTimeField(
         auto_now_add=True,
     )
-    load_failure_count = models.PositiveIntegerField(default=0)
+    load_failure_count = models.PositiveIntegerField(
+        default=0,
+    )
 
     objects = TaskManager()
 
@@ -129,16 +131,39 @@ class CreativeStatus(models.TextChoices):
 
 
 class Creative(models.Model):
-    task = models.OneToOneField(Task, on_delete=models.CASCADE, related_name="creative")
-    status = models.CharField(max_length=50, choices=CreativeStatus, default=CreativeStatus.WAITING)
-    need_rated_at = models.DateTimeField(null=True)
-    gsheet_sent = models.BooleanField(default=False)
-    created = models.DateTimeField(auto_now_add=True)
+    task = models.OneToOneField(
+        Task,
+        on_delete=models.CASCADE,
+        related_name="creative",
+    )
+    status = models.CharField(
+        max_length=50,
+        choices=CreativeStatus,
+        default=CreativeStatus.WAITING,
+    )
+    need_rated_at = models.DateTimeField(
+        null=True,
+    )
+    gsheet_sent = models.BooleanField(
+        default=False,
+    )
+    created = models.DateTimeField(
+        auto_now_add=True,
+    )
 
-    next_reminder_at = models.DateTimeField(null=True, blank=True)
-    reminder_success_count = models.PositiveIntegerField(default=0)
-    reminder_failure_count = models.PositiveIntegerField(default=0)
-    reminder_fail_reason = models.TextField(blank=True)
+    next_reminder_at = models.DateTimeField(
+        null=True,
+        blank=True,
+    )
+    reminder_success_count = models.PositiveIntegerField(
+        default=0,
+    )
+    reminder_failure_count = models.PositiveIntegerField(
+        default=0,
+    )
+    reminder_fail_reason = models.TextField(
+        blank=True,
+    )
 
     objects = CreativeManager()
 
@@ -196,7 +221,9 @@ class CreativeAdaptation(models.Model):
         related_name="adaptations",
         related_query_name="adaptation",
     )
-    name = models.CharField(max_length=255)
+    name = models.CharField(
+        max_length=255,
+    )
 
     def __str__(self) -> str:
         return f"<CreativeAdaptation:{self.name}>"
@@ -208,14 +235,28 @@ class CreativeGeoDataStatus(models.TextChoices):
 
 
 class CreativeGeoData(models.Model):
-    creative_adaptation = models.ForeignKey(CreativeAdaptation, on_delete=models.CASCADE, related_name="geo_data")
-    country = models.ForeignKey(Country, on_delete=models.CASCADE)
+    creative_adaptation = models.ForeignKey(
+        CreativeAdaptation,
+        on_delete=models.CASCADE,
+        related_name="geo_data",
+    )
+    country = models.ForeignKey(
+        Country,
+        on_delete=models.CASCADE,
+    )
     hook = models.FloatField()
     hold = models.FloatField()
     ctr = models.FloatField()
-    status = models.CharField(max_length=50, choices=CreativeGeoDataStatus)
-    comment = models.TextField(blank=True)
-    created = models.DateTimeField(auto_now_add=True)
+    status = models.CharField(
+        max_length=50,
+        choices=CreativeGeoDataStatus,
+    )
+    comment = models.TextField(
+        blank=True,
+    )
+    created = models.DateTimeField(
+        auto_now_add=True,
+    )
 
     class Meta:
         unique_together = ("creative_adaptation", "country")
@@ -225,10 +266,20 @@ class CreativeGeoData(models.Model):
 
 
 class CreativeProjectSection(models.Model):
-    section_id = models.CharField(max_length=30)
-    section_name = models.CharField(max_length=254, blank=True)
-    project_name = models.CharField(max_length=254, blank=True)
-    created = models.DateTimeField(auto_now_add=True)
+    section_id = models.CharField(
+        max_length=30,
+    )
+    section_name = models.CharField(
+        max_length=254,
+        blank=True,
+    )
+    project_name = models.CharField(
+        max_length=254,
+        blank=True,
+    )
+    created = models.DateTimeField(
+        auto_now_add=True,
+    )
 
     def __str__(self) -> str:
         return self.section_name if self.section_name else self.section_id
