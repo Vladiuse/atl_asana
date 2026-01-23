@@ -90,6 +90,7 @@ class CreativeGeoDataCreateView(View):
             {
                 "form": form,
                 "creative_adaptation": creative_adaptation,
+                "creative": creative_adaptation.creative,
             },
         )
 
@@ -108,6 +109,7 @@ class CreativeGeoDataCreateView(View):
         context = {
             "form": form,
             "creative_adaptation": creative_adaptation,
+            "creative": creative_adaptation.creative,
         }
         return render(request, self.template_name, context)
 
