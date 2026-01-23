@@ -41,9 +41,19 @@
         {%if creative.status != creative_statuses.RATED%}
         <form method="post" action="{% url 'creative_quality:creative_mark_estimate' creative.pk %}">
             {% csrf_token %}
+            {%if creative.is_can_be_complete%}
             <button type="submit" class="btn btn-success">
                 Завершить оценку
             </button>
+            {%else%}
+            <span disabled data-bs-toggle="tooltip" data-bs-placement="top"
+                title="Заполните данные по каждому из креативов">
+                <button type="submit" class="btn btn-success" disabled>
+                    Завершить оценку
+                </button>
+            </span>
+
+            {%endif%}
         </form>
         {%endif%}
     </div>
