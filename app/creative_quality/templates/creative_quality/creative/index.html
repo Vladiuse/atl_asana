@@ -37,7 +37,7 @@
             </tr>
         </tbody>
     </table>
-    <div class="d-flex flex-row gap-3 justify-content-between">
+    <div class="d-flex flex-row gap-3 justify-content-between mb-3 mt-3">
         {%if creative.status != creative_statuses.RATED%}
         <form method="post" action="{% url 'creative_quality:creative_mark_estimate' creative.pk %}">
             {% csrf_token %}
@@ -48,59 +48,86 @@
         {%endif%}
     </div>
 
-    {%for creative_adaptation in creative.adaptations.all%}
-    <div class="d-flex flex-row gap-3 justify-content-between">
-        <h3>{{creative_adaptation.name}}
-            {%if creative.is_can_be_updated%}
-            <a class="btn btn-primary" href="{% url 'creative_quality:creative_geo_data_create' creative_adaptation.pk%}">
-                Добавить данные по гео
-            </a>
-            {%endif%}
-        </h3>
+    <div class="accordion" id="adaptationsAccordion">
+
+        {% for creative_adaptation in creative.adaptations.all %}
+        <div class="accordion-item">
+
+            <h2 class="accordion-header" id="heading{{ creative_adaptation.pk }}">
+                <button class="accordion-button" type="button" data-bs-toggle="collapse"
+                    data-bs-target="#collapse{{ creative_adaptation.pk }}" aria-expanded="true"
+                    aria-controls="collapse{{ creative_adaptation.pk }}">
+                    {{ creative_adaptation.name }}
+                </button>
+            </h2>
+
+            <div id="collapse{{ creative_adaptation.pk }}" class="accordion-collapse collapse show"
+                aria-labelledby="heading{{ creative_adaptation.pk }}">
+                <div class="accordion-body">
+
+                    {% if creative.is_can_be_updated %}
+                    <div class="mb-3">
+                        <a class="btn btn-primary"
+                            href="{% url 'creative_quality:creative_geo_data_create' creative_adaptation.pk %}">
+                            Добавить данные по гео
+                        </a>
+                    </div>
+                    {% endif %}
+
+                    <table class="table table-bordered w-100 geo-data-table">
+                        <thead>
+                            <tr>
+                                <th>Country</th>
+                                <th>Status</th>
+                                <th>Hook</th>
+                                <th>Hold</th>
+                                <th>CTR</th>
+                                <th>Comment</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+
+                            {% for geo_data in creative_adaptation.geo_data.all %}
+                            <tr>
+                                <td>{{ geo_data.country }}</td>
+                                <td>{{ geo_data.status }}</td>
+                                <td>{{ geo_data.hook }}</td>
+                                <td>{{ geo_data.hold }}</td>
+                                <td>{{ geo_data.ctr }}</td>
+                                <td>{{ geo_data.comment|default:"-" }}</td>
+                                <td>
+                                    {% if creative.is_can_be_updated %}
+                                    <a class="btn btn-primary btn-sm"
+                                        href="{% url 'creative_quality:creative_geo_data' geo_data.pk %}">
+                                        <i class="fa-solid fa-pen-to-square"></i>
+                                    </a>
+                                    <button type="button" class="btn btn-danger btn-sm" data-bs-toggle="modal"
+                                        data-bs-target="#deleteGeoData" data-bs-geo-data-pk="{{ geo_data.pk }}"
+                                        data-bs-geo-data-country="{{ geo_data.country }}">
+                                        <i class="fa-solid fa-trash"></i>
+                                    </button>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="7" class="text-center text-muted">
+                                    No geo data
+                                </td>
+                            </tr>
+                            {% endfor %}
+
+                        </tbody>
+                    </table>
+
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+
     </div>
-    <table class="table table-bordered w-100 geo-data-table mt-3">
-        <thead>
-            <tr>
-                <th>Country</th>
-                <th>Status</th>
-                <th>Hook</th>
-                <th>Hold</th>
-                <th>CTR</th>
-                <th>Comment</th>
-                <th>Action</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for geo_data in creative_adaptation.geo_data.all %}
-            <tr>
-                <td>{{ geo_data.country }}</td>
-                <td>{{ geo_data.status }}</td>
-                <td>{{ geo_data.hook}}</td>
-                <td>{{ geo_data.hold}}</td>
-                <td>{{ geo_data.ctr }}</td>
-                <td>{{ geo_data.comment|default:"-"}}</td>
-                <td>
-                    {%if creative.is_can_be_updated %}
-                    <a class="btn btn-primary" href="{% url 'creative_quality:creative_geo_data' geo_data.pk%}">
-                        <i class="fa-solid fa-pen-to-square"></i>
-                    </a>
-                    <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#deleteGeoData"
-                        data-bs-geo-data-pk="{{geo_data.pk}}" data-bs-geo-data-country="{{geo_data.country}}">
-                        <i class="fa-solid fa-trash"></i>
-                    </button>
-                    {%endif%}
-                </td>
-            </tr>
-            {% empty %}
-            <tr>
-                <td colspan="6" class="text-center text-muted">
-                    No geo data
-                </td>
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
-    {%endfor%}
+
 </div>
 <div class="modal fade" id="deleteGeoData" tabindex="-1" aria-labelledby="deleteGeoDataLabel" aria-hidden="true">
     <div class="modal-dialog">
