@@ -62,8 +62,15 @@
             {% if form.non_field_errors %}
             <div class="alert alert-danger">
                 {{ form.non_field_errors }}
-            </div>
+            </div>да
             {% endif %}
+
+            <div class="mb-3">
+                <label class="form-label">
+                    Creative Adaptation:
+                </label>
+                <input type="text" class="form-control" disabled value="{{ form.creative_adaptation.name }}">
+            </div>
 
             <!-- status -->
             <div class="mb-3">
