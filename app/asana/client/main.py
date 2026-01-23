@@ -14,6 +14,7 @@ ReturnType = TypeVar("ReturnType")
 
 def asana_error_handler(func: Callable[..., ReturnType]) -> Callable[..., ReturnType]:
     """Автоматическая обработка ошибок для методов AsanaApiClient."""
+
     @wraps(func)
     def wrapper(self: "AsanaApiClient", *args: Any, **kwargs: Any) -> Any:  # noqa: ANN401
         try:
@@ -139,6 +140,16 @@ class AsanaApiClient:
 
     def mark_task_completed(self, task_id: str) -> dict[str, Any]:
         return self.update_task(task_id=task_id, data={"completed": True}, opt_fields=["completed", "name"])
+
+    @asana_error_handler
+    def get_sub_tasks(self, task_id: str) -> list[dict[str, Any]]:
+        response = requests.get(
+            f"{self.API_ENDPOINT}tasks/{task_id}/subtasks",
+            headers=self._auth_headers,
+            timeout=self.timeout,
+        )
+        response.raise_for_status()
+        return response.json()["data"]
 
     @asana_error_handler
     def get_workspace_memberships_for_user(self, user_id: int) -> list[dict[str, Any]]:
