@@ -53,7 +53,7 @@ class SendEstimationMessageUseCase:
 
 class SendCreativesToGoogleSheetUseCase:
     def _convert_creative_to_dto(self, creative_geo_data: CreativeGeoData) -> CreativeDto:
-        creative = creative_geo_data.creative
+        creative = creative_geo_data.creative_adaptation
         task = creative.task
         return CreativeDto(
             assignee=task.get_assignee_display(),

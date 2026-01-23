@@ -182,13 +182,26 @@ class Creative(models.Model):
         return url
 
 
+class CreativeAdaptation(models.Model):
+    creative = models.ForeignKey(
+        to=Creative,
+        on_delete=models.CASCADE,
+        related_name="adaptations",
+        related_query_name="adaptation",
+    )
+    name = models.CharField(max_length=255)
+
+    def __str__(self) -> str:
+        return f"<CreativeAdaptation:{self.name}>"
+
+
 class CreativeGeoDataStatus(models.TextChoices):
     ZASHEL = "зашел", "Зашел"
     NE_ZASHEL = "незашел", "Не зашел"
 
 
 class CreativeGeoData(models.Model):
-    creative = models.ForeignKey(Creative, on_delete=models.CASCADE, related_name="geo_data")
+    creative_adaptation = models.ForeignKey(CreativeAdaptation, on_delete=models.CASCADE, related_name="geo_data")
     country = models.ForeignKey(Country, on_delete=models.CASCADE)
     hook = models.FloatField()
     hold = models.FloatField()
@@ -198,10 +211,10 @@ class CreativeGeoData(models.Model):
     created = models.DateTimeField(auto_now_add=True)
 
     class Meta:
-        unique_together = ("creative", "country")
+        unique_together = ("creative_adaptation", "country")
 
     def __str__(self) -> str:
-        return f"{self.country}-{self.creative}"
+        return f"{self.country}-{self.creative_adaptation}"
 
 
 class CreativeProjectSection(models.Model):

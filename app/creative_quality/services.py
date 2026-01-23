@@ -1,17 +1,17 @@
 from dataclasses import dataclass
 from datetime import timedelta
-from typing import Any
 
 from asana.client import AsanaApiClient
 from asana.client.exception import AsanaApiClientError, AsanaForbiddenError, AsanaNotFoundError
 from common import MessageRenderer
 from constance import config
 from django.conf import settings
+from django.db import transaction
 from django.utils import timezone
 from message_sender.client import AtlasMessageSender
 from message_sender.client.exceptions import AtlasMessageSenderError
 
-from .models import Creative, CreativeProjectSection, Task, TaskStatus
+from .models import Creative, CreativeAdaptation, CreativeProjectSection, Task, TaskStatus
 
 
 @dataclass
@@ -35,25 +35,26 @@ class CreativeProjectSectionService:
         return [task["gid"] for task in section_tasks]
 
 
-@dataclass
-class TaskService:
-    asana_api_client: AsanaApiClient
+@dataclass(frozen=True)
+class CreativeSubTask:
+    name: str
 
-    @dataclass(frozen=True)
-    class TaskData:
-        assignee_id: str
-        name: str
-        bayer_code: str
-        url: str
-        work_url: str
 
-    def _get_task_dto(self, task_data: dict[str, Any]) -> TaskData:
-        """Get task dto.
+@dataclass(frozen=True)
+class CreativeTaskData:
+    assignee_id: str
+    name: str
+    bayer_code: str
+    url: str
+    work_url: str
 
-        Raises:
-             AsanaApiClientError
 
-        """
+class CreativeService:
+    def __init__(self, asana_api_client: AsanaApiClient):
+        self.asana_api_client = asana_api_client
+
+    def _get_task_dto(self, creative_task: Task) -> CreativeTaskData:
+        task_data = self.asana_api_client.get_task(task_id=creative_task.task_id)
         assignee_id = "" if task_data["assignee"] is None else task_data["assignee"]["gid"]
         task_name = task_data["name"]
         url = task_data["permalink_url"]
@@ -67,7 +68,7 @@ class TaskService:
             if field["name"] == config.DESIGN_TASK_LINK_ON_WORK_FIELD_NAME:
                 work_url = field.get("text_value", "")
                 break
-        return self.TaskData(
+        return CreativeTaskData(
             assignee_id=assignee_id,
             name=task_name,
             bayer_code=bayer_code,
@@ -75,24 +76,62 @@ class TaskService:
             work_url=work_url,
         )
 
-    def update(self, creative_task: Task) -> Task:
-        try:
-            task_data = self.asana_api_client.get_task(task_id=creative_task.task_id)
-            task_dto = self._get_task_dto(task_data=task_data)
-            creative_task.assignee_id = task_dto.assignee_id
-            creative_task.bayer_code = task_dto.bayer_code.strip().lower()
-            creative_task.task_name = task_dto.name
-            creative_task.url = task_dto.url
-            creative_task.work_url = task_dto.work_url
-            creative_task.status = TaskStatus.CREATED
+    def _get_sub_tasks(self, creative_task: Task) -> list[CreativeSubTask]:
+        sub_tasks_data = self.asana_api_client.get_sub_tasks(task_id=creative_task.task_id)
+        return [CreativeSubTask(name=sub_task["name"]) for sub_task in sub_tasks_data]
+
+    def update_task(self, creative_task: Task, task_dto: CreativeTaskData, *, save: bool = True) -> Task:
+        creative_task.assignee_id = task_dto.assignee_id
+        creative_task.bayer_code = task_dto.bayer_code.strip().lower()
+        creative_task.task_name = task_dto.name
+        creative_task.url = task_dto.url
+        creative_task.work_url = task_dto.work_url
+        if save:
             creative_task.save()
+        return creative_task
+
+    def create_creative(self, creative_task: Task) -> Creative | None:
+        try:
+            task_dto = self._get_task_dto(creative_task=creative_task)
+            sub_tasks = self._get_sub_tasks(creative_task=creative_task)
         except (AsanaNotFoundError, AsanaForbiddenError):
             creative_task.mark_deleted()
         except AsanaApiClientError:
             creative_task.mark_error_load_info()
-        return creative_task
+        else:
+            with transaction.atomic():
+                creative_task = self.update_task(creative_task=creative_task, task_dto=task_dto, save=False)
+                creative_task.status = TaskStatus.CREATED
+                creative_task.save()
+                need_rated_at = creative_task.created + timedelta(days=config.NEED_RATED_AT)
+                creative = Creative.objects.create(task=creative_task, need_rated_at=need_rated_at)
+                if len(sub_tasks) == 0:
+                    sub_tasks = [CreativeSubTask(name=task_dto.name)]
+                creative_adaptations_to_create = []
+                for sub_task in sub_tasks:
+                    creative_adaptation = CreativeAdaptation(
+                        name=sub_task.name,
+                        creative=creative,
+                    )
+                    creative_adaptations_to_create.append(creative_adaptation)
+                CreativeAdaptation.objects.bulk_create(creative_adaptations_to_create)
+                return creative
+        return None
 
-    def mark_completed(self, task: Task) -> None:
+    def end_estimate(self, creative: Creative) -> None:
+        creative.mark_rated()
+        # make asana task complete
+        try:
+            self.mark_task_completed(task=creative.task)
+        except AsanaApiClientError:
+            from .tasks import mark_asana_task_completed_task
+
+            mark_asana_task_completed_task.apply_async(  # type: ignore[attr-defined]
+                kwargs={"task_pk": creative.task.pk},
+                countdown=3600,
+            )
+
+    def mark_task_completed(self, task: Task) -> None:
         """Mark task completed.
 
         Raises:
@@ -105,32 +144,6 @@ class TaskService:
             task.save(update_fields=["is_completed"])
         except (AsanaNotFoundError, AsanaForbiddenError):
             task.mark_deleted()
-
-
-class CreativeService:
-    def __init__(self, asana_api_client: AsanaApiClient):
-        self.asana_api_client = asana_api_client
-        self.task_service = TaskService(asana_api_client=asana_api_client)
-
-    def create_creative(self, creative_task: Task) -> Creative | None:
-        creative_task = self.task_service.update(creative_task=creative_task)
-        if creative_task.status == TaskStatus.CREATED:
-            need_rated_at = creative_task.created + timedelta(days=config.NEED_RATED_AT)
-            return Creative.objects.create(task=creative_task, need_rated_at=need_rated_at)
-        return None
-
-    def end_estimate(self, creative: Creative) -> None:
-        creative.mark_rated()
-        # make asana task complete
-        try:
-            self.task_service.mark_completed(task=creative.task)
-        except AsanaApiClientError:
-            from .tasks import mark_asana_task_completed_task
-
-            mark_asana_task_completed_task.apply_async(  # type: ignore[attr-defined]
-                kwargs={"task_pk": creative.task.pk},
-                countdown=3600,
-            )
 
 
 class SendEstimationMessageService:

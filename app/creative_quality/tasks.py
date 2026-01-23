@@ -7,7 +7,7 @@ from django.conf import settings
 from message_sender.client import AtlasMessageSender
 
 from .models import Task
-from .services import CreativeProjectSectionService, CreativeService, SendEstimationMessageService, TaskService
+from .services import CreativeProjectSectionService, CreativeService, SendEstimationMessageService
 from .use_cases import (
     CreateCreativesForNewTasksUseCase,
     CreativesOverDueForEstimateUseCase,
@@ -27,10 +27,10 @@ message_renderer = MessageRenderer()
 
 @shared_task(bind=True, max_retries=1, default_retry_delay=1 * 3600)
 def mark_asana_task_completed_task(self: CeleryTask, task_pk: int) -> None:
-    task_service = TaskService(asana_api_client=asana_api_client)
+    task_service = CreativeService(asana_api_client=asana_api_client)
     try:
         task = Task.objects.get(pk=task_pk)
-        task_service.mark_completed(task=task)
+        task_service.mark_task_completed(task=task)
     except Exception as error:  # noqa: BLE001
         self.retry(exc=error)
 

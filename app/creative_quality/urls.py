@@ -27,7 +27,7 @@ urlpatterns = [
         name="creative_geo_data_delete",
     ),
     path(
-        "creative-geo-data/<int:creative_pk>/create-geo-data/",
+        "creative-geo-data/<int:creative_adaptation_pk>/create-geo-data/",
         views.CreativeGeoDataCreateView.as_view(),
         name="creative_geo_data_create",
     ),

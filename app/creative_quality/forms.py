@@ -3,7 +3,7 @@ from typing import Any
 from common.models import Country
 from django import forms
 
-from .models import Creative, CreativeGeoData, CreativeGeoDataStatus
+from .models import CreativeAdaptation, CreativeGeoData, CreativeGeoDataStatus
 
 
 class CreativeGeoDataForm(forms.ModelForm):  # type: ignore[type-arg]
@@ -44,8 +44,8 @@ class CreativeGeoDataForm(forms.ModelForm):  # type: ignore[type-arg]
         model = CreativeGeoData
         fields = ("hook", "hold", "ctr", "comment", "country", "status")
 
-    def __init__(self, *args: Any, creative: Creative, **kwargs: Any):  # noqa: ANN401
-        self.creative = creative
+    def __init__(self, *args: Any, creative_adaptation: CreativeAdaptation, **kwargs: Any):  # noqa: ANN401
+        self.creative_adaptation = creative_adaptation
         super().__init__(*args, **kwargs)
 
     def clean(self) -> dict[str, Any]:
@@ -56,7 +56,7 @@ class CreativeGeoDataForm(forms.ModelForm):  # type: ignore[type-arg]
         if (
             country
             and CreativeGeoData.objects.filter(
-                creative=self.creative,
+                creative_adaptation=self.creative_adaptation,
                 country=country,
             )
             .exclude(pk=self.instance.pk)
