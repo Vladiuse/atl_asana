@@ -35,7 +35,7 @@ GET_DTO_TEST_DATA = [
                 {"name": WORK_URL_FIELD_NAME, "text_value": "ZZZ"},
             ],
         },
-        TaskService.TaskData(
+        TaskService.CreativeTaskData(
             assignee_id="12345",
             name="NAME",
             url="URL",
@@ -53,7 +53,7 @@ GET_DTO_TEST_DATA = [
                 {"name": WORK_URL_FIELD_NAME, "text_value": "ZZZ"},
             ],
         },
-        TaskService.TaskData(
+        TaskService.CreativeTaskData(
             assignee_id="",
             name="NAME",
             url="URL",
@@ -83,13 +83,13 @@ def mock_asana_client() -> Mock:
 @pytest.mark.django_db
 class TestTaskService:
     @pytest.mark.parametrize(("data", "expected"), GET_DTO_TEST_DATA)
-    def test_get_task_dto(self, data: dict[str, Any], expected: TaskService.TaskData, mock_asana_client: Mock) -> None:
+    def test_get_task_dto(self, data: dict[str, Any], expected: TaskService.CreativeTaskData, mock_asana_client: Mock) -> None:
         service = TaskService(asana_api_client=mock_asana_client)
         if isinstance(expected, type) and issubclass(expected, Exception):
             with pytest.raises(expected):
-                service._get_task_dto(task_data=data)
+                service.get_task_dto(task_data=data)
         else:
-            assert service._get_task_dto(task_data=data) == expected
+            assert service.get_task_dto(task_data=data) == expected
 
     def test_mark_completed_no_error(self, mock_asana_client: Mock) -> None:
         task = Mock(spec=Task)
@@ -117,7 +117,7 @@ class TestTaskService:
     def test_update_success(self, mock_asana_client: Mock) -> None:
         task = Task.objects.create(task_id="x")
         service = TaskService(asana_api_client=mock_asana_client)
-        data = TaskService.TaskData(
+        data = TaskService.CreativeTaskData(
             assignee_id="assignee_id",
             bayer_code="bayer_code",
             name="name",
