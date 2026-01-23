@@ -22,10 +22,6 @@
                 <td><a href="{{ creative.task.url }}" target="_blank">открыть</a></td>
             </tr>
             <tr>
-                <th scope="row">Данных по страннам</th>
-                <td>{{creative.geo_data.all|length}}</td>
-            </tr>
-            <tr>
                 <th scope="row">Таск завершен</th>
                 <td>
                     {% if creative.task.is_completed %}
@@ -42,11 +38,7 @@
         </tbody>
     </table>
     <div class="d-flex flex-row gap-3 justify-content-between">
-        {%if creative.is_can_be_updated %}
-        <a class="btn btn-primary" href="{% url 'creative_quality:creative_geo_data_create' creative.pk%}">
-            Добавить данные по гео
-        </a>
-        {%if creative.geo_data.all%}
+        {%if creative.status != creative_statuses.RATED%}
         <form method="post" action="{% url 'creative_quality:creative_mark_estimate' creative.pk %}">
             {% csrf_token %}
             <button type="submit" class="btn btn-success">
@@ -54,9 +46,18 @@
             </button>
         </form>
         {%endif%}
-        {%endif%}
     </div>
 
+    {%for creative_adaptation in creative.adaptations.all%}
+    <div class="d-flex flex-row gap-3 justify-content-between">
+        <h3>{{creative_adaptation.name}}
+            {%if creative.is_can_be_updated%}
+            <a class="btn btn-primary" href="{% url 'creative_quality:creative_geo_data_create' creative_adaptation.pk%}">
+                Добавить данные по гео
+            </a>
+            {%endif%}
+        </h3>
+    </div>
     <table class="table table-bordered w-100 geo-data-table mt-3">
         <thead>
             <tr>
@@ -70,7 +71,7 @@
             </tr>
         </thead>
         <tbody>
-            {% for geo_data in creative.geo_data.all %}
+            {% for geo_data in creative_adaptation.geo_data.all %}
             <tr>
                 <td>{{ geo_data.country }}</td>
                 <td>{{ geo_data.status }}</td>
@@ -84,9 +85,7 @@
                         <i class="fa-solid fa-pen-to-square"></i>
                     </a>
                     <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#deleteGeoData"
-                        data-bs-geo-data-pk="{{geo_data.pk}}"
-                        data-bs-geo-data-country="{{geo_data.country}}"
-                        >
+                        data-bs-geo-data-pk="{{geo_data.pk}}" data-bs-geo-data-country="{{geo_data.country}}">
                         <i class="fa-solid fa-trash"></i>
                     </button>
                     {%endif%}
@@ -101,6 +100,7 @@
             {% endfor %}
         </tbody>
     </table>
+    {%endfor%}
 </div>
 <div class="modal fade" id="deleteGeoData" tabindex="-1" aria-labelledby="deleteGeoDataLabel" aria-hidden="true">
     <div class="modal-dialog">
@@ -109,7 +109,8 @@
                 <h5 class="modal-title" id="deleteGeoDataabel">Удалить</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
-            <form method="POST" id="geo-data-delete-form" data-base-url="{% url 'creative_quality:creative_geo_data_delete' 0 %}">
+            <form method="POST" id="geo-data-delete-form"
+                data-base-url="{% url 'creative_quality:creative_geo_data_delete' 0 %}">
                 {%csrf_token%}
                 <div class="modal-body">
                     <p class="text" id="geo-data-delete-info"></p>
