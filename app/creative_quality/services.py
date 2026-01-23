@@ -151,6 +151,7 @@ class SendEstimationMessageService:
     ✏️ Нужно оценить креатив:<br>
     Task: {{task_name}}<br>
     Estimate Link: {{estimate_url}}<br>
+    Task url: {{task_url}}
     """
 
     def __init__(self, message_sender: AtlasMessageSender, message_renderer: MessageRenderer):
@@ -163,6 +164,7 @@ class SendEstimationMessageService:
         context = {
             "task_name": creative.task.task_name,
             "estimate_url": self._get_estimation_url(creative=creative),
+            "task_url": creative.task.url,
         }
         message = self.message_renderer.render(template=self.message, context=context)
         try:
