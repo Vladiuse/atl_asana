@@ -172,6 +172,13 @@ class Creative(models.Model):
     def is_can_be_updated(self) -> bool:
         return self.status != CreativeStatus.RATED
 
+    def is_complete_geo_data(self) -> bool:
+        """Is all creative adaptations have one or more GeoData."""
+        return not self.adaptations.filter(geo_data__isnull=True).exists()
+
+    def is_can_be_complete(self) -> bool:
+        return self.is_complete_geo_data()
+
     def get_estimate_url(self, domain: str | None = None) -> str:
         url = reverse(
             "creative_quality:creative_detail",
