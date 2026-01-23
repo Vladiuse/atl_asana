@@ -145,8 +145,10 @@ class FetchMissingTasksUseCase:
                     except IntegrityError:
                         with_errors.append(task_id)
         if any([new_found, with_errors]):
-            message = f"⚠️ {self.__class__.__name__}:\n"
-            f"Found new_found:{new_found} missing creatives tasks, errors: {with_errors}"
+            message = (
+                f"⚠️ {self.__class__.__name__}:\n"
+                f"Found new_found:{new_found} missing creatives tasks, errors: {with_errors}"
+            )
             send_log_message_task.delay(message=message)  # type: ignore[attr-defined]
         return {"new_found": new_found, "with_errors": with_errors}
 
