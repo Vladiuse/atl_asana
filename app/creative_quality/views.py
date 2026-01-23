@@ -54,7 +54,8 @@ class CreativeGeoDataDetailView(View):
             {
                 "form": form,
                 "creative_geo_data": creative_geo_data,
-                "creative": creative_geo_data.creative_adaptation,
+                "creative_adaptation": creative_geo_data.creative_adaptation,
+                "creative": creative_geo_data.creative_adaptation.creative,
             },
         )
 
