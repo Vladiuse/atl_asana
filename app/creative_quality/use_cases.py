@@ -53,7 +53,8 @@ class SendEstimationMessageUseCase:
 
 class SendCreativesToGoogleSheetUseCase:
     def _convert_creative_to_dto(self, creative_geo_data: CreativeGeoData) -> CreativeDto:
-        creative = creative_geo_data.creative_adaptation
+        creative_adaptation = creative_geo_data.creative_adaptation
+        creative = creative_geo_data.creative_adaptation.creative
         task = creative.task
         return CreativeDto(
             assignee=task.get_assignee_display(),
@@ -67,6 +68,7 @@ class SendCreativesToGoogleSheetUseCase:
             status=creative_geo_data.status,
             comment=creative_geo_data.comment,
             country=creative_geo_data.country.iso_code,
+            adaptive_name=creative_adaptation.name,
         )
 
     def _get_client(self) -> Client:
@@ -88,16 +90,17 @@ class SendCreativesToGoogleSheetUseCase:
         creatives_to_send = (
             Creative.objects.need_send_to_gsheet()
             .select_related("task")
-            .prefetch_related("geo_data", "geo_data__country")
+            .prefetch_related("adaptations","adaptations__geo_data", "adaptations__geo_data__country")
         )
         send_result: list[dict[Any, Any]] = []
         for creative in creatives_to_send:
-            creatives_geo_data_dto = [
-                self._convert_creative_to_dto(creative_geo_data=creative_geo_data)
-                for creative_geo_data in creative.geo_data.all()
-            ]
+            creatives_dto_list = []
+            for adaptation in creative.adaptations.all():
+                for geo_data in adaptation.geo_data.all():
+                    creative_dto = self._convert_creative_to_dto(creative_geo_data=geo_data)
+                    creatives_dto_list.append(creative_dto)
             google_table = CreativeGoogleTable(client=client)
-            result = google_table.add_creatives(creatives=creatives_geo_data_dto)
+            result = google_table.add_creatives(creatives=creatives_dto_list)
             send_result.append(dict(result))
             creative.gsheet_sent = True
             creative.save()
@@ -116,6 +119,7 @@ class SendCreativesToGoogleSheetUseCase:
             link_on_work="link_on_work",
             status="STATUS",
             comment="comment text",
+            adaptive_name="adaptation name",
         )
         client = self._get_client()
         google_table = CreativeGoogleTable(client=client)

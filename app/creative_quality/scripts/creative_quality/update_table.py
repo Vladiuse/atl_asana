@@ -27,11 +27,12 @@ test_data = [
         comment="Первый тестовый креатив",
         country="AA",
         link_on_work="link on work",
+        adaptive_name="XXX",
     ),
     CreativeDto(
         assignee="Мария Петрова",
         bayer_code="B456",
-          hook=1,
+        hook=1,
         hold=1,
         ctr=1,
         task_name="Креатив №2",
@@ -40,6 +41,7 @@ test_data = [
         comment="Второй тестовый креатив",
         country="AA",
         link_on_work="link on work",
+        adaptive_name="YYY",
     ),
     CreativeDto(
         assignee="Сергей Смирнов",
@@ -53,6 +55,7 @@ test_data = [
         comment="Третий тестовый креатив",
         country="AA",
         link_on_work="link on work",
+        adaptive_name="ZZZ",
     ),
 ]
 

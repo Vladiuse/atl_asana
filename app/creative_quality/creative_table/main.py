@@ -42,6 +42,7 @@ class CreativeDto:
     status: str
     comment: str
     link_on_work: str
+    adaptive_name: str
 
 
 class CreativeGoogleTable:
@@ -52,6 +53,7 @@ class CreativeGoogleTable:
         return [
             "Дата",
             "Страна",
+            "Адаптив",
             "Task",
             "Url",
             "Ссылка на работу",
@@ -68,8 +70,9 @@ class CreativeGoogleTable:
     def _convert_creative_to_line(self, creative_dto: CreativeDto) -> list[str | int | float]:
         return [
             timezone.localtime().strftime("%Y-%m-%d %H:%M:%S"),
-            creative_dto.country,
             creative_dto.task_name,
+            creative_dto.country,
+            creative_dto.adaptive_name,
             creative_dto.task_url,
             creative_dto.link_on_work,
             creative_dto.assignee,
