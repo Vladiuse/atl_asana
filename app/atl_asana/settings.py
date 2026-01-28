@@ -64,6 +64,7 @@ INSTALLED_APPS = [
     "message_sender.apps.MessageSenderConfig",
     "creative_quality.apps.CreativeQualityConfig",
     "common.apps.CommonConfig",
+    "leave_events.apps.LeaveEventsConfig",
 ]
 
 MIDDLEWARE = [
