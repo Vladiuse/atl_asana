@@ -6,7 +6,7 @@ from django.http import HttpRequest
 from message_sender.client import AtlasMessageSender
 from message_sender.services import UserService
 
-from .models import AtlasUser
+from .models import AtlasUser, ScheduledMessage
 
 message_sender = AtlasMessageSender(
     host=settings.MESSAGE_SENDER_HOST,
@@ -43,3 +43,33 @@ class AtlasUserAdmin(admin.ModelAdmin):  # type: ignore[type-arg]
         result = service.update_all_users()
         message = str(result)
         self.message_user(request, message, level=messages.ERROR)
+
+
+
+
+@admin.register(ScheduledMessage)
+class ScheduledMessageAdmin(admin.ModelAdmin):  # type: ignore[type-arg]
+    list_display = (
+        "id",
+        "status",
+        "run_at",
+        "user_tag",
+        "handler",
+        "created_at",
+    )
+    list_filter = ("status",)
+    search_fields = ("user_tag", "handler", "text")
+    ordering = ("-run_at",)
+    readonly_fields = ("created_at",)
+
+    fieldsets = (
+        (None, {
+            "fields": ("status", "run_at", "text"),
+        }),
+        ("Target", {
+            "fields": ("user_tag", "handler"),
+        }),
+        ("Meta", {
+            "fields": ("created_at",),
+        }),
+    )
