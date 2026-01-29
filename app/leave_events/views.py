@@ -1,5 +1,5 @@
+from common.auth import BearerAuthentication
 from rest_framework import status
-from rest_framework.authentication import TokenAuthentication
 from rest_framework.decorators import action
 from rest_framework.generics import get_object_or_404
 from rest_framework.permissions import IsAuthenticated
@@ -14,7 +14,7 @@ from .serializers import LeaveNotificationDeleteSerializer, LeaveNotificationSer
 class LeaveNotificationView(ModelViewSet):  # type: ignore[type-arg]
     queryset = LeaveNotification.objects.all()
     serializer_class = LeaveNotificationSerializer
-    authentication_classes = (TokenAuthentication,)
+    authentication_classes = (BearerAuthentication,)
     permission_classes = (IsAuthenticated,)
 
     @action(detail=False, methods=["delete"], url_path="delete-by-ref")
