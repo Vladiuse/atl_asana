@@ -90,7 +90,7 @@ class SendCreativesToGoogleSheetUseCase:
         creatives_to_send = (
             Creative.objects.need_send_to_gsheet()
             .select_related("task")
-            .prefetch_related("adaptations","adaptations__geo_data", "adaptations__geo_data__country")
+            .prefetch_related("adaptations", "adaptations__geo_data", "adaptations__geo_data__country")
         )
         send_result: list[dict[Any, Any]] = []
         for creative in creatives_to_send:
@@ -176,11 +176,13 @@ class DataIntegrityCheckUseCase:
         creatives_qs = Creative.objects.filter(status=CreativeStatus.REMINDER_LIMIT_REACHED)
         if creatives_qs.exists():
             creatives_ids = creatives_qs.values_list("pk", flat=True)
-            message = f"⚠️ {self.__class__.__name__}:\n"
-            f"Found creatives with status {CreativeStatus.REMINDER_LIMIT_REACHED}: {creatives_ids}"
+            message = (f"⚠️ {self.__class__.__name__}:\n "
+                f"Found creatives with status {CreativeStatus.REMINDER_LIMIT_REACHED}: {creatives_ids}"
+            )
             send_log_message_task.delay(message=message)  # type: ignore[attr-defined]
 
     def execute(self) -> None:
         self._check_tasks_full_data()
         self._check_task_error_load_info()
         self._check_creatives_cant_send_message()
+
