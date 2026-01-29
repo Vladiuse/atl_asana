@@ -1,17 +1,31 @@
-from rest_framework.serializers import BaseSerializer
+from rest_framework import status
+from rest_framework.decorators import action
+from rest_framework.generics import get_object_or_404
+from rest_framework.request import Request
+from rest_framework.response import Response
 from rest_framework.viewsets import ModelViewSet
 
 from .models import LeaveNotification
-from .serializers import LeaveNotificationSerializer
-from .services import LeaveNotificationService
+from .serializers import LeaveNotificationDeleteSerializer, LeaveNotificationSerializer
 
 
 class LeaveNotificationView(ModelViewSet):  # type: ignore[type-arg]
     queryset = LeaveNotification.objects.all()
     serializer_class = LeaveNotificationSerializer
 
-    def perform_create(
-        self,
-        serializer: BaseSerializer,  # type: ignore[type-arg]
-    ) -> None:
-        LeaveNotificationService().create_notifications(validated_data=serializer.validated_data)
+    @action(detail=False, methods=["delete"], url_path="delete-by-ref")
+    def delete_by_ref(self, request: Request) -> Response:
+        serializer = LeaveNotificationDeleteSerializer(data=request.query_params)
+        serializer.is_valid(raise_exception=True)
+        instance = get_object_or_404(
+            LeaveNotification,
+            start_date=serializer.validated_data["start_date"],
+            employee=serializer.validated_data["employee"],
+        )
+        if instance.is_can_be_deleted():
+            instance.delete()
+            return Response(status=status.HTTP_204_NO_CONTENT)
+        data = {
+            "details": "Cant delete LeaveNotification",
+        }
+        return Response(status=status.HTTP_400_BAD_REQUEST, data=data)
