@@ -1,7 +1,7 @@
 from datetime import timedelta
 from typing import Any
 
-from django.db import models
+from django.db import models, transaction
 from django.utils import timezone
 from message_sender.models import ScheduledMessage
 
@@ -13,20 +13,21 @@ class LeaveType(models.TextChoices):
 
 class LeaveNotificationManager(models.Manager):  # type: ignore[type-arg]
     def create(self, **kwargs: Any) -> "LeaveNotification":  # noqa: ANN401
-        leave = super().create(**kwargs)
-        ScheduledMessage.objects.create(
-            run_at=timezone.now() + timedelta(minutes=5),
-            text=f"Отпуск создан: {leave.start_date} – {leave.end_date}",
-            user_tag="kva_tech",
-            reference_id=f"leave-{leave.pk}",
-        )
-        ScheduledMessage.objects.create(
-            run_at=leave.start_date - timedelta(weeks=2),
-            text=f"Напоминание: отпуск с {leave.start_date} по {leave.end_date}",
-            user_tag="kva_tech",
-            reference_id=f"leave-{leave.pk}",
-        )
-        return leave
+        with transaction.atomic():
+            leave = super().create(**kwargs)
+            ScheduledMessage.objects.create(
+                run_at=timezone.now() + timedelta(minutes=5),
+                text=f"Отпуск создан: {leave.start_date} – {leave.end_date}",
+                user_tag="kva_tech",
+                reference_id=f"leave-{leave.pk}",
+            )
+            ScheduledMessage.objects.create(
+                run_at=leave.start_date - timedelta(weeks=2),
+                text=f"Напоминание: отпуск с {leave.start_date} по {leave.end_date}",
+                user_tag="kva_tech",
+                reference_id=f"leave-{leave.pk}",
+            )
+            return leave
 
 
 class LeaveNotification(models.Model):
