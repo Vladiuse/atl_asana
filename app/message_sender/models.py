@@ -54,6 +54,11 @@ class ScheduledMessage(models.Model):
     created_at = models.DateTimeField(
         auto_now_add=True,
     )
+    reference_id = models.CharField(
+        max_length=100,
+        blank=True,
+        help_text="Logical connection to an object (e.g. leave-123) or other mark",
+    )
 
     objects = ScheduledMessageManager()
 
