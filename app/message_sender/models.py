@@ -1,5 +1,6 @@
 from django.core.exceptions import ValidationError
 from django.db import models
+from django.db.models import Q
 
 from message_sender.client import Handlers
 
@@ -18,6 +19,15 @@ class AtlasUser(models.Model):
         return self.name
 
 
+class ScheduledMessageQuerySet(models.QuerySet["ScheduledMessage"]):
+    def need_send(self) -> "ScheduledMessageQuerySet":
+        return self.filter(status=ScheduledMessageStatus.PENDING)
+
+
+class ScheduledMessageManager(models.Manager.from_queryset(ScheduledMessageQuerySet)):  # type: ignore[misc]
+    pass
+
+
 class ScheduledMessageStatus(models.TextChoices):
     PENDING = "pending", "Pending"
     SENT = "sent", "Sent"
@@ -25,14 +35,10 @@ class ScheduledMessageStatus(models.TextChoices):
 
 
 class ScheduledMessage(models.Model):
-    STATUS_PENDING = "pending"
-    STATUS_SENT = "sent"
-    STATUS_FAILED = "failed"
-
     status = models.CharField(
         max_length=20,
         choices=ScheduledMessageStatus,
-        default=STATUS_PENDING,
+        default=ScheduledMessageStatus,
     )
     run_at = models.DateTimeField()
     user_tag = models.CharField(
@@ -49,8 +55,18 @@ class ScheduledMessage(models.Model):
         auto_now_add=True,
     )
 
+    objects = ScheduledMessageManager()
+
     class Meta:
         indexes = (models.Index(fields=["status", "run_at"]),)
+        constraints = (
+            models.CheckConstraint(
+                condition=(
+                    Q(user_tag__isnull=False, handler__isnull=True) | Q(user_tag__isnull=True, handler__isnull=False)
+                ),
+                name="only_one_of_user_tag_or_handler",
+            ),
+        )
 
     def __str__(self) -> str:
         return f"{self.status} @ {self.run_at}"
