@@ -1,6 +1,6 @@
 [tool.ruff]
 line-length = 119
-exclude = ["_temp"]
+exclude = ["_temp", ".venv"]
 
 [tool.ruff.lint]
 fixable = ["ALL"]
