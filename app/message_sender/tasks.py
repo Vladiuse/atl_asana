@@ -5,6 +5,8 @@ from django.conf import settings
 from message_sender.client import AtlasMessageSender, Handlers
 from message_sender.services import UserService
 
+from .use_cases import SendScheduledMessagesUseCase
+
 message_sender = AtlasMessageSender(
     host=settings.MESSAGE_SENDER_HOST,
     api_key=settings.DOMAIN_MESSAGE_API_KEY,
@@ -39,3 +41,8 @@ def send_message_task(self: Task, handler: Handlers, message: str) -> None:
 def update_messenger_users() -> dict[str, int]:
     service = UserService(message_sender_client=message_sender)
     return service.update_all_users()
+
+
+@shared_task()
+def send_scheduled_messages_task() -> None:
+    SendScheduledMessagesUseCase(message_sender=message_sender).execute()
