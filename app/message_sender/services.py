@@ -1,7 +1,8 @@
 from django.db import transaction
 
-from .client import AtlasMessageSender
-from .models import AtlasUser
+from .client import AtlasMessageSender, Handlers
+from .client.exceptions import AtlasMessageSenderError
+from .models import AtlasUser, ScheduledMessage, ScheduledMessageStatus
 
 
 class UserService:
@@ -28,3 +29,22 @@ class UserService:
                 if created:
                     created_count += 1
         return {"created_count": created_count, "deleted_count": deleted_count}
+
+
+class MessageSenderService:
+    def __init__(self, message_sender: AtlasMessageSender):
+        self.message_sender = message_sender
+
+    def send(self, message: ScheduledMessage) -> None:
+        try:
+            if message.handler:
+                handler = Handlers(message.handler)
+                self.message_sender.send_message(handler=handler, message=message.text)
+            else:
+                self.message_sender.send_message_to_user(user_tag=message.user_tag, message=message.text)
+            message.status = ScheduledMessageStatus.SENT
+        except (TypeError, AtlasMessageSenderError):
+            message.status = ScheduledMessageStatus.FAILED
+            raise
+        finally:
+            message.save()
