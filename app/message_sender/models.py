@@ -38,7 +38,7 @@ class ScheduledMessage(models.Model):
     status = models.CharField(
         max_length=20,
         choices=ScheduledMessageStatus,
-        default=ScheduledMessageStatus,
+        default=ScheduledMessageStatus.PENDING,
     )
     run_at = models.DateTimeField()
     user_tag = models.CharField(
@@ -66,9 +66,7 @@ class ScheduledMessage(models.Model):
         indexes = (models.Index(fields=["status", "run_at"]),)
         constraints = (
             models.CheckConstraint(
-                condition=(
-                    Q(user_tag__isnull=False, handler__isnull=True) | Q(user_tag__isnull=True, handler__isnull=False)
-                ),
+                condition=(Q(user_tag="", handler__gt="")) | (Q(user_tag__gt="", handler="")),
                 name="only_one_of_user_tag_or_handler",
             ),
         )

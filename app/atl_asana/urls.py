@@ -7,4 +7,5 @@ urlpatterns = [
     path("asana/", include("asana.urls")),
     path("comment_notifier/", include("comment_notifier.urls")),
     path("creative-quality/", include("creative_quality.urls")),
+    path("leave-events/", include("leave_events.urls")),
 ]
