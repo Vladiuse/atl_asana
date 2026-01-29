@@ -3,13 +3,16 @@ from celery import Task, shared_task
 from django.conf import settings
 
 from message_sender.client import AtlasMessageSender, Handlers
-from message_sender.services import UserService
+from message_sender.services import MessageSenderService, UserService
 
 from .use_cases import SendScheduledMessagesUseCase
 
 message_sender = AtlasMessageSender(
     host=settings.MESSAGE_SENDER_HOST,
     api_key=settings.DOMAIN_MESSAGE_API_KEY,
+)
+sender_service = MessageSenderService(
+    message_sender=message_sender,
 )
 DELAY_RETRY = 60
 
@@ -37,6 +40,7 @@ def send_message_task(self: Task, handler: Handlers, message: str) -> None:
     except Exception as error:  # noqa: BLE001
         self.retry(exc=error)
 
+
 @shared_task
 def update_messenger_users() -> dict[str, int]:
     service = UserService(message_sender_client=message_sender)
@@ -45,4 +49,4 @@ def update_messenger_users() -> dict[str, int]:
 
 @shared_task()
 def send_scheduled_messages_task() -> None:
-    SendScheduledMessagesUseCase(message_sender=message_sender).execute()
+    SendScheduledMessagesUseCase(sender_service=sender_service).execute()
