@@ -85,6 +85,8 @@ class AtlasMessageSender:
         handler: Handlers,
         message: str,
         timeout: int = REQUEST_TIMEOUT,
+        *,
+        html: bool = False,
     ) -> dict[str, str | list[str]]:
         """Send message by handler.
 
@@ -96,6 +98,12 @@ class AtlasMessageSender:
             "title": handler.value,
             "text": message,
         }
+        if html:
+            data.update(
+                {
+                    "parse_mode": "HTML",
+                },
+            )
         url = f"{self.base_url}/alert/custom"
         response = self.session.post(url, json=data, timeout=timeout)
         response.raise_for_status()
