@@ -4,26 +4,26 @@ from typing import Any
 from common.message_renderer import render_message
 from django.db import models, transaction
 from django.utils import timezone
-from message_sender.models import ScheduledMessage
 from message_sender.client import Handlers
+from message_sender.models import ScheduledMessage
 
 TABLE_URL = "https://docs.google.com/spreadsheets/d/1bbo6WxBLGk24FeSRucCYkwuWu1cYafb_5XsVgBO1DnY/edit?gid=570923352#gid=570923352"
 NOTIFICATION_MESSAGE = """
-Запланирован отпуск  📅
-{{supervisor_tag}}
-Сотрудник {{employee}} согласовал {{leave_type}} в даты {{start_date}} - {{end_date}}
-Таблица отпусков: {{table_url}}
+<b>Запланирован {{leave_type|lower}}</b> 📅<br>
+{{supervisor_tag}}<br>
+Сотрудник {{employee}} согласовал {{leave_type}} в даты {{start_date}} - {{end_date}}<br>
+<a href="{{table_url}}">Таблицу отпусков Atlas</a>
 """
 
 REMIND_MESSAGE = """
-Начало отпуска ⏳
-{{supervisor_tag}}
-Сотрудник {{employee}} уходит в отпуска через 2 недели
-Отпуск: {{start_date}} - {{end_date}}
-Таблица отпусков: {{table_url}}
+<b>Начало отпуска ⏳</b><br>
+{{supervisor_tag}}<br>
+Сотрудник {{employee}} уходит в отпуска через 2 недели<br>
+Отпуск: {{start_date}} - {{end_date}}<br>
+<a href="{{table_url}}">Таблицу отпусков Atlas</a>
 """
 
-
+ 
 class LeaveType(models.TextChoices):
     VACATION = "VACATION", "Отпуск"
     DAY_OFF = "DAY_OFF", "Отгул"
@@ -35,6 +35,7 @@ class LeaveNotificationManager(models.Manager):  # type: ignore[type-arg]
             leave:LeaveNotification = super().create(**kwargs)
             context = {
                 "table_url": TABLE_URL,
+                "leave_type": LeaveType(leave.type).label,
                 "supervisor_tag": leave.supervisor_tag,
                 "employee": leave.employee,
                 "start_date": leave.start_date.strftime("%d.%m.%Y"),
@@ -49,7 +50,7 @@ class LeaveNotificationManager(models.Manager):  # type: ignore[type-arg]
 
             run_at = datetime.combine(
                 leave.start_date,
-                timezone.now().time(),
+                timezone.localtime(timezone.now()).time(),
             ) - timedelta(weeks=2)
             ScheduledMessage.objects.create(
                 run_at=run_at,
