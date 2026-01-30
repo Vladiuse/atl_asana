@@ -1,48 +1,67 @@
 <!DOCTYPE html>
 <html lang="ru">
+
 <head>
     <meta charset="UTF-8">
-    <title>Scheduled message {{ message.id }}</title>
+    <title>Scheduled messages</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
 </head>
+<style>
+    .bg-success-soft { background-color: #b7d7b7; color: #2f4f2f; }
+    .bg-danger-soft { background-color: #f5b7b1; color: #7f2f2f; }
+    .bg-secondary-soft { background-color: #d3d3d3; color: #4a4a4a; }
+</style>
 <body class="p-4">
 
-<div class="container">
-    <h1>Scheduled message #{{ message.id }}</h1>
+    <div class="container">
+        <h1>Scheduled messages</h1>
 
-    <table class="table table-bordered table-striped mt-3">
-        <tbody>
-            <tr>
-                <th scope="row">Status</th>
-                <td>{{ message.status }}</td>
-            </tr>
-            <tr>
-                <th scope="row">Run at</th>
-                <td>{{ message.run_at|date:"d.m.Y H:i" }}</td>
-            </tr>
-            <tr>
-                <th scope="row">User tag</th>
-                <td>{{ message.user_tag|default:"—" }}</td>
-            </tr>
-            <tr>
-                <th scope="row">Handler</th>
-                <td>{{ message.handler|default:"—" }}</td>
-            </tr>
-            <tr>
-                <th scope="row">Text</th>
-                <td><pre class="mb-0">{{ message.text }}</pre></td>
-            </tr>
-            <tr>
-                <th scope="row">Reference ID</th>
-                <td>{{ message.reference_id|default:"—" }}</td>
-            </tr>
-            <tr>
-                <th scope="row">Created at</th>
-                <td>{{ message.created_at|date:"d.m.Y H:i" }}</td>
-            </tr>
-        </tbody>
-    </table>
-</div>
+        <table class="table table-bordered table-striped mt-3">
+            <thead class="table-light">
+                <tr>
+                    <th>ID</th>
+                    <th>Status</th>
+                    <th>Run at</th>
+                    <th>User tag</th>
+                    <th>Handler</th>
+                    <th>Text</th>
+                    <th>Reference ID</th>
+                    <th>Created at</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for message in messages %}
+                <tr>
+                    <td>{{ message.id }}</td>
+                    <td>
+                        {% if message.status == 'pending' %}
+                        <span class="badge bg-secondary">{{ message.get_status_display }}</span>
+                        {% elif message.status == 'sent' %}
+                        <span class="badge bg-success">{{ message.get_status_display }}</span>
+                        {% elif message.status == 'failed' %}
+                        <span class="badge bg-danger">{{ message.get_status_display }}</span>
+                        {% else %}
+                        {{ message.status }}
+                        {% endif %}
+                    </td>
+                    <td>{{ message.run_at|date:"d.m.Y H:i" }}</td>
+                    <td>{{ message.user_tag|default:"—" }}</td>
+                    <td>{{ message.handler|default:"—" }}</td>
+                    <td>
+                        <pre class="mb-0">{{ message.text }}</pre>
+                    </td>
+                    <td>{{ message.reference_id|default:"—" }}</td>
+                    <td>{{ message.created_at|date:"d.m.Y H:i" }}</td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="8" class="text-center">Нет сообщений</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
 
 </body>
+
 </html>
