@@ -5,6 +5,7 @@ from common.message_renderer import render_message
 from django.db import models, transaction
 from django.utils import timezone
 from message_sender.models import ScheduledMessage
+from message_sender.client import Handlers
 
 TABLE_URL = "https://docs.google.com/spreadsheets/d/1bbo6WxBLGk24FeSRucCYkwuWu1cYafb_5XsVgBO1DnY/edit?gid=570923352#gid=570923352"
 NOTIFICATION_MESSAGE = """
@@ -42,7 +43,7 @@ class LeaveNotificationManager(models.Manager):  # type: ignore[type-arg]
             ScheduledMessage.objects.create(
                 run_at=timezone.now() + timedelta(minutes=5),
                 text=render_message(template=NOTIFICATION_MESSAGE, context=context),
-                user_tag="kva_tech",
+                handler=Handlers.HR_VACATION,
                 reference_id=f"leave-{leave.pk}",
             )
 
@@ -53,7 +54,7 @@ class LeaveNotificationManager(models.Manager):  # type: ignore[type-arg]
             ScheduledMessage.objects.create(
                 run_at=run_at,
                 text=render_message(template=REMIND_MESSAGE, context=context),
-                user_tag="kva_tech",
+                handler=Handlers.HR_VACATION,
                 reference_id=f"leave-{leave.pk}",
             )
             return leave
