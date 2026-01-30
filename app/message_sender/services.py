@@ -43,7 +43,7 @@ class MessageSenderService:
             else:
                 self.message_sender.send_message_to_user(user_tag=message.user_tag, message=message.text)
             message.status = ScheduledMessageStatus.SENT
-        except (TypeError, AtlasMessageSenderError):
+        except (ValueError, AtlasMessageSenderError):
             message.status = ScheduledMessageStatus.FAILED
             raise
         finally:

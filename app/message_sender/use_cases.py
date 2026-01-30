@@ -16,7 +16,7 @@ class SendScheduledMessagesUseCase:
         for message in ScheduledMessage.objects.need_send():
             try:
                 self.sender_service.send(message)
-            except (TypeError, AtlasMessageSenderError) as error:
+            except (ValueError, AtlasMessageSenderError) as error:
                 error_message = self.ERROR_TEMPLATE.format(
                     cls=self.__class__.__name__,
                     message_id=message.pk,

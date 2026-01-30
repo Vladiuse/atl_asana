@@ -43,7 +43,7 @@ class LeaveNotificationManager(models.Manager):  # type: ignore[type-arg]
             ScheduledMessage.objects.create(
                 run_at=timezone.now() + timedelta(minutes=5),
                 text=render_message(template=NOTIFICATION_MESSAGE, context=context),
-                handler=Handlers.HR_VACATION,
+                handler=Handlers.HR_VACATION.value,
                 reference_id=f"leave-{leave.pk}",
             )
 
@@ -54,7 +54,7 @@ class LeaveNotificationManager(models.Manager):  # type: ignore[type-arg]
             ScheduledMessage.objects.create(
                 run_at=run_at,
                 text=render_message(template=REMIND_MESSAGE, context=context),
-                handler=Handlers.HR_VACATION,
+                handler=Handlers.HR_VACATION.value,
                 reference_id=f"leave-{leave.pk}",
             )
             return leave
