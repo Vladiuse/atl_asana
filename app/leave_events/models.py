@@ -12,15 +12,15 @@ NOTIFICATION_MESSAGE = """
 <b>Запланирован {{leave_type|lower}}</b> 📅<br>
 {{supervisor_tag}}<br>
 Сотрудник {{employee}} согласовал {{leave_type}} в даты {{start_date}} - {{end_date}}<br>
-<a href="{{table_url}}">Таблицу отпусков Atlas</a>
+<a href="{{table_url}}">Таблица отпусков Atlas</a>
 """
 
 REMIND_MESSAGE = """
-<b>Начало отпуска ⏳</b><br>
+<b>Начало {{leave_type|lower}}a ⏳</b><br>
 {{supervisor_tag}}<br>
-Сотрудник {{employee}} уходит в отпуска через 2 недели<br>
+Сотрудник {{employee}} уходит в {{leave_type|lower}} через 2 недели<br>
 Отпуск: {{start_date}} - {{end_date}}<br>
-<a href="{{table_url}}">Таблицу отпусков Atlas</a>
+<a href="{{table_url}}">Таблица отпусков Atlas</a>
 """
 
  
