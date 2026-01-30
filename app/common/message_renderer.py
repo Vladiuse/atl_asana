@@ -15,8 +15,14 @@ class MessageRenderer:
         return self._postprocess(text)
 
     def _postprocess(self, text: str) -> str:
-        text = text.replace("\r", "").replace("<br>", "\n").replace("<tab>", " " * self.tab_size)
         if self.strip_newlines:
             lines = [line.strip() for line in text.split("\n")]
             text = "\n".join([line for line in lines if line])
-        return text
+        return text.replace("\r", "").replace("<br>", "\n").replace("<tab>", " " * self.tab_size)
+
+
+renderer = MessageRenderer()
+
+
+def render_message(template: str, context: dict[str, Any]) -> str:
+    return renderer.render(template=template, context=context)
