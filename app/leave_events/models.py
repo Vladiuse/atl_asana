@@ -11,7 +11,7 @@ TABLE_URL = "https://docs.google.com/spreadsheets/d/1bbo6WxBLGk24FeSRucCYkwuWu1c
 NOTIFICATION_MESSAGE = """
 <b>Запланирован {{leave_type|lower}}</b> 📅<br>
 {{supervisor_tag}}<br>
-Сотрудник {{employee}} согласовал {{leave_type}} в даты {{start_date}} - {{end_date}}<br>
+Сотрудник {{employee}} согласовал {{leave_type|lower}} в даты {{start_date}} - {{end_date}}<br>
 <a href="{{table_url}}">Таблица отпусков Atlas</a>
 """
 
