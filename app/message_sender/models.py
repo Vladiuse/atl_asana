@@ -1,6 +1,7 @@
 from django.core.exceptions import ValidationError
 from django.db import models
 from django.db.models import Q
+from django.utils import timezone
 
 from message_sender.client import Handlers
 
@@ -21,7 +22,7 @@ class AtlasUser(models.Model):
 
 class ScheduledMessageQuerySet(models.QuerySet["ScheduledMessage"]):
     def need_send(self) -> "ScheduledMessageQuerySet":
-        return self.filter(status=ScheduledMessageStatus.PENDING)
+        return self.filter(status=ScheduledMessageStatus.PENDING, run_at__lt=timezone.now())
 
 
 class ScheduledMessageManager(models.Manager.from_queryset(ScheduledMessageQuerySet)):  # type: ignore[misc]
