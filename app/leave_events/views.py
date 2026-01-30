@@ -1,4 +1,7 @@
 from common.auth import BearerAuthentication
+from django.http import HttpRequest, HttpResponse
+from django.shortcuts import render
+from message_sender.models import ScheduledMessage
 from rest_framework import status
 from rest_framework.decorators import action
 from rest_framework.generics import get_object_or_404
@@ -33,3 +36,11 @@ class LeaveNotificationView(ModelViewSet):  # type: ignore[type-arg]
             "details": "Cant delete LeaveNotification",
         }
         return Response(status=status.HTTP_400_BAD_REQUEST, data=data)
+
+
+def messages_list(request: HttpRequest) -> HttpResponse:
+    messages = ScheduledMessage.objects.filter(reference_id__startswith="leave-").order_by("-run_at")
+    content = {
+        "messages": messages,
+    }
+    return render(request, "message_sender/message_list.html", content)
