@@ -32,6 +32,7 @@ class Handlers(Enum):
     SMS_SERVICE_BALANCE = "p1sms_balance"
     OFFER_AWAKEN = "offer_reawake"
     ONBOARDING = "onboarding"
+    HR_VACATION = "hr_vacation"
 
 
 class UserTag(Enum):
