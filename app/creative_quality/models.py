@@ -234,6 +234,11 @@ class CreativeGeoDataStatus(models.TextChoices):
     NE_ZASHEL = "незашел", "Не зашел"
 
 
+class VideoType(models.TextChoices):
+    POST = "post", "Пост"
+    ADS = "ads", "Ads"
+
+
 class CreativeGeoData(models.Model):
     creative_adaptation = models.ForeignKey(
         CreativeAdaptation,
@@ -247,6 +252,12 @@ class CreativeGeoData(models.Model):
     hook = models.FloatField()
     hold = models.FloatField()
     ctr = models.FloatField()
+    spend = models.FloatField()
+    cpm = models.FloatField()
+    video_type = models.CharField(
+        max_length=30,
+        choices=VideoType,
+    )
     status = models.CharField(
         max_length=50,
         choices=CreativeGeoDataStatus,

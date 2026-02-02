@@ -92,6 +92,9 @@
                                 <th>Hook</th>
                                 <th>Hold</th>
                                 <th>CTR</th>
+                                <th>CPM</th>
+                                <th>Spend</th>
+                                <th>Video-Type</th>
                                 <th>Comment</th>
                                 <th>Action</th>
                             </tr>
@@ -100,11 +103,14 @@
 
                             {% for geo_data in creative_adaptation.geo_data.all %}
                             <tr>
-                                <td>{{ geo_data.country }}</td>
+                                <td>{{ geo_data.country.iso_code }}</td>
                                 <td>{{ geo_data.status }}</td>
                                 <td>{{ geo_data.hook }}</td>
                                 <td>{{ geo_data.hold }}</td>
                                 <td>{{ geo_data.ctr }}</td>
+                                <td>{{ geo_data.cpm }}</td>
+                                <td>{{ geo_data.spend }}</td>
+                                <td>{{ geo_data.get_video_type_display }}</td>
                                 <td>{{ geo_data.comment|default:"-" }}</td>
                                 <td>
                                     {% if creative.is_can_be_updated %}

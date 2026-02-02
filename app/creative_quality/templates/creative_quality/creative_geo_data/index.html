@@ -78,13 +78,12 @@
                     {{ form.status.label }}:
                 </label>
 
-               <select name="{{ form.status.html_name }}" id="{{ form.status.id_for_label }}" class="form-select">
-                {% for value, label in form.status.field.choices %}
-                    <option value="{{ value }}"
-                        {% if form.status.value|stringformat:"s" == value|stringformat:"s" %}selected{% endif %}>
+                <select name="{{ form.status.html_name }}" id="{{ form.status.id_for_label }}" class="form-select">
+                    {% for value, label in form.status.field.choices %}
+                    <option value="{{ value }}" {% if form.status.value|stringformat:"s" == value|stringformat:"s" %}selected{% endif %}>
                         {{ label }}
                     </option>
-                {% endfor %}
+                    {% endfor %}
                 </select>
 
                 {% if form.status.help_text %}
@@ -125,8 +124,7 @@
                     {{ form.hook.label }}:
                 </label>
 
-                <input type="text" name="{{ form.hook.html_name }}" id="{{ form.hook.id_for_label }}"
-                    value="{{ form.hook.value|default:'' }}" class="form-control">
+                <input type="text" name="{{ form.hook.html_name }}" id="{{ form.hook.id_for_label }}" value="{{ form.hook.value|default:'' }}" class="form-control">
 
 
                 {% if form.hook.help_text %}
@@ -144,8 +142,7 @@
                     {{ form.hold.label }}:
                 </label>
 
-                <input type="text" name="{{ form.hold.html_name }}" id="{{ form.hold.id_for_label }}"
-                    value="{{ form.hold.value|default:'' }}" class="form-control">
+                <input type="text" name="{{ form.hold.html_name }}" id="{{ form.hold.id_for_label }}" value="{{ form.hold.value|default:'' }}" class="form-control">
 
                 {% if form.hold.help_text %}
                 <div class="form-text">{{ form.hold.help_text }}</div>
@@ -162,8 +159,7 @@
                     {{ form.ctr.label }}:
                 </label>
 
-                <input type="text" name="{{ form.ctr.html_name }}" id="{{ form.ctr.id_for_label }}"
-                    value="{{ form.ctr.value|default:'' }}" class="form-control">
+                <input type="text" name="{{ form.ctr.html_name }}" id="{{ form.ctr.id_for_label }}" value="{{ form.ctr.value|default:'' }}" class="form-control">
 
                 {% if form.ctr.help_text %}
                 <div class="form-text">{{ form.ctr.help_text }}</div>
@@ -173,14 +169,67 @@
                 <div class="text-danger small">{{ error }}</div>
                 {% endfor %}
             </div>
+            <!-- cpm -->
+            <div class="mb-3">
+                <label for="{{ form.cpm.id_for_label }}" class="form-label">
+                    {{ form.cpm.label }}:
+                </label>
+
+                <input type="text" name="{{ form.cpm.html_name }}" id="{{ form.cpm.id_for_label }}" value="{{ form.cpm.value|default:'' }}" class="form-control">
+
+                {% if form.cpm.help_text %}
+                <div class="form-text">{{ form.cpm.help_text }}</div>
+                {% endif %}
+
+                {% for error in form.cpm.errors %}
+                <div class="text-danger small">{{ error }}</div>
+                {% endfor %}
+            </div>
+            <!-- spend -->
+            <div class="mb-3">
+                <label for="{{ form.spend.id_for_label }}" class="form-label">
+                    {{ form.spend.label }}:
+                </label>
+
+                <input type="text" name="{{ form.spend.html_name }}" id="{{ form.spend.id_for_label }}" value="{{ form.spend.value|default:'' }}" class="form-control">
+
+                {% if form.spend.help_text %}
+                <div class="form-text">{{ form.spend.help_text }}</div>
+                {% endif %}
+
+                {% for error in form.spend.errors %}
+                <div class="text-danger small">{{ error }}</div>
+                {% endfor %}
+            </div>
+            <!-- video_type -->
+            <div class="mb-3">
+                <label for="{{ form.video_type.id_for_label }}" class="form-label">
+                    {{ form.video_type.label }}:
+                </label>
+
+                <select name="{{ form.video_type.html_name }}" id="{{ form.video_type.id_for_label }}" class="form-select">
+                    {% for value, label in form.video_type.field.choices %}
+                    <option value="{{ value }}" {% if value|stringformat:"s" == form.video_type.value|stringformat:"s" %}selected{% endif %}>
+                        {{ label }}
+                    </option>
+                    {% endfor %}
+                </select>
+
+                {% if form.video_type.help_text %}
+                <div class="form-text">{{ form.video_type.help_text }}</div>
+                {% endif %}
+
+                {% for error in form.video_type.errors %}
+                <div class="text-danger small">{{ error }}</div>
+                {% endfor %}
+            </div>
             <!-- comment -->
             <div class="mb-3">
                 <label for="{{ form.comment.id_for_label }}" class="form-label">
                     {{ form.comment.label }}:
                 </label>
 
-                <textarea type="text" name="{{ form.comment.html_name }}" id="{{ form.comment.id_for_label }}"
-                    class="form-control">{{ form.comment.value|default:'' }}</textarea>
+                <textarea type="text" name="{{ form.comment.html_name }}" id="{{ form.comment.id_for_label }}" class="form-control">{{ form.comment.value|default:'' }}</textarea>
 
                 {% if form.comment.help_text %}
                 <div class="form-text">{{ form.comment.help_text }}</div>
@@ -191,7 +240,7 @@
                 {% endfor %}
             </div>
 
-            <button type="submit" class="btn btn-primary" >
+            <button type="submit" class="btn btn-primary">
                 Сохранить
                 <div class="spinner-grow text-light" role="status" style="display: none;">
                     <span class="visually-hidden">Loading...</span>

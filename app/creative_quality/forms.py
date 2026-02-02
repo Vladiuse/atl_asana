@@ -3,7 +3,7 @@ from typing import Any
 from common.models import Country
 from django import forms
 
-from .models import CreativeAdaptation, CreativeGeoData, CreativeGeoDataStatus
+from .models import CreativeAdaptation, CreativeGeoData, CreativeGeoDataStatus, VideoType
 
 
 class CreativeGeoDataForm(forms.ModelForm):  # type: ignore[type-arg]
@@ -34,6 +34,22 @@ class CreativeGeoDataForm(forms.ModelForm):  # type: ignore[type-arg]
         help_text="Укажите значение CTR в %",
         decimal_places=2,
     )
+    cpm = forms.DecimalField(
+        label="CPM",
+        help_text="Укажите значение CPM в $",
+        decimal_places=2,
+    )
+    spend = forms.DecimalField(
+        label="Spend",
+        help_text="Укажите траты в $",
+        decimal_places=2,
+    )
+    video_type = forms.ChoiceField(
+        choices=[("", "— выберите тип видео —"), *VideoType.choices],
+        label="Video",
+        initial="",
+        help_text="Укажите тип видео",
+    )
     comment = forms.CharField(
         required=False,
         label="Комментарий",
@@ -42,7 +58,17 @@ class CreativeGeoDataForm(forms.ModelForm):  # type: ignore[type-arg]
 
     class Meta:
         model = CreativeGeoData
-        fields = ("hook", "hold", "ctr", "comment", "country", "status")
+        fields = (
+            "hook",
+            "hold",
+            "ctr",
+            "cpm",
+            "spend",
+            "comment",
+            "country",
+            "video_type",
+            "status",
+        )
 
     def __init__(self, *args: Any, creative_adaptation: CreativeAdaptation, **kwargs: Any):  # noqa: ANN401
         self.creative_adaptation = creative_adaptation

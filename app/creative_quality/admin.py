@@ -69,7 +69,19 @@ class CreativeAdaptationAdmin(admin.ModelAdmin):  # type: ignore[type-arg]
 
 @admin.register(CreativeGeoData)
 class CreativeGeoDataAdmin(admin.ModelAdmin):  # type: ignore[type-arg]
-    list_display = ("creative_adaptation", "status", "country", "hook", "hold", "ctr", "short_comment", "created")
+    list_display = (
+        "creative_adaptation",
+        "status",
+        "country",
+        "hook",
+        "hold",
+        "ctr",
+        "cpm",
+        "video_type",
+        "spend",
+        "short_comment",
+        "created",
+    )
     ordering = ("creative_adaptation",)
 
     @admin.display(description="Comment")
