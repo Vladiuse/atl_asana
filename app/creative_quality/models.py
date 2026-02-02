@@ -235,7 +235,8 @@ class CreativeGeoDataStatus(models.TextChoices):
 
 
 class VideoType(models.TextChoices):
-    POST = "post", "Пост"
+    POST_WITH_BUTTON = "post_w_button", "Пост с кнопкой"
+    POST_WITHOUT_BUTTON = "post_without_button", "Пост без кнопки"
     ADS = "ads", "Ads"
 
 
