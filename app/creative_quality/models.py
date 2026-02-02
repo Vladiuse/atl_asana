@@ -262,9 +262,7 @@ class CreativeGeoData(models.Model):
         max_length=50,
         choices=CreativeGeoDataStatus,
     )
-    comment = models.TextField(
-        blank=True,
-    )
+    comment = models.TextField()
     created = models.DateTimeField(
         auto_now_add=True,
     )

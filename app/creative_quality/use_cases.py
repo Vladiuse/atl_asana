@@ -69,6 +69,9 @@ class SendCreativesToGoogleSheetUseCase:
             comment=creative_geo_data.comment,
             country=creative_geo_data.country.iso_code,
             adaptive_name=creative_adaptation.name,
+            cpm=creative_geo_data.cpm,
+            spend=creative_geo_data.spend,
+            video_type=creative_geo_data.video_type,
         )
 
     def _get_client(self) -> Client:
@@ -120,6 +123,9 @@ class SendCreativesToGoogleSheetUseCase:
             status="STATUS",
             comment="comment text",
             adaptive_name="adaptation name",
+            cpm=50,
+            spend=100,
+            video_type="type",
         )
         client = self._get_client()
         google_table = CreativeGoogleTable(client=client)

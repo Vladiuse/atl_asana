@@ -43,7 +43,9 @@ class CreativeDto:
     comment: str
     link_on_work: str
     adaptive_name: str
-
+    cpm: float
+    spend: float
+    video_type: str
 
 class CreativeGoogleTable:
     def __init__(self, client: Client):
@@ -62,9 +64,11 @@ class CreativeGoogleTable:
             "Hook %",
             "Hold %",
             "CTR %",
+            "CPM",
+            "Spend",
+            "Video-type",
             "Статус",
             "Комментарий",
-            "Прим. от дизайнера",
         ]
 
     def _convert_creative_to_line(self, creative_dto: CreativeDto) -> list[str | int | float]:
@@ -80,6 +84,9 @@ class CreativeGoogleTable:
             creative_dto.hook,
             creative_dto.hold,
             creative_dto.ctr,
+            creative_dto.cpm,
+            creative_dto.spend,
+            creative_dto.video_type,
             creative_dto.status,
             creative_dto.comment,
         ]
@@ -97,7 +104,7 @@ class CreativeGoogleTable:
         )
         sheet.insert_row([], index=2)
         sheet.format(
-            "A2:M2",
+            "A2:P2",
             {
                 "backgroundColor": {"red": 1, "green": 1, "blue": 1},
                 "textFormat": {"bold": False},

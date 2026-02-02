@@ -51,9 +51,8 @@ class CreativeGeoDataForm(forms.ModelForm):  # type: ignore[type-arg]
         help_text="Укажите тип видео",
     )
     comment = forms.CharField(
-        required=False,
-        label="Комментарий",
-        help_text="Можно оставить пустым",
+        label="Выводы по креативу",
+        min_length=10,
     )
 
     class Meta:
