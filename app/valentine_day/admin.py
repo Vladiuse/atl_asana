@@ -11,5 +11,5 @@ class CustomerAdmin(admin.ModelAdmin):  # type: ignore[type-arg]
     @admin.display(description="Img")
     def image_tag(self, obj: Customer) -> str:
         if obj.image:
-            return format_html('<img src="{}" style="height:50px;"/>', obj.image.url)
+            return format_html('<img src="{}" style="height:60px;"/>', obj.image.url)
         return "-"
