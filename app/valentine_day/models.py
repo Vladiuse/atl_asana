@@ -3,7 +3,7 @@ from django.db import models
 
 class Customer(models.Model):
     image = models.ImageField(
-        upload_to="images/",
+        upload_to="valentine_day/images/avatars",
         blank=True,
         max_length=255,
     )
