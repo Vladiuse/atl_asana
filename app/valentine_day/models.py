@@ -1,7 +1,7 @@
 from django.db import models
 
 
-class Customer(models.Model):
+class Employee(models.Model):
     image = models.ImageField(
         upload_to="valentine_day/images/avatars",
         blank=True,

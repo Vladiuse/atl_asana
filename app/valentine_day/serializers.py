@@ -1,11 +1,11 @@
 from rest_framework import serializers
 
-from .models import Customer
+from .models import Employee
 
 
 class CustomerSerializer(serializers.ModelSerializer):  # type: ignore[type-arg]
 
     class Meta:
-        model = Customer
+        model = Employee
         fields = "__all__"
 
