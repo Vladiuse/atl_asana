@@ -66,6 +66,7 @@ INSTALLED_APPS = [
     "creative_quality.apps.CreativeQualityConfig",
     "common.apps.CommonConfig",
     "leave_events.apps.LeaveEventsConfig",
+    "valentine_day.apps.ValentineDayConfig",
 ]
 
 MIDDLEWARE = [
