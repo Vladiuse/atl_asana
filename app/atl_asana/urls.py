@@ -1,3 +1,5 @@
+from django.conf import settings
+from django.conf.urls.static import static
 from django.contrib import admin
 from django.urls import include, path
 
@@ -8,4 +10,5 @@ urlpatterns = [
     path("comment_notifier/", include("comment_notifier.urls")),
     path("creative-quality/", include("creative_quality.urls")),
     path("leave-events/", include("leave_events.urls")),
+    * static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT),
 ]
