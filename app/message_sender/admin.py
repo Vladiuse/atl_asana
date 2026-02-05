@@ -55,6 +55,7 @@ class ScheduledMessageAdmin(admin.ModelAdmin):  # type: ignore[type-arg]
         "run_at",
         "user_tag",
         "handler",
+        "text",
         "created_at",
     )
     list_filter = ("status",)
