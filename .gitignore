@@ -180,5 +180,6 @@ trackers_data.json
 #my
 app/static/
 /app/_temp/
+/app/media/
 service_account.json
 **/scripts/**/x.py
