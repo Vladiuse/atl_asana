@@ -24,16 +24,27 @@ REMIND_MESSAGE = """
 <a href="{{table_url}}">Таблица отпусков Atlas</a>
 """
 
- 
+
 class LeaveType(models.TextChoices):
     VACATION = "VACATION", "Отпуск"
     DAY_OFF = "DAY_OFF", "Отгул"
 
 
+class LeaveNotificationQuerySet(models.QuerySet["LeaveNotification"]):
+    def delete(self, *args: Any, **kwargs: Any) -> tuple[int, dict[str, Any]]:  # noqa: ANN401
+        _ = args, kwargs
+        for obj in self:
+            obj.delete()
+        return len(self), {}
+
+
 class LeaveNotificationManager(models.Manager):  # type: ignore[type-arg]
+    def get_queryset(self) -> LeaveNotificationQuerySet:
+        return LeaveNotificationQuerySet(self.model, using=self._db)
+
     def create(self, **kwargs: Any) -> "LeaveNotification":  # noqa: ANN401
         with transaction.atomic():
-            leave:LeaveNotification = super().create(**kwargs)
+            leave: LeaveNotification = super().create(**kwargs)
             context = {
                 "table_url": TABLE_URL,
                 "leave_type": LeaveType(leave.type).label,
