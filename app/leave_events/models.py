@@ -2,6 +2,7 @@ from datetime import datetime, timedelta
 from typing import Any
 
 from common.message_renderer import render_message
+from constance import config
 from django.db import models, transaction
 from django.utils import timezone
 from message_sender.client import Handlers
@@ -42,7 +43,7 @@ class LeaveNotificationManager(models.Manager):  # type: ignore[type-arg]
                 "end_date": leave.end_date.strftime("%d.%m.%Y"),
             }
             ScheduledMessage.objects.create(
-                run_at=timezone.now() + timedelta(minutes=5),
+                run_at=timezone.now() + timedelta(minutes=config.SEND_NOTIFICATION_DELAY),
                 text=render_message(template=NOTIFICATION_MESSAGE, context=context),
                 handler=Handlers.HR_VACATION.value,
                 reference_id=f"leave-{leave.pk}",
@@ -51,7 +52,7 @@ class LeaveNotificationManager(models.Manager):  # type: ignore[type-arg]
             run_at = datetime.combine(
                 leave.start_date,
                 timezone.localtime(timezone.now()).time(),
-            ) - timedelta(weeks=2)
+            ) - timedelta(days=config.SEND_REMINDER_DELAY)
             ScheduledMessage.objects.create(
                 run_at=run_at,
                 text=render_message(template=REMIND_MESSAGE, context=context),

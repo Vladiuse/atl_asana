@@ -6,6 +6,8 @@ from asana.constance_settings import CONSTANCE_CONFIG_FIELDSETS as ASANA_FIELDSE
 from creative_quality.constance_settings import CONSTANCE_CONFIG as CREATIVE_ESTIMATE_CONSTANCE_CONFIG
 from creative_quality.constance_settings import CONSTANCE_CONFIG_FIELDSETS as CREATIVE_ESTIMATE_FIELDSETS
 from dotenv import load_dotenv
+from leave_events.constance_settings import CONSTANCE_CONFIG_FIELDSETS as EMPLOYEE_LEAVE_FIELDSETS
+from leave_events.constance_settings import CONSTANCE_CONFIG as EMPLOYEE_LEAVE_CONFIG
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -208,6 +210,7 @@ CONSTANCE_CONFIG = {
     ),
     **ASANA_CONSTANCE_CONFIG,
     **CREATIVE_ESTIMATE_CONSTANCE_CONFIG,
+    **EMPLOYEE_LEAVE_CONFIG,
 }
 
 
@@ -218,4 +221,5 @@ CONSTANCE_CONFIG_FIELDSETS = {
     ),
     **ASANA_FIELDSETS,
     **CREATIVE_ESTIMATE_FIELDSETS,
+    **EMPLOYEE_LEAVE_FIELDSETS,
 }

@@ -1,6 +1,7 @@
 from datetime import timedelta
 from typing import Any
 
+from constance import config
 from django.utils import timezone
 from rest_framework import serializers
 
@@ -19,7 +20,7 @@ class LeaveNotificationSerializer(serializers.ModelSerializer):  # type: ignore[
         )
 
     def create(self, validated_data: dict[str, Any]) -> LeaveNotification:
-        validated_data["cancellable_until"] = timezone.now() + timedelta(minutes=5)
+        validated_data["cancellable_until"] = timezone.now() + timedelta(minutes=config.SEND_NOTIFICATION_DELAY)
         return super().create(validated_data)
 
 
