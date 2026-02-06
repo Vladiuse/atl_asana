@@ -11,7 +11,7 @@ class CustomerSerializer(serializers.ModelSerializer):  # type: ignore[type-arg]
 
 class ValentineImageSerializer(serializers.ModelSerializer):  # type: ignore[type-arg]
     class Meta:
-        models = ValentineImage
+        model = ValentineImage
         fields = "__all__"
 
 

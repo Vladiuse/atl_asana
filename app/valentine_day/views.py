@@ -16,6 +16,7 @@ def api_root(request: Request, format: str | None = None) -> Response:
         {
             "my-valentines": reverse("valentine_day:valentine-list", request=request, format=format),
             "my-images": reverse("valentine_day:valentine-image-list", request=request, format=format),
+            "employee": reverse("valentine_day:employee-list", request=request, format=format),
         },
     )
 
@@ -23,8 +24,7 @@ def api_root(request: Request, format: str | None = None) -> Response:
 def index(request: HttpRequest) -> HttpResponse:
     return render(request, "valentine_day/index.html")
 
-
-class CustomerView(viewsets.ModelViewSet):  # type: ignore[type-arg]
+class EmployeeView(viewsets.ModelViewSet):  # type: ignore[type-arg]
     queryset = Employee.objects.all()
     serializer_class = CustomerSerializer
 
