@@ -6,7 +6,7 @@ from django.db.models import Q
 
 
 class Employee(models.Model):
-    image = models.ImageField(
+    avatar = models.ImageField(
         upload_to="valentine_day/images/avatars",
         null=True,
         blank=True,

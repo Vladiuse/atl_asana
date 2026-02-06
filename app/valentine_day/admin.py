@@ -5,13 +5,13 @@ from .models import Employee, Valentine, ValentineImage
 
 
 @admin.register(Employee)
-class CustomerAdmin(admin.ModelAdmin):  # type: ignore[type-arg]
+class EmployeeAdmin(admin.ModelAdmin):  # type: ignore[type-arg]
     list_display = ("id", "name", "surname", "position", "image_tag")
 
     @admin.display(description="Img")
     def image_tag(self, obj: Employee) -> str:
-        if obj.image:
-            return format_html('<img src="{}" style="height:60px;"/>', obj.image.url)
+        if obj.avatar:
+            return format_html('<img src="{}" style="height:60px;"/>', obj.avatar.url)
         return "-"
 
 
