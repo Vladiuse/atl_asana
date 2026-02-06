@@ -7,6 +7,7 @@ from .models import ScheduledMessage
 
 
 class ScheduledMessageSerializer(serializers.ModelSerializer):  # type: ignore[type-arg]
+
     class Meta:
         model = ScheduledMessage
         fields = ("pk", "status", "run_at", "user_tag", "handler", "text")
