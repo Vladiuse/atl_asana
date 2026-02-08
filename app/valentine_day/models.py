@@ -1,11 +1,29 @@
 from typing import Any
 
+from django.contrib.auth.models import User
 from django.core.exceptions import ValidationError
 from django.db import models
-from django.db.models import Q
+from django.db.models import Q, QuerySet
+from rest_framework.authtoken.models import Token
+from transliterate import translit
+
+
+class EmployeeQuerySet(models.QuerySet["Employee"]):
+    def delete(self) -> tuple[int, dict[str, int]]:
+        users = [e.user for e in self.select_related("user")]
+        delete_result = super().delete()
+        for user in users:
+            user.delete()
+        return delete_result
+
+
+class EmployeeManager(models.Manager):  # type: ignore[type-arg]
+    def get_queryset(self) -> QuerySet["Employee"]:
+        return EmployeeQuerySet(self.model, using=self._db)
 
 
 class Employee(models.Model):
+    user = models.OneToOneField(to=User, on_delete=models.CASCADE)
     avatar = models.ImageField(
         upload_to="valentine_day/images/avatars",
         null=True,
@@ -24,9 +42,24 @@ class Employee(models.Model):
     created = models.DateTimeField(
         auto_now_add=True,
     )
+    objects = EmployeeManager()
 
     def __str__(self) -> str:
         return f"{self.name} {self.surname}"
+
+    def save(self, *args: Any, **kwargs: Any) -> None:  # noqa: ANN401
+        if not self.pk:
+            full_name = f"{self.name}_{self.surname}"
+            username = translit(full_name, "ru", reversed=True).replace(" ", "_").lower()
+            self.user = User.objects.create_user(username=username, password="0000")  # noqa: S106
+            Token.objects.create(user=self.user)
+        super().save(*args, **kwargs)
+
+    def delete(self, *args: Any, **kwargs: Any) -> tuple[int, dict[str, int]]:  # noqa: ANN401
+        user = self.user
+        delete_result = super().delete(*args, **kwargs)
+        user.delete()
+        return delete_result
 
 
 class ValentineImage(models.Model):
@@ -40,7 +73,7 @@ class ValentineImage(models.Model):
         to=Employee,
         on_delete=models.CASCADE,
         null=True,
-        default=None,
+        blank=True,
     )
     created = models.DateTimeField(
         auto_now_add=True,
