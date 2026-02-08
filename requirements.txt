@@ -75,6 +75,7 @@ sqlparse==0.5.3
 stack-data==0.6.3
 tomli==2.3.0
 traitlets==5.14.3
+transliterate==1.10.2
 types-PyYAML==6.0.12.20250915
 types-requests==2.32.4.20250913
 types-retry==0.9.9.20250322
