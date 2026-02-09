@@ -1,8 +1,10 @@
 from django.http import HttpRequest, HttpResponse
 from django.shortcuts import get_object_or_404, render
 from rest_framework import viewsets
+from rest_framework.authentication import TokenAuthentication
 from rest_framework.authtoken.models import Token
 from rest_framework.decorators import api_view
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.request import Request
 from rest_framework.response import Response
 from rest_framework.reverse import reverse
@@ -35,11 +37,15 @@ class EmployeeView(viewsets.ModelViewSet):  # type: ignore[type-arg]
 class ValentineImageView(viewsets.ModelViewSet):  # type: ignore[type-arg]
     queryset = ValentineImage.objects.all()
     serializer_class = ValentineImageSerializer
+    authentication_classes = (TokenAuthentication,)
+    permission_classes = (IsAuthenticated,)
 
 
 class ValentineView(viewsets.ModelViewSet):  # type: ignore[type-arg]
     queryset = Valentine.objects.all()
     serializer_class = ValentineSerializer
+    authentication_classes = (TokenAuthentication,)
+    permission_classes = (IsAuthenticated,)
 
 
 class GetTokenView(APIView):
