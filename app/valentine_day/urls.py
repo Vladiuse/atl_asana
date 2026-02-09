@@ -13,5 +13,6 @@ app_name = "valentine_day"
 urlpatterns = [
     path("", views.index, name="index"),
     path("api-root/", views.api_root, name="api_root"),
+    path("get-token/", views.GetTokenView.as_view()),
     path("", include(router.urls)),
 ]

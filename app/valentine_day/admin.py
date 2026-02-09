@@ -6,7 +6,7 @@ from .models import Employee, Valentine, ValentineImage
 
 @admin.register(Employee)
 class EmployeeAdmin(admin.ModelAdmin):  # type: ignore[type-arg]
-    list_display = ("id", "user", "name", "surname", "position", "image_tag")
+    list_display = ("id", "telegram_user_id", "user", "name", "surname", "position", "image_tag")
     readonly_fields = ("user",)
 
     @admin.display(description="Img")

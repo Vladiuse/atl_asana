@@ -19,3 +19,7 @@ class ValentineSerializer(serializers.ModelSerializer):  # type: ignore[type-arg
     class Meta:
         model = Valentine
         fields = "__all__"
+
+
+class GetTokenSerializers(serializers.Serializer):  # type: ignore[type-arg]
+    telegram_user_id = serializers.CharField()
