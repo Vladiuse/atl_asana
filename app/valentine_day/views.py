@@ -14,6 +14,8 @@ from rest_framework.response import Response
 from rest_framework.reverse import reverse
 from rest_framework.serializers import BaseSerializer
 from rest_framework.views import APIView
+from django.utils import timezone
+from datetime import datetime
 
 from .models import Employee, Valentine, ValentineImage
 from .serializers import CustomerSerializer, GetTokenSerializers, ValentineImageSerializer, ValentineSerializer
@@ -80,6 +82,20 @@ class ValentineView(viewsets.ModelViewSet):  # type: ignore[type-arg]
         user: User = self.request.user  # type: ignore[assignment]
         employee = get_object_or_404(Employee, user=user)
         serializer.save(sender=employee)
+
+
+    @action(detail=False, methods=["get"], url_path="received")
+    def received_valentines(self, request: Request) -> Response:
+        employee = get_object_or_404(Employee, user=request.user)
+        qs = self.get_queryset().filter(recipient=employee)
+        serializer = self.get_serializer(qs, many=True)
+        now = timezone.localtime(timezone.now())
+        release_time = datetime(2026, 2, 13, 14, 0, tzinfo=now.tzinfo)
+        data = {
+            "valentines": serializer.data,
+             "is_up_time": now >= release_time,
+        }
+        return Response(data)
 
 
 class GetTokenView(APIView):
