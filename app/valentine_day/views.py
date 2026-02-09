@@ -9,7 +9,7 @@ from rest_framework.request import Request
 from rest_framework.response import Response
 from rest_framework.reverse import reverse
 from rest_framework.views import APIView
-
+from django.db.models import QuerySet
 from .models import Employee, Valentine, ValentineImage
 from .serializers import CustomerSerializer, GetTokenSerializers, ValentineImageSerializer, ValentineSerializer
 
@@ -32,6 +32,11 @@ def index(request: HttpRequest) -> HttpResponse:
 class EmployeeView(viewsets.ModelViewSet):  # type: ignore[type-arg]
     queryset = Employee.objects.all()
     serializer_class = CustomerSerializer
+    authentication_classes = (TokenAuthentication,)
+    permission_classes = (IsAuthenticated,)
+
+    def get_queryset(self) -> QuerySet["Employee"]:
+        return super().get_queryset().exclude(user=self.request.user)
 
 
 class ValentineImageView(viewsets.ModelViewSet):  # type: ignore[type-arg]

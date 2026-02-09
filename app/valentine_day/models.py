@@ -29,6 +29,7 @@ class Employee(models.Model):
     )
     telegram_user_id = models.CharField(
         max_length=30,
+        unique=True,
     )
     avatar = models.ImageField(
         upload_to="valentine_day/images/avatars",
