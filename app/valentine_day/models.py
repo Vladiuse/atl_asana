@@ -76,10 +76,9 @@ class ValentineImage(models.Model):
         max_length=255,
     )
     owner = models.ForeignKey(
-        to=Employee,
+        to=User,
         on_delete=models.CASCADE,
         null=True,
-        blank=True,
     )
     created = models.DateTimeField(
         auto_now_add=True,
