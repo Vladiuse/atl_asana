@@ -87,10 +87,10 @@ class ValentineView(viewsets.ModelViewSet):  # type: ignore[type-arg]
     @action(detail=False, methods=["get"], url_path="received")
     def received_valentines(self, request: Request) -> Response:
         employee = get_object_or_404(Employee, user=request.user)
-        qs = self.get_queryset().filter(recipient=employee)
+        qs = Valentine.objects.filter(recipient=employee)
         serializer = self.get_serializer(qs, many=True)
         now = timezone.localtime(timezone.now())
-        release_time = datetime(2026, 2, 13, 14, 0, tzinfo=now.tzinfo)
+        release_time = datetime(2026, 2, 3, 14, 0, tzinfo=now.tzinfo)
         data = {
             "valentines": serializer.data,
              "is_up_time": now >= release_time,

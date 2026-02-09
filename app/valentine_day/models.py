@@ -110,6 +110,10 @@ class Valentine(models.Model):
         max_length=50,
         blank=True,
     )
+    is_read_by_recipient = models.BooleanField(
+        default=False,
+        blank=True,
+    )
     created = models.DateTimeField(
         auto_now_add=True,
     )

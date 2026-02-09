@@ -38,6 +38,7 @@ class ValentineAdmin(admin.ModelAdmin):  # type: ignore[type-arg]
         "recipient",
         "image_tag",
         "is_anonymously",
+        "is_read_by_recipient",
         "created",
     )
     list_filter = ("recipient",)
