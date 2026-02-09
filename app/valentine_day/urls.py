@@ -5,7 +5,7 @@ from . import views
 
 router = DefaultRouter()
 router.register("employee", views.EmployeeView)
-router.register("my-valentines", views.ValentineView)
+router.register("my-valentines", views.ValentineView, basename="valentine")
 router.register("my-images", views.ValentineImageView, basename="valentine-image")
 
 app_name = "valentine_day"

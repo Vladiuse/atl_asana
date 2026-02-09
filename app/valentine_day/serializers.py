@@ -1,3 +1,5 @@
+from typing import Any
+
 from rest_framework import serializers
 
 from .models import Employee, Valentine, ValentineImage
@@ -19,6 +21,14 @@ class ValentineSerializer(serializers.ModelSerializer):  # type: ignore[type-arg
     class Meta:
         model = Valentine
         fields = "__all__"
+        read_only_fields = ("sender", "created")
+
+    def validate(self, data: dict[str, Any]) -> dict[str, Any]:
+        if data.get("is_anonymously") and not data.get("anonymous_signature"):
+            raise serializers.ValidationError(
+                "При анонимной отправке нужно указать подпись",
+            )
+        return data
 
 
 class GetTokenSerializers(serializers.Serializer):  # type: ignore[type-arg]
