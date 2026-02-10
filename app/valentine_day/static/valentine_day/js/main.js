@@ -333,7 +333,7 @@ class WriteTextScreen {
     }
 
     show() {
-        this.textarea.value = "12345"
+        this.textarea.value = ""
         this.context.ui.bottomBar.setClickHandler(this._submitText.bind(this))
     }
 
