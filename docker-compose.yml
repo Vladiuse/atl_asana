@@ -58,7 +58,7 @@ services:
     depends_on:
       - atl_asana_web
 
-  valentine_bot:
+  valentine-bot:
     build: .
     command: python valentine_bot.py
     volumes:
