@@ -691,11 +691,17 @@ class ValentineApp {
 
     async start() {
         this.router.go("preload")
-        var tg_user_id = this.telegramApp.initDataUnsafe.user.id
-        // var tg_user_id = "333333"
+        try {
+            var tg_user_id = this.telegramApp.initDataUnsafe.user.id
+        } catch (error) {
+            console.error("Ошибка доступа к данным Telegram:", error.message);
+            var tg_user_id = "test_id"
+        }
+        
         try {
             var token = await this.context.api.client.getToken(tg_user_id)
         } catch (e) {
+            console.error("Cant get token", e.message);
             this.router.go("error-screen", { message: `Cant get token, unknown telegram id.\ntelegram_user_id: ${tg_user_id}` })
             return
         }

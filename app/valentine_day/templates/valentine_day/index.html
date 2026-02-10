@@ -20,7 +20,7 @@
     <script src="https://code.jquery.com/jquery-4.0.0.min.js" integrity="sha256-OaVG6prZf4v69dPg6PhVattBXkcOWQB62pdZ3ORyrao=" crossorigin="anonymous"></script>
     <link rel="stylesheet" href="{%static 'valentine_day/css/styles.css' %}">
     <link rel="stylesheet" href="{%static 'valentine_day/css/screens.css'%}">
-    <script src="{%static 'valentine_day/js/main.js'%}?v=1"></script>
+    <script src="{%static 'valentine_day/js/main.js'%}?v=2"></script>
 </head>
 
 <body>
@@ -204,7 +204,7 @@
         const tg = window.Telegram.WebApp;
         tg.ready();
         tg.expand();
-        const BASE_URL = `http://127.0.0.1:8000/valentine-day`
+        const BASE_URL = "{{ request.scheme }}://{{ request.get_host }}/valentine-day";
         const apiClient = new ApiClient(BASE_URL)
         const appContext = {
             ui: {
