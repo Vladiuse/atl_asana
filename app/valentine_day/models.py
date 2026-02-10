@@ -72,8 +72,6 @@ class Employee(models.Model):
 class ValentineImage(models.Model):
     image = models.ImageField(
         upload_to="valentine_day/images/for_valentines",
-        null=True,
-        blank=True,
         max_length=255,
     )
     owner = models.ForeignKey(
