@@ -16,6 +16,11 @@ class ValentineImageSerializer(serializers.ModelSerializer):  # type: ignore[typ
         model = ValentineImage
         fields = "__all__"
 
+    def to_representation(self, instance: ValentineImage) -> dict[str, Any]:
+        ret = super().to_representation(instance)
+        ret["image"] = ret["image"].replace("http:", "").replace("https:", "")
+        return ret
+
 
 class ValentineSerializer(serializers.ModelSerializer):  # type: ignore[type-arg]
     class Meta:
