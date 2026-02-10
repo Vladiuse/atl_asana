@@ -360,7 +360,7 @@ class CheckFormScreen {
         this.imgElem.src = imgData.image
         this.textElem.innerText = text
         this.recipientNameElem.innerText = recipientData.fullName
-        this.recipientAvatarElem.src = recipientData.avatar
+        this.recipientAvatarElem.src = recipientData.avatar ?? this.context.defaults.avatar
     }
 
     async _submitCheck() {
@@ -544,12 +544,13 @@ class ReceivedValentineListScreen {
         return li
     }
 
-    show() {
+    async show() {
         if (!this.context.collections.received_valentines.isUpTime) {
             this.waitBlock.style.display = "block"
             return
         }
         this.waitBlock.style.display = "none"
+        await this.context.collections.received_valentines.loadAll()
         var valentines = this.context.collections.received_valentines.all()
         if (valentines.length == 0) {
             this.noItemsBlock.style.display = "block"
@@ -710,7 +711,6 @@ class ValentineApp {
         this.context.collections.employees.loadAll()
         this.context.collections.valentineImages.loadAll()
         this.context.collections.my_valentines.loadAll()
-        this.context.collections.received_valentines.loadAll()
         setTimeout(() => {
             this.router.go("main")
         }, 2800)
