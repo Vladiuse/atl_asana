@@ -62,8 +62,9 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     keyboard = [[InlineKeyboardButton(text="💌 Отправить валентинку", web_app=WebAppInfo(url=web_app_url))]]
     reply_markup = InlineKeyboardMarkup(keyboard)
     async with aiofiles.open(HELLO_IMG_PATH, "rb") as photo_file:
+        photo_bytes: bytes = await photo_file.read()
         await update.message.reply_photo(
-            photo=photo_file,
+            photo=photo_bytes,
             caption=welcome_text_1,
             parse_mode="HTML",
         )
