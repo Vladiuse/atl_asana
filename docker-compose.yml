@@ -60,7 +60,9 @@ services:
 
   valentine_bot:
     build: .
-    command: python ./app/valentine_bot.py
+    command: python valentine_bot.py
+    volumes:
+      - ./app:/app
     container_name: valentine_bot_app
     restart: always 
     logging:
