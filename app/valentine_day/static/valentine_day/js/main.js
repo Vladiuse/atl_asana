@@ -713,7 +713,7 @@ class ValentineApp {
         this.context.collections.received_valentines.loadAll()
         setTimeout(() => {
             this.router.go("main")
-        }, 28)
+        }, 2800)
     }
 }
 

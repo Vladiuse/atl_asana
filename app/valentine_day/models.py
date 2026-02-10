@@ -80,6 +80,7 @@ class ValentineImage(models.Model):
         to=User,
         on_delete=models.CASCADE,
         null=True,
+        blank=True,
     )
     created = models.DateTimeField(
         auto_now_add=True,
