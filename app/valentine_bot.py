@@ -76,10 +76,11 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
         )
 
 
-async def main() -> None:
+def main() -> None:
     application = ApplicationBuilder().token(API_KEY).build()
 
     application.add_handler(CommandHandler("start", start))
+    print("Бот запускает сервер вебхуков...")
     # application.run_polling()
 
     application.run_webhook(
@@ -90,5 +91,5 @@ async def main() -> None:
 
 
 if __name__ == "__main__":
-    asyncio.run(main())
+    main()
     print("Бот запущен...")
