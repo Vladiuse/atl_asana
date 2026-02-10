@@ -35,6 +35,7 @@ ALLOWED_HOSTS = [
     "127.0.0.1",
     "37.1.208.252",
     DOMAIN,
+    "atl_asana_web",
     "atl-valentine.vim-store.ru",
 ]
 
