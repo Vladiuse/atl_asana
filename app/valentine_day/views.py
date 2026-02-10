@@ -1,10 +1,14 @@
 from datetime import datetime
 
+from zoneinfo import ZoneInfo
+import zoneinfo
+from constance import config
 from django.contrib.auth.models import User
 from django.db.models import QuerySet
 from django.http import HttpRequest, HttpResponse
 from django.shortcuts import get_object_or_404, render
 from django.utils import timezone
+from django.utils.timezone import is_naive, make_aware
 from rest_framework import status, viewsets
 from rest_framework.authentication import TokenAuthentication
 from rest_framework.authtoken.models import Token
@@ -18,7 +22,7 @@ from rest_framework.views import APIView
 
 from .models import Employee, Valentine, ValentineImage
 from .serializers import CustomerSerializer, GetTokenSerializers, ValentineImageSerializer, ValentineSerializer
-from constance import config
+
 
 @api_view(["GET"])
 def api_root(request: Request, format: str | None = None) -> Response:
@@ -89,6 +93,9 @@ class ValentineView(viewsets.ModelViewSet):  # type: ignore[type-arg]
         serializer = self.get_serializer(qs, many=True)
         now = timezone.localtime(timezone.now())
         release_time = config.SHOW_VALENTINES_AT
+        if release_time and is_naive(release_time):
+            user_tz = ZoneInfo("Europe/Moscow")
+            release_time = make_aware(release_time, user_tz)
         data = {
             "valentines": serializer.data,
             "is_up_time": now >= release_time if release_time else False,
