@@ -22,7 +22,7 @@
 #main-screen main {
   display: flex;
   flex-direction: column;
-  gap: 6rem;
+  gap: 5rem;
 }
 
 #main-screen main .button-wrapper {
@@ -315,9 +315,12 @@
 /* 2. СТИЛЬ ДЛЯ ПК (Linux и Windows ~0.65) */
 /* Это сработает для всех устройств, которые "квадратнее", чем мобилка */
 /* @media (min-aspect-ratio: 384/591) { */
-@media (min-aspect-ratio: 64/100) {
-  body {
-    background-color: #350000;
+@media (min-aspect-ratio: 60/100) {
+  body{
+    /* background-color: #350000;  */
+  }
+  #debug-window {
+    background-color: #350000; 
   }
   
   #main-screen main {
