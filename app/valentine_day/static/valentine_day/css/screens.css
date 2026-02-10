@@ -83,6 +83,7 @@
 }
 
 .employee-card img {
+  max-width: 75%;
   height: auto;
   border-radius: 50%;
   object-fit: cover;
@@ -306,9 +307,14 @@
   margin: 0 10px;
 }
 
-@media screen and (max-width: 500px) {
+#check-form .container {
+  padding-bottom: 100px;
+}
+
+/* @media screen and (max-width: 500px) { */
+@media (min-aspect-ratio: 480/738) {
   body {
-    /* background-color: #222; */
+    background-color: #222;
   }
 
   #main-screen main {
@@ -324,24 +330,36 @@
   }
 }
 
-#check-form .container{
-  padding-bottom: 100px;
-}
-
-@media screen and (max-width: 420px) {
+/* @media screen and (max-width: 420px) { */
+/* 2. СТИЛЬ ДЛЯ ПК (Linux и Windows ~0.65) */
+/* Это сработает для всех устройств, которые "квадратнее", чем мобилка */
+/* @media (min-aspect-ratio: 384/591) { */
+@media (min-aspect-ratio: 64/100) {
   body {
     /* background-color: #350000; */
   }
-  .main-btn{
+  
+  #main-screen main {
+    gap: 2rem;
+  }
+  
+  #main-screen main .button-wrapper {
+    gap: 1rem;
+  }
+
+  /* Ужимаем картинку, так как высота экрана маленькая */
+  #check-form #check-img {
+    width: 80%;
+    margin: auto;
+  }
+
+  .main-btn {
     font-size: 1.2rem;
     padding: 8px;
   }
-  #chose-img .swiper-container{
+
+  #chose-img .swiper-container {
     width: 90%;
-    margin: auto;
-  }
-  #check-form #check-img {
-    width: 75%;
     margin: auto;
   }
 }
