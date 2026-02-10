@@ -1,10 +1,11 @@
-from typing import Any
+from datetime import datetime
 
 from django.contrib.auth.models import User
 from django.db.models import QuerySet
 from django.http import HttpRequest, HttpResponse
 from django.shortcuts import get_object_or_404, render
-from rest_framework import viewsets
+from django.utils import timezone
+from rest_framework import status, viewsets
 from rest_framework.authentication import TokenAuthentication
 from rest_framework.authtoken.models import Token
 from rest_framework.decorators import action, api_view
@@ -14,8 +15,6 @@ from rest_framework.response import Response
 from rest_framework.reverse import reverse
 from rest_framework.serializers import BaseSerializer
 from rest_framework.views import APIView
-from django.utils import timezone
-from datetime import datetime
 
 from .models import Employee, Valentine, ValentineImage
 from .serializers import CustomerSerializer, GetTokenSerializers, ValentineImageSerializer, ValentineSerializer
@@ -83,7 +82,6 @@ class ValentineView(viewsets.ModelViewSet):  # type: ignore[type-arg]
         employee = get_object_or_404(Employee, user=user)
         serializer.save(sender=employee)
 
-
     @action(detail=False, methods=["get"], url_path="received")
     def received_valentines(self, request: Request) -> Response:
         employee = get_object_or_404(Employee, user=request.user)
@@ -93,9 +91,17 @@ class ValentineView(viewsets.ModelViewSet):  # type: ignore[type-arg]
         release_time = datetime(2026, 2, 3, 14, 0, tzinfo=now.tzinfo)
         data = {
             "valentines": serializer.data,
-             "is_up_time": now >= release_time,
+            "is_up_time": now >= release_time,
         }
         return Response(data)
+
+    @action(detail=True, methods=["post"], url_path="mark-read")
+    def mark_read(self, request: Request, pk: int) -> Response:
+        _ = request
+        valentine = Valentine.objects.get(pk=pk)
+        valentine.is_read_by_recipient = True
+        valentine.save(update_fields=["is_read_by_recipient"])
+        return Response({"status": "marked as read"}, status=status.HTTP_200_OK)
 
 
 class GetTokenView(APIView):

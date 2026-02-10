@@ -57,6 +57,7 @@ class ValentineAdmin(admin.ModelAdmin):  # type: ignore[type-arg]
                     "recipient",
                     "image",
                     "text",
+                    "is_read_by_recipient",
                 ),
             },
         ),
