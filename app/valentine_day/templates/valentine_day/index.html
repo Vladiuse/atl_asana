@@ -204,7 +204,7 @@
         const tg = window.Telegram.WebApp;
         tg.ready();
         tg.expand();
-        const BASE_URL = "{{ request.scheme }}://{{ request.get_host }}/valentine-day";
+        const BASE_URL = "//{{ request.get_host }}/valentine-day";
         const apiClient = new ApiClient(BASE_URL)
         const appContext = {
             ui: {
