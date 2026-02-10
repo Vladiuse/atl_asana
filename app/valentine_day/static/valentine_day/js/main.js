@@ -711,6 +711,7 @@ class ValentineApp {
         this.context.collections.employees.loadAll()
         this.context.collections.valentineImages.loadAll()
         this.context.collections.my_valentines.loadAll()
+        this.context.collections.received_valentines.loadAll()
         setTimeout(() => {
             this.router.go("main")
         }, 2800)

@@ -25,7 +25,7 @@
   gap: 6rem;
 }
 
-#main-screen main .button-wrapper{
+#main-screen main .button-wrapper {
   width: 100%;
   padding: 0 10%;
   display: flex;
@@ -186,6 +186,12 @@
 }
 
 /* CREATED VALENTINES  */
+#my-valentines ul {
+  -webkit-tap-highlight-color: transparent;
+  cursor: default;
+  -webkit-user-select: none;
+  user-select: none;
+}
 .valentine-list {
   list-style: none;
   margin: 0;
@@ -236,7 +242,7 @@
   width: 80%;
   margin: auto;
 }
-#received-valentines{
+#received-valentines {
   /* color: black; */
 }
 #received-valentines .wait img {
@@ -256,42 +262,42 @@
 }
 
 .valentine-item {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 8px 12px;
-    border: 1px solid #ddd;
-    border-radius: 8px;
-    margin-bottom: 8px;
-    cursor: pointer;
-    background: #f9f9f9;
-    color: black;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 12px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  margin-bottom: 8px;
+  cursor: pointer;
+  background: #f9f9f9;
+  color: black;
 }
 
 .valentine-item .avatar {
-    width: 40px;
-    height: 40px;
-    border-radius: 50%;
-    object-fit: cover;
-    margin-right: 12px;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  object-fit: cover;
+  margin-right: 12px;
 }
 
 .valentine-item .name {
-    flex: 1;
-    text-align: center;
-    font-weight: 500;
+  flex: 1;
+  text-align: center;
+  font-weight: 500;
 }
 
 .valentine-item .icons {
-    display: flex;
-    gap: 8px;
-    font-size: 1.4rem;
+  display: flex;
+  gap: 8px;
+  font-size: 1.4rem;
 }
-#received-valentines-detail .recipient-info{
+#received-valentines-detail .recipient-info {
   display: flex;
   align-items: center;
 }
-#received-valentines-detail .avatar{
+#received-valentines-detail .avatar {
   width: 60px;
   height: 60px;
   display: inline-block;
