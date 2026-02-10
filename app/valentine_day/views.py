@@ -18,7 +18,7 @@ from rest_framework.views import APIView
 
 from .models import Employee, Valentine, ValentineImage
 from .serializers import CustomerSerializer, GetTokenSerializers, ValentineImageSerializer, ValentineSerializer
-
+from constance import config
 
 @api_view(["GET"])
 def api_root(request: Request, format: str | None = None) -> Response:
@@ -88,10 +88,10 @@ class ValentineView(viewsets.ModelViewSet):  # type: ignore[type-arg]
         qs = Valentine.objects.filter(recipient=employee)
         serializer = self.get_serializer(qs, many=True)
         now = timezone.localtime(timezone.now())
-        release_time = datetime(2026, 2, 3, 14, 0, tzinfo=now.tzinfo)
+        release_time = config.SHOW_VALENTINES_AT
         data = {
             "valentines": serializer.data,
-            "is_up_time": now >= release_time,
+            "is_up_time": now >= release_time if release_time else False,
         }
         return Response(data)
 

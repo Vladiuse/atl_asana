@@ -6,8 +6,10 @@ from asana.constance_settings import CONSTANCE_CONFIG_FIELDSETS as ASANA_FIELDSE
 from creative_quality.constance_settings import CONSTANCE_CONFIG as CREATIVE_ESTIMATE_CONSTANCE_CONFIG
 from creative_quality.constance_settings import CONSTANCE_CONFIG_FIELDSETS as CREATIVE_ESTIMATE_FIELDSETS
 from dotenv import load_dotenv
-from leave_events.constance_settings import CONSTANCE_CONFIG_FIELDSETS as EMPLOYEE_LEAVE_FIELDSETS
 from leave_events.constance_settings import CONSTANCE_CONFIG as EMPLOYEE_LEAVE_CONFIG
+from leave_events.constance_settings import CONSTANCE_CONFIG_FIELDSETS as EMPLOYEE_LEAVE_FIELDSETS
+from valentine_day.constance_settings import CONSTANCE_CONFIG as VALENTINE_CONFIG
+from valentine_day.constance_settings import CONSTANCE_CONFIG_FIELDSETS as VALENTINE_FIELDSETS
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -80,7 +82,6 @@ INSTALLED_APPS = [
 MIDDLEWARE = [
     "corsheaders.middleware.CorsMiddleware",
     "django.middleware.common.CommonMiddleware",
-
     "django.middleware.security.SecurityMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
@@ -194,6 +195,12 @@ CONSTANCE_ADDITIONAL_FIELDS = {
             "choices": (("CA", "CANADA"), ("US", "USA")),
         },
     ),
+    "datetime": (
+        "django.forms.SplitDateTimeField",
+        {
+            "widget": "django.contrib.admin.widgets.AdminSplitDateTime",
+        },
+    ),
 }
 
 
@@ -208,9 +215,15 @@ CONSTANCE_CONFIG = {
         "Включить отправку СМС",
         bool,
     ),
+    "DATETIME": (
+        None,
+        "Время",
+        "datetime",
+    ),
     **ASANA_CONSTANCE_CONFIG,
     **CREATIVE_ESTIMATE_CONSTANCE_CONFIG,
     **EMPLOYEE_LEAVE_CONFIG,
+    **VALENTINE_CONFIG,
 }
 
 
@@ -218,8 +231,10 @@ CONSTANCE_CONFIG_FIELDSETS = {
     "Examples": (
         "ENABLE_SMS_SENDING",
         "DEFAULT_COUNTRY",
+        "DATETIME",
     ),
     **ASANA_FIELDSETS,
     **CREATIVE_ESTIMATE_FIELDSETS,
     **EMPLOYEE_LEAVE_FIELDSETS,
+    **VALENTINE_FIELDSETS,
 }
