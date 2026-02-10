@@ -552,12 +552,12 @@ class ReceivedValentineListScreen {
         this.waitBlock.style.display = "none"
         await this.context.collections.received_valentines.loadAll()
         var valentines = this.context.collections.received_valentines.all()
+        this.container.innerHTML = ""
         if (valentines.length == 0) {
             this.noItemsBlock.style.display = "block"
             return
         }
         this.noItemsBlock.style.display = "none"
-        this.container.innerHTML = ""
         valentines.forEach(valentine => {
             var card = this._createCards(valentine)
             card.addEventListener("click", () =>
@@ -988,6 +988,7 @@ class ReceivedValentineCollection {
 
     async loadAll() {
         const data = await this.apiClient.receivedValentines()
+        this.items.clear()
         this.isUpTime = data.is_up_time
         data.valentines.forEach(v => {
             this.items.set(v.id, new Valentine(v))
