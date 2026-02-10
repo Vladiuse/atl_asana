@@ -1,4 +1,5 @@
 import os  # noqa: INP001
+from pathlib import Path
 
 import aiofiles
 from dotenv import load_dotenv
@@ -9,9 +10,10 @@ from telegram.ext import (
     ContextTypes,
 )
 
-load_dotenv("../.env")
+BASE_DIR = Path(__file__).resolve().parent
+load_dotenv(BASE_DIR.parent / ".env")
 
-HELLO_IMG_PATH = "valentine_day/static/valentine_day/main.png"
+HELLO_IMG_PATH = (BASE_DIR / "valentine_day/static/valentine_day/img/main.png")
 API_KEY = os.environ["VALENTINE_BOT_API_KEY"]
 
 
