@@ -61,7 +61,7 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     # Создание кнопки Mini App
     keyboard = [[InlineKeyboardButton(text="💌 Отправить валентинку", web_app=WebAppInfo(url=web_app_url))]]
     reply_markup = InlineKeyboardMarkup(keyboard)
-    with aiofiles.open(HELLO_IMG_PATH, "rb") as photo_file:
+    async with aiofiles.open(HELLO_IMG_PATH, "rb") as photo_file:
         await update.message.reply_photo(
             photo=photo_file,
             caption=welcome_text_1,
