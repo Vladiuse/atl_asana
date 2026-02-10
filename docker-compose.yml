@@ -57,5 +57,16 @@ services:
       - /etc/letsencrypt:/etc/letsencrypt:ro
     depends_on:
       - atl_asana_web
+
+  valentine_bot:
+    build: .
+    command: python ./app/valentine_bot.py
+    container_name: valentine_bot_app
+    restart: always 
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10mb"
+        max-file: "3"
 volumes:
   atl_asana_pgdata:
