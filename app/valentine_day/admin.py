@@ -12,7 +12,7 @@ class EmployeeAdmin(admin.ModelAdmin):  # type: ignore[type-arg]
     @admin.display(description="Img")
     def image_tag(self, obj: Employee) -> str:
         if obj.avatar:
-            return format_html('<img src="{}" style="height:60px;"/>', obj.avatar.url)
+            return format_html('<img src="{}" style="height:80px;"/>', obj.avatar.url)
         return "-"
 
 

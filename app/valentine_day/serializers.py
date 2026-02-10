@@ -10,6 +10,12 @@ class CustomerSerializer(serializers.ModelSerializer):  # type: ignore[type-arg]
         model = Employee
         fields = "__all__"
 
+    def to_representation(self, instance: Employee) -> dict[str, Any]:
+        ret = super().to_representation(instance)
+        if ret["avatar"]:
+            ret["avatar"] = ret["avatar"].replace("http:", "").replace("https:", "")
+        return ret
+
 
 class ValentineImageSerializer(serializers.ModelSerializer):  # type: ignore[type-arg]
     class Meta:
