@@ -691,8 +691,8 @@ class ValentineApp {
 
     async start() {
         this.router.go("preload")
-        // var tg_user_id = this.telegramApp.initDataUnsafe.user.id
-        var tg_user_id = "333333"
+        var tg_user_id = this.telegramApp.initDataUnsafe.user.id
+        // var tg_user_id = "333333"
         try {
             var token = await this.context.api.client.getToken(tg_user_id)
         } catch (e) {
