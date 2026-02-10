@@ -73,5 +73,7 @@ services:
       options:
         max-size: "10mb"
         max-file: "3"
+    expose:
+      - "8000"
 volumes:
   atl_asana_pgdata:

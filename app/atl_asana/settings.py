@@ -33,17 +33,16 @@ DEBUG = os.environ.get("DJANGO_DEBUG", "false").lower() == "true"
 DOMAIN = "atl-asana.vim-store.ru"
 ALLOWED_HOSTS = [
     "127.0.0.1",
-    "83.222.20.96",
     "37.1.208.252",
     DOMAIN,
+    "atl-valentine.vim-store.ru",
 ]
 
 CSRF_TRUSTED_ORIGINS = [
-    "http://83.222.20.96",
     "http://atl-asana.vim-store.ru",
     "https://atl-asana.vim-store.ru",
-    "http://atl-asana.vim-store.ru:81",
-    "https://atl-asana.vim-store.ru:81",
+    "http://atl-valentine.vim-store.ru",
+    "https://atl-valentine.vim-store.ru",
 ]
 
 CORS_ALLOWED_ORIGINS = [

@@ -1,3 +1,4 @@
+import asyncio
 import os  # noqa: INP001
 from pathlib import Path
 
@@ -13,7 +14,7 @@ from telegram.ext import (
 BASE_DIR = Path(__file__).resolve().parent
 load_dotenv(BASE_DIR.parent / ".env")
 
-HELLO_IMG_PATH = (BASE_DIR / "valentine_day/static/valentine_day/img/main.png")
+HELLO_IMG_PATH = BASE_DIR / "valentine_day/static/valentine_day/img/main.png"
 API_KEY = os.environ["VALENTINE_BOT_API_KEY"]
 
 
@@ -75,9 +76,19 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
         )
 
 
-if __name__ == "__main__":
-    app = ApplicationBuilder().token(API_KEY).build()
+async def main() -> None:
+    application = ApplicationBuilder().token(API_KEY).build()
 
-    app.add_handler(CommandHandler("start", start))
+    application.add_handler(CommandHandler("start", start))
+    # application.run_polling()
+
+    application.run_webhook(
+        listen="0.0.0.0",
+        port=8000,
+        webhook_url="https://atl-valentine.vim-store.ru/",
+    )
+
+
+if __name__ == "__main__":
+    asyncio.run(main())
     print("Бот запущен...")
-    app.run_polling()
