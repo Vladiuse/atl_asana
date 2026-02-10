@@ -545,14 +545,15 @@ class ReceivedValentineListScreen {
     }
 
     async show() {
+        this.container.innerHTML = ""
         if (!this.context.collections.received_valentines.isUpTime) {
             this.waitBlock.style.display = "block"
+            this.noItemsBlock.style.display = "none"
             return
         }
         this.waitBlock.style.display = "none"
         await this.context.collections.received_valentines.loadAll()
         var valentines = this.context.collections.received_valentines.all()
-        this.container.innerHTML = ""
         if (valentines.length == 0) {
             this.noItemsBlock.style.display = "block"
             return
