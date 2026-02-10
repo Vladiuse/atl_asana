@@ -1,0 +1,129 @@
+* {
+  box-sizing: border-box;
+}
+
+:root {
+  --red: #A50121;
+  --pink: #F8C0BE;
+  --selected-green: #4caf50;
+  --seconde-color: black;
+  --seconde-color-disable: #555;
+  --padding: 10px;
+  --font-color: #DED9CF;
+}
+body {
+  background-color: var(--red);
+  font-family: "Comic Relief", system-ui;
+  color: var(--font-color);
+  margin: 0;
+}
+img{
+  display: block;
+}
+.d-none{
+  display: none !important;
+}
+.container{
+  width: 100%;
+  padding-left: var(--padding);
+  padding-right: var(--padding);
+}
+
+.w-full{
+  width: 100%;
+}
+
+.bottom-block {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: -100px; /* изначально спрятан */
+  background: var(--seconde-color);
+  color: var(--font-color);
+  padding: 16px;
+  text-align: center;
+  transition: bottom 0.4s ease; /* плавное движение */
+  z-index: 1000;
+  box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.2);
+}
+
+.bottom-block.show {
+  bottom: 0; /* выезжает */
+}
+
+.bottom-block.disabled{
+  background: var(--seconde-color-disable);
+}
+
+#next-btn {
+  display: flex;
+  justify-content: center;
+  font-size: 1.4rem;
+  padding: 10px 0;
+  background-color: inherit;
+  border: 2px solid var(--font-color);
+  border-radius: 6px;
+  color: var(--font-color);
+  width: 100%;
+}
+
+/* CANCEL FORM */
+[data-screen-go] {
+  font-size: 2rem;
+}
+
+.heart {
+  display: flex;
+  width: 120px;
+  height: 120px;
+  background: var(--font-color);
+  border-radius: 0 0 0 1rem;
+  transform: rotate(-45deg);
+  animation: pulse 1s infinite;
+}
+.heart::before,
+.heart::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  /* width: 120px;
+  height: 120px; */
+  width: 100%;
+  height: 100%;
+  background: inherit;
+  border-radius: 50%;
+}
+.heart::before {
+  transform: translatey(-50%);
+}
+.heart::after {
+  transform: translatex(50%);
+}
+/* Animation */
+@keyframes pulse {
+  0%,
+  20% {
+    transform: rotate(-45deg) scale(1);
+  }
+  30% {
+    transform: rotate(-45deg) scale(1.2);
+  }
+  50% {
+    transform: rotate(-45deg) scale(1);
+  }
+  60% {
+    transform: rotate(-45deg) scale(1.1);
+  }
+  70%,
+  100% {
+    transform: rotate(-45deg) scale(1);
+  }
+}
+
+.heart.btn-load-heart {
+  margin: 0 10px;
+  margin-top: 4px;
+  width: 22px;
+  height: 22px;
+  border-radius: 6px;
+}

@@ -1,13 +1,254 @@
 {%load static%}
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ru">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Document</title>
-    <link rel="stylesheet" href="{%static 'valentine_day/style.css' %}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.1/css/all.min.css"
+        integrity="sha512-2SwdPD6INVrV/lHTZbO2nodKhrnDdJK9/kg2XD1r9uGqPo1cUbujc+IYdlYdEErWNu69gVcYgdxlmVmzTWnetw==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.1/normalize.min.css" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Comic+Relief:wght@400;700&family=Love+Ya+Like+A+Sister&family=Mukta:wght@200;300;400;500;600;700;800&family=Noto+Serif+Dives+Akuru&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@12/swiper-bundle.min.css" />
+    <script src="https://cdn.jsdelivr.net/npm/swiper@12/swiper-bundle.min.js"></script>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <script src="https://code.jquery.com/jquery-4.0.0.min.js" integrity="sha256-OaVG6prZf4v69dPg6PhVattBXkcOWQB62pdZ3ORyrao=" crossorigin="anonymous"></script>
+    <link rel="stylesheet" href="{%static 'valentine_day/css/styles.css' %}">
+    <link rel="stylesheet" href="{%static 'valentine_day/css/screens.css'%}">
+    <script src="{%static 'valentine_day/js/main.js'%}"></script>
 </head>
+
 <body>
-    V
+    <div id="pre-load-screen">
+        <div class="heart"></div>
+    </div>
+    <div id="main-screen" style="display: none;">
+        <header class="container">
+            <i class="fa-regular fa-circle-question" data-screen-go="about"></i>
+            <span></span>
+            <i class="fa-solid fa-envelope" id="my-messages" data-screen-go="received-valentines-list"></i>
+        </header>
+        <main>
+            <img src="{%static 'valentine_day/img/main.png'%}" alt="" style="width: 100%;">
+            <div class="button-wrapper">
+                <button id="start-button" class="main-btn">Создать валентинку</button>
+                <button id="open-my-valentines" class="main-btn">Мои валентинки</button>
+            </div>
+        </main>
+        <footer>
+
+        </footer>
+    </div>
+    <div id="about" style="display: none;">
+        <header class="screen-header">
+            <i class="fa-solid fa-chevron-left" data-screen-go="main"></i>
+        </header>
+        <div class="container">
+            <h2>О дне Святого Валентина</h2>
+            <img src="{%static 'valentine_day/img/about.webp'%}" alt="" class="w-full">
+            <p><b>День святого Валентина</b> — это праздник, который отмечается 14 февраля и посвящён любви, симпатии и тёплым чувствам между людьми. Его история уходит корнями в Древний Рим и связана
+                с легендой о святом Валентине — священнике, который, по преданию, тайно венчал влюблённые пары, несмотря на запреты императора. За это он был казнён, а позже канонизирован.</p>
+            <p>Со временем праздник утратил религиозный характер и стал светским. Сегодня День святого Валентина — это повод выразить внимание и заботу не только романтическому партнёру, но и друзьям,
+                коллегам или близким людям. Традиционными символами праздника считаются сердечки, цветы, открытки-«валентинки» и небольшие подарки.</p>
+            <p>Главная идея этого дня — напомнить о важности искренних чувств, поддержки и добрых слов. Даже простой жест внимания может поднять настроение и сделать день особенным.</p>
+        </div>
+    </div>
+    <div id="chose-employee" style="display: none;">
+        <header class="screen-header">
+            <h2 class="screen-title">1 / 3 Выберете получателя</h2>
+            <i class="fa-solid fa-xmark" data-screen-go="main"></i>
+        </header>
+        <div class="employee-cards-container">
+            <!-- <div class="employee-card">
+                <img src="./assets/img/avatar.png" alt="Employee">
+                <h3>Павел Антипов</h3>
+                <p>Owner</p>
+            </div> -->
+
+        </div>
+    </div>
+    <div id="chose-img" style="display: none;">
+        <header class="screen-header">
+            <h2 class="screen-title">2 / 3 Выберете картинку</h2>
+            <i class="fa-solid fa-xmark" data-screen-go="main"></i>
+        </header>
+        <div class="swiper-container">
+            <div class="swiper-wrapper">
+                <!-- <div class="swiper-slide"><img src="./assets/img/v/1 Валентика.png" alt=""></div> -->
+            </div>
+            <div class="swiper-pagination"></div>
+        </div>
+        <div class="swiper-controls">
+            <div class="heart-button-prev">
+                <i class="fa-solid fa-heart"></i>
+            </div>
+            <div class="heart-button-next">
+                <i class="fa-solid fa-heart"></i>
+            </div>
+        </div>
+    </div>
+    <div id="write-text" style="display: none;">
+        <header class="screen-header">
+            <h2 class="screen-title">3 / 3 Напиши текст</h2>
+            <i class="fa-solid fa-xmark" data-screen-go="main"></i>
+        </header>
+        <div class="text-wrapper">
+            <textarea placeholder="Введите текст для валентинки (минимум 5 символов)"></textarea>
+        </div>
+    </div>
+    <div id="check-form" style="display: none;">
+        <header class="screen-header">
+            <h2 class="screen-title">Проверка</h2>
+            <i class="fa-solid fa-xmark" data-screen-go="main"></i>
+        </header>
+        <div class="container">
+            <p>Проверьте, все ли вы заполнили верно</p>
+            <img id="check-img" src="" alt="" style="width: 100%;">
+            <p id="check-text"></p>
+            <h3 class="recipient-data">Кому: <img id="check-recipient-avatar" src="" alt=""><span id="check-recipient-name"></span></h3>
+        </div>
+    </div>
+    <div id="my-valentines" style="display: none;">
+        <header class="screen-header">
+            <i class="fa-solid fa-chevron-left" data-screen-go="main"></i>
+            <h2 class="screen-title">Мои валентинки</h2>
+            <span></span>
+        </header>
+        <div class="container">
+            <h3><i class="fa-solid fa-circle-info"></i>
+                Ваши валентинки будут отправлены <br>13 февраля в 14:00</h3>
+            <ul class="valentine-list">
+                <!-- <li class="valentine-item">
+                    <img class="avatar" src="./assets/img/avatar.png" alt="Avatar">
+                    <span class="name">Иван Иванов</span>
+                    <i class="fa-solid fa-eye view-icon my-valentine-detail"></i>
+                    <i class="fa-solid fa-trash my-valentine-delete"></i>
+                </li> -->
+            </ul>
+        </div>
+    </div>
+    <div id="my-valentine-detail" style="display: none;">
+        <header class="screen-header">
+            <i class="fa-solid fa-chevron-left" data-screen-go="my-valentines-list"></i>
+        </header>
+        <div class="container">
+            <img class="valentine-img" src="" alt="" style="width: 100%;">
+            <p class="valentine-text"></p>
+            <h3>Получатель: <span class="valentine-recipient-name"></span></h3>
+        </div>
+    </div>
+    <div id="my-valentine-delete" style="display: none;">
+        <header class="screen-header">
+            <i class="fa-solid fa-chevron-left" data-screen-go="my-valentines-list"></i>
+        </header>
+        <div class="container">
+            <p>Хотите удалить валентинку?</p>
+            <img src="{%static 'valentine_day/img/delete.png' %}" alt="">
+        </div>
+    </div>
+    <div id="bottom-block" class="bottom-block">
+        <button id="next-btn">
+            <span class="btn-text">
+                Далее
+            </span>
+            <i class="fa-solid fa-angle-right"></i>
+        </button>
+    </div>
+    <div id="received-valentines" style="display: none;">
+        <header class="screen-header">
+            <i class="fa-solid fa-chevron-left" data-screen-go="main"></i>
+            <h2 class="screen-title">Полученные валентинки</h2>
+            <span></span>
+        </header>
+        <div class="container wait" style="display: none;">
+            <h3>Валентинки придут 13го февраля в 14:00 (мкс)</h3>
+            <img src="{%static 'valentine_day/img/wait.png'%}" alt="">
+        </div>
+        <div class="container empty" style="display: none;">
+            <h2>К сожалению ничего нет</h2>
+            <img src="{%static 'valentine_day/img/delete.png' %}" alt="">
+        </div>
+        <div class="container">
+            <ul class="valentine-list"></ul>
+        </div>
+    </div>
+    <div id="received-valentines-detail" style="display: none;">
+        <header class="screen-header">
+            <i class="fa-solid fa-chevron-left" data-screen-go="received-valentines-list"></i>
+        </header>
+        <div class="container">
+            <img class="valentine-img" src="" alt="" style="width: 100%;">
+            <p class="valentine-text"></p>
+            <h3 class="recipient-info">От:
+                <img class="avatar" src="" alt="">
+                <span class="valentine-recipient-name">Инкогнито</span>
+            </h3>
+        </div>
+    </div>
+    <div id="error-screen" style="display: none;">
+        <header class="screen-header">
+            <i class="fa-solid fa-chevron-left" data-screen-go="main"></i>
+        </header>
+        <div class="container">
+            <h2>Ошибка</h2>
+            <p id="error-message"></p>
+            <img src="{%static 'valentine_day/img/delete.png' %}" alt="">
+        </div>
+    </div>
+    <script>
+        const tg = window.Telegram.WebApp;
+        tg.ready();
+        tg.expand();
+        const BASE_URL = `http://127.0.0.1:8000/valentine-day`
+        const apiClient = new ApiClient(BASE_URL)
+        const appContext = {
+            ui: {
+                bottomBar: new BottomBar(),
+            },
+            api: {
+                client: apiClient,
+            },
+            collections: {},
+            formState: new ValentineFormState(),
+            defaults: {
+                avatar: "{% static 'valentine_day/img/avatar.png' %}",
+            }
+        }
+
+        appContext.collections.employees = new EmployeeCollection(apiClient, appContext)
+        appContext.collections.my_valentines = new MyValentineCollection(apiClient, appContext)
+        appContext.collections.valentineImages = new ValentineImageCollection(apiClient, appContext)
+        appContext.collections.received_valentines = new ReceivedValentineCollection(apiClient, appContext)
+
+        const router = new ScreenRouter()
+        const screens = [
+            ["main", MainScreen],
+            ["about", AboutScreen],
+            ["preload", PreLoadScreen],
+            ["error-screen", ErrorMessageScreen],
+            ["my-valentines-list", MyValentineListScreen],
+            ["my-valentines-detail", MyValentineDetailScreen],
+            ["my-valentines-delete", MyValentineDeleteScreen],
+            ["received-valentines-list", ReceivedValentineListScreen],
+            ["received-valentines-detail", ReceivedValentineDetailScreen],
+            ["form/chose-employee", EmployeeScreen],
+            ["form/chose-image", ChoseImageScreen],
+            ["form/write-text", WriteTextScreen],
+            ["form/check", CheckFormScreen],
+        ]
+
+        screens.forEach(([route, ScreenClass]) => {
+            router.register(route, new ScreenClass(router, appContext))
+        })
+
+        const app = new ValentineApp(appContext, router, tg)
+        app.start()
+    </script>
 </body>
+
 </html>
