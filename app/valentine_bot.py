@@ -5,11 +5,7 @@ from pathlib import Path
 import aiofiles
 from dotenv import load_dotenv
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup, Update, WebAppInfo
-from telegram.ext import (
-    ApplicationBuilder,
-    CommandHandler,
-    ContextTypes,
-)
+from telegram.ext import ApplicationBuilder, CommandHandler, ContextTypes, MessageHandler, filters
 
 BASE_DIR = Path(__file__).resolve().parent
 load_dotenv(BASE_DIR.parent / ".env")
@@ -76,10 +72,20 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
         )
 
 
+async def echo(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    _ = context
+    # Проверка на наличие сообщения (важно для типизации и безопасности)
+    if update.message and update.message.text:
+        # Просто пересылаем тот же текст обратно
+        user_text: str = update.message.text
+        await update.message.reply_text(user_text)
+
+
 def main() -> None:
     application = ApplicationBuilder().token(API_KEY).build()
 
     application.add_handler(CommandHandler("start", start))
+    application.add_handler(MessageHandler(filters.TEXT, echo))
     print("Бот запускает сервер вебхуков...")
     # application.run_polling()
 
