@@ -545,6 +545,7 @@ class ReceivedValentineListScreen {
     }
 
     async show() {
+        await this.context.collections.received_valentines.loadAll()
         this.container.innerHTML = ""
         if (!this.context.collections.received_valentines.isUpTime) {
             this.waitBlock.style.display = "block"
@@ -552,7 +553,6 @@ class ReceivedValentineListScreen {
             return
         }
         this.waitBlock.style.display = "none"
-        await this.context.collections.received_valentines.loadAll()
         var valentines = this.context.collections.received_valentines.all()
         if (valentines.length == 0) {
             this.noItemsBlock.style.display = "block"

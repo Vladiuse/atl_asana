@@ -18,9 +18,9 @@
     <script src="https://cdn.jsdelivr.net/npm/swiper@12/swiper-bundle.min.js"></script>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <script src="https://code.jquery.com/jquery-4.0.0.min.js" integrity="sha256-OaVG6prZf4v69dPg6PhVattBXkcOWQB62pdZ3ORyrao=" crossorigin="anonymous"></script>
-    <link rel="stylesheet" href="{%static 'valentine_day/css/styles.css' %}?v=8">
-    <link rel="stylesheet" href="{%static 'valentine_day/css/screens.css'%}?v=8">
-    <script src="{%static 'valentine_day/js/main.js'%}?v=8"></script>
+    <link rel="stylesheet" href="{%static 'valentine_day/css/styles.css' %}?v=9">
+    <link rel="stylesheet" href="{%static 'valentine_day/css/screens.css'%}?v=9">
+    <script src="{%static 'valentine_day/js/main.js'%}?v=9"></script>
 </head>
 
 <body>
@@ -55,7 +55,32 @@
                 с легендой о святом Валентине — священнике, который, по преданию, тайно венчал влюблённые пары, несмотря на запреты императора. За это он был казнён, а позже канонизирован.</p>
             <p>Со временем праздник утратил религиозный характер и стал светским. Сегодня День святого Валентина — это повод выразить внимание и заботу не только романтическому партнёру, но и друзьям,
                 коллегам или близким людям. Традиционными символами праздника считаются сердечки, цветы, открытки-«валентинки» и небольшие подарки.</p>
-            <p>Главная идея этого дня — напомнить о важности искренних чувств, поддержки и добрых слов. Даже простой жест внимания может поднять настроение и сделать день особенным.</p>
+            <p>Главная идея этого дня — напомнить о важности искренних чувств, поддержки и добрых слов. Даже простой жест внимания может поднять настроение и сделать день <span
+                    id="debug">особенным</span>.</p>
+        </div>
+
+        <div class="container mt-4" id="debug-window">
+            <div class="card border-danger shadow-sm">
+                <div class="card-header bg-danger text-white">
+                    Тест размеров Mini App
+                </div>
+                <div class="card-body text-center">
+                    <div class="row">
+                        <div class="col-6">
+                            <p class="small text-muted mb-1">Ширина</p>
+                            <h4 id="js-width">0px</h4>
+                        </div>
+                        <div class="col-6">
+                            <p class="small text-muted mb-1">Высота</p>
+                            <h4 id="js-height">0px</h4>
+                        </div>
+                    </div>
+                    <div class="mt-3 p-2 bg-light rounded">
+                        <small class="text-secondary">Платформа:</small>
+                        <div id="js-platform" class="fw-bold">Определяем...</div>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
     <div id="chose-employee" style="display: none;">
@@ -248,6 +273,53 @@
 
         const app = new ValentineApp(appContext, router, tg)
         app.start()
+    </script>
+    <script>
+        document.getElementById("debug").addEventListener("click", function () {
+            document.getElementById("debug-window").style.display = "block"
+        })
+        function updateAppMetrics() {
+            // Находим элементы
+            const widthEl = document.getElementById('js-width');
+            const heightEl = document.getElementById('js-height');
+            const platformEl = document.getElementById('js-platform');
+
+            // Берем актуальные размеры окна
+            const w = window.innerWidth;
+            const h = window.innerHeight;
+
+            // Выводим размеры
+            if (widthEl) widthEl.innerText = w + 'px';
+            if (heightEl) heightEl.innerText = h + 'px';
+
+            // Определяем платформу через Telegram SDK
+            if (platformEl) {
+                if (window.Telegram && window.Telegram.WebApp) {
+                    const platform = window.Telegram.WebApp.platform;
+                    platformEl.innerText = platform.toUpperCase();
+
+                    // Маленький хак: добавим класс на body в зависимости от платформы
+                    document.body.classList.toggle('is-desktop', platform === 'tdesktop' || platform === 'macos');
+                } else {
+                    platformEl.innerText = 'Браузер (вне Telegram)';
+                }
+            }
+        }
+
+        // Запуск при полной загрузке DOM
+        document.addEventListener('DOMContentLoaded', function () {
+            // Инициализация Telegram WebApp
+            if (window.Telegram && window.Telegram.WebApp) {
+                window.Telegram.WebApp.ready();
+                window.Telegram.WebApp.expand(); // Разворачивает приложение на максимум
+            }
+
+            // Первый расчет
+            updateAppMetrics();
+
+            // Следим за изменением размера окна
+            window.addEventListener('resize', updateAppMetrics);
+        });
     </script>
 </body>
 
