@@ -767,8 +767,8 @@ class ReceivedValentineListScreen {
     }
 
     async show() {
-        await this.context.collections.received_valentines.loadAll()
         this.container.innerHTML = ""
+        await this.context.collections.received_valentines.loadAll()
         if (!this.context.collections.received_valentines.isUpTime) {
             this.waitBlock.style.display = "block"
             this.noItemsBlock.style.display = "none"

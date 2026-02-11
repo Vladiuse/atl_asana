@@ -23,6 +23,9 @@ class EmployeeManager(models.Manager):  # type: ignore[type-arg]
 
 
 class Employee(models.Model):
+    is_open_app = models.BooleanField(
+        default=False,
+    )
     user = models.OneToOneField(
         to=User,
         on_delete=models.CASCADE,

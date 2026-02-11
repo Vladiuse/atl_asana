@@ -123,6 +123,9 @@ class GetTokenView(APIView):
             "employee_id": employee.pk,
             "user_id": employee.user.pk,
         }
+        if employee.is_open_app is False:
+            employee.is_open_app = True
+            employee.save()
         return Response(data=data)
 
 register_heif_opener()
