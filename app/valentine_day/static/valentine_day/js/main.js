@@ -290,6 +290,13 @@ class ChoseImageScreen {
             }, 1500)
         } catch (e) {
             console.error("Ошибка загрузки:", e);
+            var errorMessage = e.message
+            var maxErrorLength = 200
+            errorMessage = errorMessage?.length > maxErrorLength ? errorMessage.substr(0, maxErrorLength - 1) + "..." : errorMessage;
+            this.router.go(
+                "error-screen", 
+                { message: `Не удалось загрузить картинку\n${errorMessage}` ,showCloseButton: true}
+            )
         }
     }
 
@@ -331,7 +338,7 @@ class ChoseImageScreen {
         if (this.swiper) {
             this.swiper.destroy(true, true)
             this.swiperWrapper.querySelectorAll(".swiper-slide").forEach(slide => {
-                    slide.remove()
+                slide.remove()
             })
         }
         imagesData.forEach(imageData => {
@@ -356,7 +363,7 @@ class ChoseImageScreen {
                     this.previewImg.src = event.target.result;
                     this.previewContainer.className = "preview-visible";
                     this.triggerBtn.style.display = "none";
-                    this.context.ui.bottomBar.show("Load imgs")
+                    this.context.ui.bottomBar.show("Загрузить")
                     this.context.ui.bottomBar.setClickHandler(this.handleUpload.bind(this))
                 };
                 reader.readAsDataURL(files[0]);
@@ -407,7 +414,11 @@ class ChoseImageScreen {
         const totalSlides = this.swiper.slides.length;
         const targetIndex = totalSlides - 1
         this.swiper.addSlide(targetIndex, slideHtml);
-        this.swiper.slideTo(targetIndex, 400);
+        this.swiper.update();
+        if (this.swiper.navigation) {
+            this.swiper.navigation.update();
+        }
+        this.swiper.slideTo(targetIndex - 1, 400);
     }
 
     _submitImage() {
@@ -418,7 +429,7 @@ class ChoseImageScreen {
     }
 
     show() {
-        var imagesData = this.context.collections.valentineImages.all()
+        var imagesData = this.context.collections.valentineImages.employeeImages()
         this._createSwiper(imagesData)
         this.context.ui.bottomBar.show("Далее", IconFactory.arrowNext)
         this.context.ui.bottomBar.setClickHandler(this._submitImage.bind(this))
@@ -814,7 +825,8 @@ class AboutScreen {
 }
 
 class ErrorMessageScreen {
-    constructor(router) {
+    constructor(router, context) {
+        this.context = context
         this.router = router
         this.elem = document.getElementById("error-screen")
         this.messageBlock = document.getElementById("error-message")
@@ -1297,6 +1309,12 @@ class ValentineImageCollection {
             throw new Error(`ValentineImage with id ${id} not found`)
         }
         return image
+    }
+
+    employeeImages() {
+        return Array.from(this.items.values()).filter(valentineImage =>
+            valentineImage.owner === null || valentineImage.owner === this.apiClient.userId
+        );
     }
 
     add(valentineImageData) {
