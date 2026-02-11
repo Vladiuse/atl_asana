@@ -40,19 +40,16 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
         "Что дальше? Покажет ✨любовь✨\n\n"
         "Заряжаем стрелу?"
     )
-    # Текст сообщения
-    welcome_text_2: str = (
-        "<b>С праздником, коллега! 💌</b>\n\n"
-        "В этом году мы решили наполнить наш офис теплом и добрыми словами. "
-        "Специально к <b>14 февраля</b> мы запустили приложение, где можно "
-        "отправить валентинку любому сотруднику!\n\n"
-        "<b>Как это сделать:</b>\n"
-        "1️⃣ Запустите приложение (кнопка Open или 'Отправить валентинку')\n"
-        "2️⃣ Выбери получателя\n"
-        "3️⃣ Подбери картинку и напиши текст\n"
-        "4️⃣ Нажми «Сохранить»\n\n"
-        "🤫 Все послания <b>анонимны</b>.\n"
-        "⏳ Откроем почту <b>13 февраля в 14:00</b>."
+    instruction_text: str = (
+        "Выбери того, кому хочешь отправить валентинку  💌\n\n"
+        "Как это сделать:\n\n"
+        "❤️ Запустите приложение (кнопка Open или 'Отправить валентинку')\n"
+        "❤️ Выбери получателя\n"
+        "❤️ Подбери картинку и напиши текст\n"
+        "❤️ Нажми «Сохранить»\n\n"
+        "Иногда любовь бывает переменчива. Вы можете отозвать свою валентинку, просто удалив ее 💔 \n\n"
+        "Или удалить сообщение и отправить новое, если придумали лучшее признание, "
+        "вы сегодня Валентин и все в ваших руках"
     )
 
     # Создание кнопки Mini App
@@ -66,7 +63,7 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
             parse_mode="HTML",
         )
         await update.message.reply_text(
-            text=welcome_text_2,
+            text=instruction_text,
             parse_mode="HTML",
             reply_markup=reply_markup,
         )
@@ -74,17 +71,31 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
 
 async def echo(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     _ = context
-    # Проверка на наличие сообщения (важно для типизации и безопасности)
     if update.message and update.message.text:
-        # Просто пересылаем тот же текст обратно
         user_text: str = update.message.text
-        await update.message.reply_text(user_text)
+        if user_text == "ping":
+            await update.message.reply_text(user_text)
+
+
+async def test_link(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    _ = context
+    if update.message is None:
+        return
+    web_app_url: str = "https://atl-asana.vim-store.ru/"
+    keyboard = [[InlineKeyboardButton(text="💌 Отправить валентинку", web_app=WebAppInfo(url=web_app_url))]]
+    reply_markup = InlineKeyboardMarkup(keyboard)
+    await update.message.reply_text(
+        text="Test",
+        parse_mode="HTML",
+        reply_markup=reply_markup,
+    )
 
 
 def main() -> None:
     application = ApplicationBuilder().token(API_KEY).build()
 
     application.add_handler(CommandHandler("start", start))
+    application.add_handler(CommandHandler("test_link", start))
     application.add_handler(MessageHandler(filters.TEXT, echo))
     print("Бот запускает сервер вебхуков...")
     # application.run_polling()

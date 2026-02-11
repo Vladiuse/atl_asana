@@ -374,7 +374,7 @@ class CheckFormScreen {
 
     show() {
         this._displayData()
-        this.context.ui.bottomBar.show("Сохранить валентинку", IconFactory.arrowNext)
+        this.context.ui.bottomBar.show("Направить стрелу любви", IconFactory.arrowNext)
         this.context.ui.bottomBar.setClickHandler(this._submitCheck.bind(this))
     }
 
