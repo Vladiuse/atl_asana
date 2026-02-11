@@ -120,3 +120,15 @@ class GetTokenView(APIView):
             "user_id": employee.user.pk,
         }
         return Response(data=data)
+
+
+class ValentineImageUploadView(APIView):
+    def post(self, request: Request) -> Response:
+        image_file = request.FILES.get("image")
+        owner_id = request.data.get("owner_id")
+        if not image_file:
+            return Response({"error": "Файл изображения не найден"}, status=status.HTTP_400_BAD_REQUEST)
+        owner = get_object_or_404(User, pk=owner_id)
+        valentine_image: ValentineImage = ValentineImage.objects.create(image=image_file, owner=owner)
+        serializer: ValentineImageSerializer = ValentineImageSerializer(valentine_image, context={"request": request})
+        return Response(serializer.data, status=status.HTTP_201_CREATED)

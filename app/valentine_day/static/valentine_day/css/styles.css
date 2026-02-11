@@ -55,7 +55,7 @@ img{
   background: var(--seconde-color-disable);
 }
 
-#next-btn {
+#next-btn{
   display: flex;
   justify-content: center;
   font-size: 1.4rem;

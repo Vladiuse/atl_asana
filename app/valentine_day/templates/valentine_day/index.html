@@ -105,6 +105,21 @@
         <div class="swiper-container">
             <div class="swiper-wrapper">
                 <!-- <div class="swiper-slide"><img src="./assets/img/v/1 Валентика.png" alt=""></div> -->
+                <div class="swiper-slide" id="load-image">
+                    <div class="upload-container">
+                        <input type="file" id="valentine-image-input" accept="image/*" style="display: none;">
+
+                        <button type="button" class="btn-upload" id="trigger-upload">
+                            <span class="icon">📸</span>
+                            <span class="text">Добавить фото</span>
+                        </button>
+
+                        <div id="image-preview-container" class="preview-hidden">
+                            <img id="image-preview" src="" alt="Ваша картинка">
+                            <button type="button" id="remove-image" class="btn-remove">&times;</button>
+                        </div>
+                    </div>
+                </div>
             </div>
             <div class="swiper-pagination"></div>
         </div>
@@ -117,6 +132,69 @@
             </div>
         </div>
     </div>
+
+    <style>
+        #load-image{
+            aspect-ratio: 1 /1;
+            background: var(--font-color);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        #trigger-upload{
+  
+        }
+        .upload-container {
+            margin: 20px 0;
+            text-align: center;
+        }
+
+        .btn-upload {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            width: 100%;
+            padding: 12px;
+            background-color: #f8f9fa;
+            border: 2px solid black;
+            border-radius: 12px;
+            color: black;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        #image-preview-container.preview-hidden {
+            display: none;
+        }
+
+        #image-preview-container {
+            position: relative;
+            margin-top: 15px;
+            display: inline-block;
+        }
+
+        #image-preview {
+            max-width: 200px;
+            max-height: 200px;
+            border-radius: 10px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .btn-remove {
+            position: absolute;
+            top: -10px;
+            right: -10px;
+            background: var(--red);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            cursor: pointer;
+            font-size: 1.2rem;
+        }
+    </style>
     <div id="write-text" style="display: none;">
         <header class="screen-header">
             <h2 class="screen-title">3 / 4 Напиши текст</h2>
@@ -167,98 +245,6 @@
             </div>
         </div>
     </div>
-    <style>
-        .privacy-container {
-            font-family: sans-serif;
-            max-width: 400px;
-            margin: 0 auto;
-            padding: 16px;
-        }
-
-        .options-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 12px;
-            margin-bottom: 20px;
-        }
-
-        .option-card {
-            cursor: pointer;
-        }
-
-        .option-card input {
-            display: none;
-            /* Скрываем стандартный кружок */
-        }
-
-        .card-content {
-            aspect-ratio: 1 / 1;
-            border: 3px solid var(--font-color);
-            border-radius: 12px;
-            padding: 16px;
-            text-align: center;
-            transition: all 0.2s ease;
-            background-color: var(--font-color);
-            opacity: .75;
-        }
-        .card-content img{
-            width: 100%;
-        }
-
-        /* Состояние при выборе */
-        .option-card input:checked+.card-content {
-            border-color: var(--selected-green);
-            background-color: var(--font-color);
-            opacity: 1;
-        }
-
-        .icon {
-            font-size: 24px;
-            display: block;
-            margin-bottom: 8px;
-        }
-
-        .label-text {
-            font-weight: bold;
-            display: block;
-            font-size: 0.8rem;
-            color: #333;
-        }
-
-        .sub-text {
-            font-size: 11px;
-            color: #222;
-        }
-
-        /* Секция подписи */
-        .signature-hidden {
-            display: none;
-        }
-
-        .signature-visible {
-            display: block;
-            margin-top: 15px;
-        }
-
-        .custom-input {
-            width: 100%;
-            padding: 10px;
-            border: 1px solid #ccc;
-            border-radius: 8px;
-            box-sizing: border-box;
-            background-color: var(--font-color);
-        }
-        .custom-input:focus{
-            outline: none;
-        }
-
-        .input-label {
-            display: block;
-            margin-bottom: 5px;
-            font-size: 13px;
-            font-weight: bold;
-        }
-    </style>
     <div id="check-form" style="display: none;">
         <header class="screen-header">
             <h2 class="screen-title">Проверка</h2>
@@ -364,6 +350,7 @@
         const tg = window.Telegram.WebApp;
         tg.ready();
         tg.expand();
+        const CSRF_TOKEN = "{{ csrf_token }}";
         const BASE_URL = "//{{ request.get_host }}/valentine-day";
         const apiClient = new ApiClient(BASE_URL)
         const appContext = {

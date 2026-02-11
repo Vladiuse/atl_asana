@@ -245,6 +245,10 @@ class ChoseImageScreen {
         this.elem = document.getElementById("chose-img")
         this.swiperWrapper = this.elem.querySelector(".swiper-wrapper")
         this.swiper = null
+        this.loadImgInput = document.getElementById('valentine-image-input')
+        this.triggerBtn = document.querySelector('#trigger-upload');
+        this.previewImg = document.querySelector('#image-preview');
+        this.previewContainer = document.querySelector('#image-preview-container');
 
         this.__init__()
     }
@@ -259,21 +263,84 @@ class ChoseImageScreen {
                     elem.classList.add("swiper-nav-click")
                 })
             })
+
+
+        // 1. Проксируем клик с красивой кнопки на системный инпут
+        this.triggerBtn.addEventListener('click', () => this.loadImgInput.click());
+
+        // 2. Обрабатываем выбор файла
+        this.loadImgInput.addEventListener('change', (e) => {
+            const files = e.target.files;
+
+            if (files && files[0]) {
+                const reader = new FileReader();
+                reader.onload = (event) => {
+                    this.previewImg.src = event.target.result;
+                    this.previewContainer.className = "preview-visible";
+                    this.triggerBtn.style.display = "none";
+                    this.context.ui.bottomBar.show("Load imgs")
+                    this.context.ui.bottomBar.setClickHandler(this.handleUpload.bind(this))
+                };
+                reader.readAsDataURL(files[0]);
+            }
+        });
+
+        // 3. Удаление выбранного фото
+        document.querySelector('#remove-image').addEventListener('click', () => {
+            this._clearLoadedImg()
+            this.context.ui.bottomBar.hide()
+        })
+    }
+
+    _clearLoadedImg() {
+        this.loadImgInput.value = "";
+        this.previewContainer.className = "preview-hidden";
+        this.triggerBtn.style.display = "flex";
+    }
+
+    async handleUpload() {
+        this.context.ui.bottomBar.disabled = true
+        this.context.ui.bottomBar.showLoading("Загружаю")
+        const file = this.loadImgInput.files[0];
+        try {
+            const valentineImage = await this.context.collections.valentineImages.uploadValentineImage(file);
+            console.log("Картинка загружена:", valentineImage);
+            setTimeout(() => {
+                this.context.ui.bottomBar.disabled = false
+                this.context.ui.bottomBar.hideLoading()
+                var slideElem = this._createSlide(valentineImage)
+                this._addSlideOfNewImage(slideElem)
+                this._clearLoadedImg()
+                this.context.ui.bottomBar.show("Далее", IconFactory.arrowNext)
+                this.context.ui.bottomBar.setClickHandler(this._submitImage.bind(this))
+            }, 1500)
+        } catch (e) {
+            console.error("Ошибка загрузки:", e);
+        }
+    }
+
+    _createSlide(imageData) {
+        var div = document.createElement("div")
+        div.classList.add("swiper-slide")
+        div.dataset.imageId = imageData.id
+        var img = document.createElement("img")
+        img.src = imageData.image
+        div.appendChild(img)
+        return div
     }
 
     _createSwiper(imagesData) {
         if (this.swiper) {
             this.swiper.destroy(true, true)
-            this.swiperWrapper.innerHTML = ""
+            this.swiperWrapper.querySelectorAll(".swiper-slide").forEach(slide => {
+                if (slide.id != "load-image") {
+                    slide.remove()
+                }
+            })
         }
         imagesData.forEach(imageData => {
-            var div = document.createElement("div")
-            div.classList.add("swiper-slide")
-            div.dataset.imageId = imageData.id
-            var img = document.createElement("img")
-            img.src = imageData.image
-            div.appendChild(img)
-            this.swiperWrapper.appendChild(div)
+            var slide = this._createSlide(imageData)
+            this.swiperWrapper.appendChild(slide)
         })
         this.swiper = new Swiper('.swiper-container', {
             loop: true,
@@ -285,7 +352,35 @@ class ChoseImageScreen {
                 nextEl: '.heart-button-next',
                 prevEl: '.heart-button-prev',
             },
+            on: {
+                slideChange: this._slideChange.bind(this)
+            }
         })
+    }
+
+    _showLoadImageSlide() {
+        this.context.ui.bottomBar.hide()
+        this._clearLoadedImg()
+    }
+
+    _slideChange() {
+        if (this.swiper) {
+            const index = this.swiper.activeIndex;
+            const activeSlide = this.swiper.slides[index];
+            if (activeSlide.id == "load-image") {
+                this._showLoadImageSlide()
+            } else {
+                this.context.ui.bottomBar.show("Далее", IconFactory.arrowNext)
+            }
+        }
+
+    }
+
+    _addSlideOfNewImage(slideHtml) {
+        const totalSlides = this.swiper.slides.length;
+        const targetIndex = totalSlides - 1
+        this.swiper.addSlide(targetIndex, slideHtml);
+        this.swiper.slideTo(targetIndex, 400);
     }
 
     _submitImage() {
@@ -801,8 +896,8 @@ class ValentineApp {
         this.context.collections.my_valentines.loadAll()
         this.context.collections.received_valentines.loadAll()
         setTimeout(() => {
-            this.router.go("main")
-            // this.router.go("form/sending-privacy")
+            // this.router.go("main")
+            this.router.go("form/chose-image")
         }, 28)
     }
 }
@@ -948,6 +1043,31 @@ class ApiClient {
         }
 
         return await response.json()
+    }
+
+    async uploadValentineImage(imageFile, ownerId) {
+        const url = `${this.baseUrl}/load-valentine-image/`;
+
+        // Для отправки файлов используем FormData
+        const formData = new FormData();
+        formData.append('image', imageFile);
+        formData.append('owner_id', ownerId);
+
+        const response = await fetch(url, {
+            method: "POST",
+            headers: {
+                "X-CSRFToken": CSRF_TOKEN,
+                // ВАЖНО: Content-Type НЕ ПИШЕМ, браузер поставит его сам с boundary
+            },
+            body: formData
+        });
+
+        if (!response.ok) {
+            const errorText = await response.text();
+            throw new Error(`HTTP ${response.status}: ${errorText}`);
+        }
+
+        return await response.json();
     }
 }
 
@@ -1125,6 +1245,7 @@ class ValentineImage {
     constructor(data) {
         this.id = data.id
         this.image = data.image
+        this.owner = data.owner
     }
 }
 
@@ -1151,7 +1272,20 @@ class ValentineImageCollection {
         return image
     }
 
+    add(valentineImageData) {
+        const valentine = new ValentineImage(valentineImageData)
+        this.items.set(valentine.id, valentine)
+        return valentine
+    }
+
     all() {
         return Array.from(this.items.values())
     }
+
+    async uploadValentineImage(file) {
+        var data = await this.apiClient.uploadValentineImage(file, this.apiClient.userId);
+        var valentineImage = this.add(data)
+        return valentineImage
+    }
+
 }
