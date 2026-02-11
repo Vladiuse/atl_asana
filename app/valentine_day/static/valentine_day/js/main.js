@@ -382,6 +382,7 @@ class ChoseImageScreen {
 
         this.swiper = new Swiper('.swiper-container', {
             loop: true,
+            threshold: 25,
             autoHeight: true,
             pagination: {
                 el: '.swiper-pagination',
@@ -393,7 +394,7 @@ class ChoseImageScreen {
             },
             runCallbacksOnInit: false,
             on: {
-                slideChangeTransitionEnd: this._slideChange.bind(this)
+                slideChangeTransitionStart: this._slideChange.bind(this),
             }
         })
     }
@@ -407,6 +408,7 @@ class ChoseImageScreen {
         if (this.swiper) {
             const index = this.swiper.activeIndex;
             const activeSlide = this.swiper.slides[index];
+            console.log(activeSlide)
             if (activeSlide.id == "load-image") {
                 this._showLoadImageSlide()
             } else {
