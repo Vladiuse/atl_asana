@@ -295,8 +295,8 @@ class ChoseImageScreen {
             var maxErrorLength = 200
             errorMessage = errorMessage?.length > maxErrorLength ? errorMessage.substr(0, maxErrorLength - 1) + "..." : errorMessage;
             this.router.go(
-                "error-screen", 
-                { message: `Не удалось загрузить картинку\n${errorMessage}` ,showCloseButton: true}
+                "error-screen",
+                { message: `Не удалось загрузить картинку\n${errorMessage}`, showCloseButton: true }
             )
         }
     }
@@ -334,7 +334,7 @@ class ChoseImageScreen {
         return slide;
     }
 
-    _addEventsOnUploadImageSlide(uploadImageSlide){
+    _addEventsOnUploadImageSlide(uploadImageSlide) {
         this.loadImgInput = uploadImageSlide.querySelector('#valentine-image-input')
         this.triggerBtn = uploadImageSlide.querySelector('#trigger-upload');
         this.previewImg = uploadImageSlide.querySelector('#image-preview');
@@ -349,7 +349,7 @@ class ChoseImageScreen {
                 const isHeic = fileName.endsWith('.heic') || fileName.endsWith('.heif');
                 const reader = new FileReader();
                 reader.onload = (event) => {
-                    this.previewImg.src = isHeic ? this.context.defaults.heicPrev : event.target.result ;
+                    this.previewImg.src = isHeic ? this.context.defaults.heicPrev : event.target.result;
                     this.previewContainer.className = "preview-visible";
                     this.triggerBtn.style.display = "none";
                     this.context.ui.bottomBar.show("Загрузить")
@@ -582,7 +582,7 @@ class CheckFormScreen {
         this.textElem.innerText = text
         this.recipientNameElem.innerText = recipient.fullName
         this.recipientAvatarElem.src = recipient.avatar
-        var senderName = this.context.formState.isAnonymously ? `анонимно от ${this.context.formState.anonymousSignature}` : `от Вашего имени`
+        var senderName = this.context.formState.isAnonymously ? `от ${this.context.formState.anonymousSignature}` : `от Вашего имени`
         this.senderNameElem.innerText = senderName
     }
 
@@ -624,7 +624,7 @@ class MyValentineDetailScreen {
         this.valentineTextElem.innerText = valentine.text
         this.valentineImgElem.src = valentineImage.image
         this.valentineRecipientNameElem.innerText = recipient.fullName
-        this.valentineSenderNameElem.innerText = valentine.isAnonymously ? `анонимно от ${valentine.anonymousSignature}` : `от Вашего имени`
+        this.valentineSenderNameElem.innerText = valentine.isAnonymously ? `от ${valentine.anonymousSignature}` : `от Вашего имени`
     }
 }
 
@@ -838,7 +838,7 @@ class ErrorMessageScreen {
         this.closeElem = this.elem.querySelector("[data-screen-go]")
     }
 
-    show({ message = "", showCloseButton = false }) {
+    show({ message = "", showCloseButton = false, html = false }) {
         if (!message) {
             throw new Error
         }
@@ -847,7 +847,11 @@ class ErrorMessageScreen {
         } else {
             this.closeElem.style.display = "none"
         }
-        this.messageBlock.innerText = message
+        if (html) {
+            this.messageBlock.innerHTML = message
+        } else {
+            this.messageBlock.innerText = message
+        }
     }
 }
 
@@ -920,7 +924,7 @@ class ValentineApp {
             var tg_user_id = this.telegramApp.initDataUnsafe.user.id
         } catch (error) {
             console.error("Ошибка доступа к данным Telegram:", error.message);
-            var tg_user_id = "test_id"
+            var tg_user_id = "test_id1"
         }
 
         try {
@@ -930,7 +934,10 @@ class ValentineApp {
             this.context.api.client.userId = data.user_id
         } catch (e) {
             console.error("Cant get token", e.message);
-            this.router.go("error-screen", { message: `Cant get token, unknown telegram id.\ntelegram_user_id: ${tg_user_id}` })
+            var manager = this.context.defaults.manager
+            var helpLink = `<a href="${manager.tgLink}">${manager.tgLogin}</a>`
+            var message = `ID "${tg_user_id}" не найден. Для регистрации напишите ${manager.name}: ${helpLink}`
+            this.router.go("error-screen", { message: message, html: true })
             return
         }
         console.log(token, "token")
@@ -1140,10 +1147,10 @@ class EmployeeCollection {
         const data = await this.apiClient.employeeList()
         this.items.clear()
         console.log(data.avatar)
-        
+
         data.forEach((empData) => {
             var employee = new Employee(empData)
-            if (employee.avatar == null){
+            if (employee.avatar == null) {
                 employee.avatar = this.context.defaults.avatar
             }
             this.items.set(empData.id, employee)
