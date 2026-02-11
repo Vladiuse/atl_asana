@@ -82,7 +82,7 @@ async def echo(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     if update.message and update.message.text:
         user_text: str = update.message.text
         if user_text == "ping":
-            await update.message.reply_text(user_text)
+            await update.message.reply_text("pong")
 
 
 async def test_link(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:

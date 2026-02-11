@@ -75,7 +75,7 @@ class ValentineView(viewsets.ModelViewSet):  # type: ignore[type-arg]
     def get_queryset(self) -> QuerySet[Valentine]:
         user: User = self.request.user  # type: ignore[assignment]
         employee = get_object_or_404(Employee, user=user)
-        return Valentine.objects.filter(sender=employee)
+        return Valentine.objects.filter(sender=employee).order_by("-created")
 
     def perform_create(self, serializer: BaseSerializer[Valentine]) -> None:
         user: User = self.request.user  # type: ignore[assignment]
@@ -85,7 +85,7 @@ class ValentineView(viewsets.ModelViewSet):  # type: ignore[type-arg]
     @action(detail=False, methods=["get"], url_path="received")
     def received_valentines(self, request: Request) -> Response:
         employee = get_object_or_404(Employee, user=request.user)
-        qs = Valentine.objects.filter(recipient=employee)
+        qs = Valentine.objects.filter(recipient=employee).order_by("-created")
         serializer = self.get_serializer(qs, many=True)
         now = timezone.localtime(timezone.now())
         release_time = config.SHOW_VALENTINES_AT
