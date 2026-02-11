@@ -393,7 +393,7 @@ class ChoseImageScreen {
             },
             runCallbacksOnInit: false,
             on: {
-                slideChange: this._slideChange.bind(this)
+                slideChangeTransitionEnd: this._slideChange.bind(this)
             }
         })
     }
@@ -924,7 +924,7 @@ class ValentineApp {
             var tg_user_id = this.telegramApp.initDataUnsafe.user.id
         } catch (error) {
             console.error("Ошибка доступа к данным Telegram:", error.message);
-            var tg_user_id = "test_id1"
+            var tg_user_id = "test_id"
         }
 
         try {
@@ -947,8 +947,9 @@ class ValentineApp {
         this.context.collections.my_valentines.loadAll()
         this.context.collections.received_valentines.loadAll()
         setTimeout(() => {
-            this.router.go("main")
-        }, 2800)
+            // this.router.go("main")
+            this.router.go("form/chose-image")
+        }, 28)
     }
 }
 
