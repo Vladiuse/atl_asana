@@ -1,7 +1,7 @@
-from datetime import datetime
-
-from zoneinfo import ZoneInfo
 import zoneinfo
+from datetime import datetime
+from zoneinfo import ZoneInfo
+
 from constance import config
 from django.contrib.auth.models import User
 from django.db.models import QuerySet

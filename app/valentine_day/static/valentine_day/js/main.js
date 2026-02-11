@@ -4,7 +4,7 @@ class ValentineFormState {
         this.imageId = null
         this.text = ""
         this.isAnonymously = true
-        this.anonymousSignature = "Аноним"
+        this.anonymousSignature = "Инкогнито"
     }
 
     is_valid() {
@@ -19,6 +19,8 @@ class ValentineFormState {
         this.recipientId = null
         this.imageId = null
         this.text = ""
+        this.isAnonymously = true
+        this.anonymousSignature = "Инкогнито"
     }
 }
 
@@ -329,7 +331,7 @@ class WriteTextScreen {
 
     _submitText() {
         this.context.formState.text = this.textarea.value
-        this.router.go("form/check")
+        this.router.go("form/sending-privacy")
     }
 
     show() {
@@ -338,6 +340,86 @@ class WriteTextScreen {
     }
 
     hide() {
+        this.context.ui.bottomBar.close()
+    }
+}
+
+class SendingPrivacyScreen {
+    constructor(router, context) {
+        this.router = router
+        this.context = context
+        this.elem = document.getElementById("sending-privacy")
+        this.senderAvatar = this.elem.querySelector(".sender-avatar")
+        this.anonRadio = document.getElementById('modeAnonymous');
+        this.publicRadio = document.getElementById('modePublic');
+        this.signatureSection = document.getElementById('signatureSection');
+        this.signatureInput = document.getElementById('signatureInput');
+        this.allRadios = this.elem.querySelectorAll('input[name="senderMode"]');
+
+        this.__init__()
+    }
+
+    __init__() {
+        this.allRadios.forEach(radio => {
+            radio.addEventListener('change', () => {
+                if (this.anonRadio.checked) {
+                    this._choseAnon()
+                } else {
+                    this._chosePersonal()
+                }
+            });
+        });
+
+        this.signatureInput.addEventListener("input", () => {
+            if (this._isValidAnonName()) {
+                this.context.ui.bottomBar.show("Далее", IconFactory.arrowNext)
+            } else {
+                this.context.ui.bottomBar.hide()
+            }
+        });
+    }
+
+    _isValidAnonName() {
+        const value = this.signatureInput.value.trim();
+        const length = value.length;
+        return length >= 3
+    }
+
+    _choseAnon() {
+        this.anonRadio.checked = true;
+        this.signatureSection.className = "signature-visible"
+        if (this._isValidAnonName()) {
+            this.context.ui.bottomBar.show("Далее", IconFactory.arrowNext)
+        } else {
+            this.context.ui.bottomBar.hide()
+        }
+    }
+    _chosePersonal() {
+        this.publicRadio.checked = true;
+        this.signatureSection.className = "signature-hidden"
+        this.context.ui.bottomBar.show("Далее", IconFactory.arrowNext)
+    }
+
+    async _submitPrivacy() {
+        if (this.publicRadio.checked) {
+            this.context.formState.isAnonymously = false
+        } else {
+            this.context.formState.isAnonymously = true
+            this.context.formState.anonymousSignature = this.signatureInput.value
+        }
+        this.router.go("form/check")
+    }
+
+    show() {
+        this.senderAvatar.src = this.context.collections.employees.currentEmployee().avatar
+        this.context.ui.bottomBar.show("Далее", IconFactory.arrowNext)
+        this._chosePersonal()
+        this.signatureInput.value = ""
+        this.context.ui.bottomBar.setClickHandler(this._submitPrivacy.bind(this))
+    }
+
+    hide() {
+        this.signatureInput.value = ""
         this.context.ui.bottomBar.close()
     }
 }
@@ -351,6 +433,7 @@ class CheckFormScreen {
         this.textElem = document.getElementById("check-text")
         this.recipientNameElem = document.getElementById("check-recipient-name")
         this.recipientAvatarElem = document.getElementById("check-recipient-avatar")
+        this.senderNameElem = this.elem.querySelector(".sender-name")
     }
 
     _displayData() {
@@ -361,6 +444,8 @@ class CheckFormScreen {
         this.textElem.innerText = text
         this.recipientNameElem.innerText = recipientData.fullName
         this.recipientAvatarElem.src = recipientData.avatar ?? this.context.defaults.avatar
+        var senderName = this.context.formState.isAnonymously ? `анонимно от ${this.context.formState.anonymousSignature}` : `от Вашего имени`
+        this.senderNameElem.innerText = senderName
     }
 
     async _submitCheck() {
@@ -391,6 +476,7 @@ class MyValentineDetailScreen {
         this.valentineTextElem = this.elem.querySelector(".valentine-text")
         this.valentineImgElem = this.elem.querySelector(".valentine-img")
         this.valentineRecipientNameElem = this.elem.querySelector(".valentine-recipient-name")
+        this.valentineSenderNameElem = this.elem.querySelector(".valentine-sender-name")
     }
 
     show({ valentineId } = {}) {
@@ -400,6 +486,7 @@ class MyValentineDetailScreen {
         this.valentineTextElem.innerText = valentine.text
         this.valentineImgElem.src = valentineImage.image
         this.valentineRecipientNameElem.innerText = recipient.fullName
+        this.valentineSenderNameElem.innerText = valentine.isAnonymously ? `анонимно от ${valentine.anonymousSignature}` : `от Вашего имени`
     }
 }
 
@@ -501,14 +588,13 @@ class ReceivedValentineDetailScreen {
 
     show({ valentineId } = {}) {
         var valentine = this.context.collections.received_valentines.getById(valentineId)
+        var sender = this.context.collections.employees.getById(valentine.senderId)
         this.context.collections.received_valentines.markAsRead(valentineId)
-        var recipient = this.context.collections.employees.getById(valentine.senderId)
         var valentineImage = this.context.collections.valentineImages.getById(valentine.imageId)
         this.valentineTextElem.innerText = valentine.text
         this.valentineImgElem.src = valentineImage.image
-        // this.valentineRecipientNameElem.innerText = recipient.fullName
-        this.valentineRecipientNameElem.innerText = "Инкогнито"
-        this.valentineRecipientImgElem.src = this.context.defaults.avatar
+        this.valentineRecipientNameElem.innerText = valentine.isAnonymously ? valentine.anonymousSignature : sender.fullName
+        this.valentineRecipientImgElem.src = valentine.isAnonymously ? this.context.defaults.avatar : sender.avatar
     }
 }
 
@@ -523,23 +609,21 @@ class ReceivedValentineListScreen {
     }
 
     _createCards(valentine) {
+        var sender = this.context.collections.employees.getById(valentine.senderId)
         const li = document.createElement("li")
         li.dataset.valentineId = valentine.id
         li.className = "valentine-item"
         const img = document.createElement("img")
         img.className = "avatar"
-        img.src = this.context.defaults.avatar
+        img.src = valentine.isAnonymously ? this.context.defaults.avatar : sender.avatar
         img.alt = "Avatar"
         const span = document.createElement("span")
         span.className = "name"
-        span.textContent = "Инкогнито"
+        span.textContent = valentine.isAnonymously ? valentine.anonymousSignature : sender.fullName
         var iconsDiv = document.createElement("div")
         iconsDiv.className = "icons"
-        if (valentine.isReadByRecipient) {
-            iconsDiv.append(IconFactory.mailOpen, IconFactory.eye)
-        } else {
-            iconsDiv.append(IconFactory.mailClose, IconFactory.eye)
-        }
+        var mailIcon = valentine.isReadByRecipient ? IconFactory.mailOpen : IconFactory.mailClose
+        iconsDiv.append(mailIcon, IconFactory.eye)
         li.append(img, span, iconsDiv)
         return li
     }
@@ -718,6 +802,7 @@ class ValentineApp {
         this.context.collections.received_valentines.loadAll()
         setTimeout(() => {
             this.router.go("main")
+            // this.router.go("form/sending-privacy")
         }, 28)
     }
 }
@@ -918,6 +1003,10 @@ class EmployeeCollection {
 
     all() {
         return Array.from(this.items.values())
+    }
+
+    currentEmployee() {
+        return this.getById(this.apiClient.employeeId)
     }
 }
 
