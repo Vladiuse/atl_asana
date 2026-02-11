@@ -45,10 +45,6 @@ class EmployeeView(viewsets.ModelViewSet):  # type: ignore[type-arg]
     authentication_classes = (TokenAuthentication,)
     permission_classes = (IsAuthenticated,)
 
-    def get_queryset(self) -> QuerySet[Valentine]:
-        user: User = self.request.user  # type: ignore[assignment]
-        return super().get_queryset().exclude(user=user)
-
     @action(detail=False, methods=["get"], url_path="available-recipients")
     def available_recipients(self, request: Request) -> Response:
         user: User = request.user  # type: ignore[assignment]
@@ -120,5 +116,7 @@ class GetTokenView(APIView):
         token = Token.objects.get(user=employee.user)
         data = {
             "token": token.key,
+            "employee_id": employee.pk,
+            "user_id": employee.user.pk,
         }
         return Response(data=data)

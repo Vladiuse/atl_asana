@@ -699,9 +699,12 @@ class ValentineApp {
             console.error("Ошибка доступа к данным Telegram:", error.message);
             var tg_user_id = "test_id"
         }
-        
+
         try {
-            var token = await this.context.api.client.getToken(tg_user_id)
+            var data = await this.context.api.client.getToken(tg_user_id)
+            var token = data.token
+            this.context.api.client.employeeId = data.employee_id
+            this.context.api.client.userId = data.user_id
         } catch (e) {
             console.error("Cant get token", e.message);
             this.router.go("error-screen", { message: `Cant get token, unknown telegram id.\ntelegram_user_id: ${tg_user_id}` })
@@ -715,7 +718,7 @@ class ValentineApp {
         this.context.collections.received_valentines.loadAll()
         setTimeout(() => {
             this.router.go("main")
-        }, 2800)
+        }, 28)
     }
 }
 
@@ -724,6 +727,8 @@ class ApiClient {
     constructor(baseUrl, token) {
         this.baseUrl = baseUrl
         this.token = token
+        this.employeeId = null
+        this.userId = null
     }
 
     async employeeList() {
@@ -834,7 +839,12 @@ class ApiClient {
             throw new Error(`HTTP ${response.status}: ${errorText}`)
         }
         const responseData = await response.json()
-        return responseData.token
+        // responseData = {
+        //     "token": token.key,
+        //     "employee_id": employee.pk,
+        //     "user_id": employee.user.pk,
+        // }
+        return responseData
     }
 
     async receivedValentines() {
@@ -898,9 +908,12 @@ class EmployeeCollection {
                 .all()
                 .map(v => v.recipientId)
         )
-
         return Array.from(this.items.values())
-            .filter(emp => !usedRecipientIds.has(emp.id))
+            .filter(emp => {
+                const isNotSent = !usedRecipientIds.has(emp.id);
+                const isNotMe = emp.id !== this.apiClient.employeeId;
+                return isNotSent && isNotMe;
+            });
     }
 
     all() {
