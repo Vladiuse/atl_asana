@@ -340,7 +340,6 @@
 }
 
 .card-content {
-  aspect-ratio: 1 / 1;
   border: 3px solid var(--font-color);
   border-radius: 12px;
   padding: 16px;
