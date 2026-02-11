@@ -343,9 +343,12 @@ class ChoseImageScreen {
         this.loadImgInput.addEventListener('change', (e) => {
             const files = e.target.files;
             if (files && files[0]) {
+                const file = files[0];
+                const fileName = file.name.toLowerCase();
+                const isHeic = fileName.endsWith('.heic') || fileName.endsWith('.heif');
                 const reader = new FileReader();
                 reader.onload = (event) => {
-                    this.previewImg.src = event.target.result;
+                    this.previewImg.src = isHeic ? this.context.defaults.heicPrev : event.target.result ;
                     this.previewContainer.className = "preview-visible";
                     this.triggerBtn.style.display = "none";
                     this.context.ui.bottomBar.show("Загрузить")
@@ -378,6 +381,7 @@ class ChoseImageScreen {
 
         this.swiper = new Swiper('.swiper-container', {
             loop: true,
+            autoHeight: true,
             pagination: {
                 el: '.swiper-pagination',
                 type: 'progressbar',
@@ -408,7 +412,6 @@ class ChoseImageScreen {
                 this.context.ui.bottomBar.show("Далее", IconFactory.arrowNext)
             }
         }
-
     }
 
     _addSlideOfNewImage(slideHtml) {

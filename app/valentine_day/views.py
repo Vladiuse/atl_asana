@@ -1,14 +1,18 @@
+import io
 import zoneinfo
 from datetime import datetime
 from zoneinfo import ZoneInfo
 
 from constance import config
 from django.contrib.auth.models import User
+from django.core.files.base import ContentFile
 from django.db.models import QuerySet
 from django.http import HttpRequest, HttpResponse
 from django.shortcuts import get_object_or_404, render
 from django.utils import timezone
 from django.utils.timezone import is_naive, make_aware
+from PIL import Image
+from pillow_heif import register_heif_opener
 from rest_framework import status, viewsets
 from rest_framework.authentication import TokenAuthentication
 from rest_framework.authtoken.models import Token
@@ -121,9 +125,16 @@ class GetTokenView(APIView):
         }
         return Response(data=data)
 
-
+register_heif_opener()
 class ValentineImageUploadView(APIView):
     def post(self, request: Request) -> Response:
+        image_file = request.FILES.get("image")
+        if image_file and image_file.name.lower().endswith(".heic"):
+            img = Image.open(image_file)
+            output = io.BytesIO()
+            img.convert("RGB").save(output, format="JPEG", quality=90)
+            new_name = image_file.name.lower().replace(".heic", ".jpg")
+            request.data["image"] = ContentFile(output.getvalue(), name=new_name)
         serializer = ValentineImageSerializer(data=request.data, context={"request": request})
         if serializer.is_valid():
             serializer.save()
