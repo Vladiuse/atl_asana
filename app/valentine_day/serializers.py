@@ -21,6 +21,7 @@ class ValentineImageSerializer(serializers.ModelSerializer):  # type: ignore[typ
     class Meta:
         model = ValentineImage
         fields = "__all__"
+        read_only_fields = ("created",)
 
     def to_representation(self, instance: ValentineImage) -> dict[str, Any]:
         ret = super().to_representation(instance)

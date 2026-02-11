@@ -544,7 +544,7 @@ class SendingPrivacyScreen {
     }
 
     show() {
-        this.senderAvatar.src = this.context.collections.employees.currentEmployee().avatar
+        this.senderAvatar.src = this.context.collections.employees.currentEmployee().avatar ??  this.context.defaults.avatar
         this.context.ui.bottomBar.show("Далее", IconFactory.arrowNext)
         this._chosePersonal()
         this.signatureInput.value = ""
@@ -1089,7 +1089,7 @@ class ApiClient {
         // Для отправки файлов используем FormData
         const formData = new FormData();
         formData.append('image', imageFile);
-        formData.append('owner_id', ownerId);
+        formData.append('owner', ownerId);
 
         const response = await fetch(url, {
             method: "POST",
