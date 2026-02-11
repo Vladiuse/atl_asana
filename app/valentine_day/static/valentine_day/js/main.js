@@ -245,10 +245,11 @@ class ChoseImageScreen {
         this.elem = document.getElementById("chose-img")
         this.swiperWrapper = this.elem.querySelector(".swiper-wrapper")
         this.swiper = null
-        this.loadImgInput = document.getElementById('valentine-image-input')
-        this.triggerBtn = document.querySelector('#trigger-upload');
-        this.previewImg = document.querySelector('#image-preview');
-        this.previewContainer = document.querySelector('#image-preview-container');
+        // load img elems
+        this.loadImgInput = null
+        this.triggerBtn = null
+        this.previewImg = null
+        this.previewContainer = null
 
         this.__init__()
     }
@@ -263,33 +264,6 @@ class ChoseImageScreen {
                     elem.classList.add("swiper-nav-click")
                 })
             })
-
-
-        // 1. Проксируем клик с красивой кнопки на системный инпут
-        this.triggerBtn.addEventListener('click', () => this.loadImgInput.click());
-
-        // 2. Обрабатываем выбор файла
-        this.loadImgInput.addEventListener('change', (e) => {
-            const files = e.target.files;
-
-            if (files && files[0]) {
-                const reader = new FileReader();
-                reader.onload = (event) => {
-                    this.previewImg.src = event.target.result;
-                    this.previewContainer.className = "preview-visible";
-                    this.triggerBtn.style.display = "none";
-                    this.context.ui.bottomBar.show("Load imgs")
-                    this.context.ui.bottomBar.setClickHandler(this.handleUpload.bind(this))
-                };
-                reader.readAsDataURL(files[0]);
-            }
-        });
-
-        // 3. Удаление выбранного фото
-        document.querySelector('#remove-image').addEventListener('click', () => {
-            this._clearLoadedImg()
-            this.context.ui.bottomBar.hide()
-        })
     }
 
     _clearLoadedImg() {
@@ -329,19 +303,71 @@ class ChoseImageScreen {
         return div
     }
 
+    _createUploadImageSlide() {
+        const slide = document.createElement('div');
+        slide.className = 'swiper-slide';
+        slide.id = 'load-image';
+        slide.innerHTML = `
+        <div class="upload-container">
+            <input type="file" id="valentine-image-input" accept="image/*" style="display: none;">
+
+            <button type="button" class="btn-upload" id="trigger-upload">
+                <span class="icon">📸</span>
+                <span class="text">Добавить фото</span>
+            </button>
+
+            <div id="image-preview-container" class="preview-hidden">
+                <img id="image-preview" src="" alt="Ваша картинка">
+                <button type="button" id="remove-image" class="btn-remove">&times;</button>
+            </div>
+        </div>
+    `;
+
+        return slide;
+    }
+
     _createSwiper(imagesData) {
+        console.log("_createSwiper")
         if (this.swiper) {
             this.swiper.destroy(true, true)
             this.swiperWrapper.querySelectorAll(".swiper-slide").forEach(slide => {
-                if (slide.id != "load-image") {
                     slide.remove()
-                }
             })
         }
         imagesData.forEach(imageData => {
             var slide = this._createSlide(imageData)
             this.swiperWrapper.appendChild(slide)
         })
+
+        var uploadImageSlide = this._createUploadImageSlide()
+        console.log(uploadImageSlide)
+        this.loadImgInput = uploadImageSlide.querySelector('#valentine-image-input')
+        this.triggerBtn = uploadImageSlide.querySelector('#trigger-upload');
+        this.previewImg = uploadImageSlide.querySelector('#image-preview');
+        this.previewContainer = uploadImageSlide.querySelector('#image-preview-container');
+
+        this.triggerBtn.addEventListener('click', () => this.loadImgInput.click());
+        this.loadImgInput.addEventListener('change', (e) => {
+            const files = e.target.files;
+
+            if (files && files[0]) {
+                const reader = new FileReader();
+                reader.onload = (event) => {
+                    this.previewImg.src = event.target.result;
+                    this.previewContainer.className = "preview-visible";
+                    this.triggerBtn.style.display = "none";
+                    this.context.ui.bottomBar.show("Load imgs")
+                    this.context.ui.bottomBar.setClickHandler(this.handleUpload.bind(this))
+                };
+                reader.readAsDataURL(files[0]);
+            }
+        });
+        uploadImageSlide.querySelector('#remove-image').addEventListener('click', () => {
+            this._clearLoadedImg()
+            this.context.ui.bottomBar.hide()
+        })
+        this.swiperWrapper.appendChild(uploadImageSlide)
+
         this.swiper = new Swiper('.swiper-container', {
             loop: true,
             pagination: {
@@ -352,6 +378,7 @@ class ChoseImageScreen {
                 nextEl: '.heart-button-next',
                 prevEl: '.heart-button-prev',
             },
+            runCallbacksOnInit: false,
             on: {
                 slideChange: this._slideChange.bind(this)
             }
