@@ -1,3 +1,6 @@
+.avatar-ratio{
+  aspect-ratio: 1/ 1;
+}
 /* START SCreen */
 #pre-load-screen {
   height: 100vh;
@@ -78,7 +81,6 @@
   text-align: center;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
   transition: transform 0.3s ease;
-  /* aspect-ratio: 1 / 1; */
   justify-content: center;
 }
 
@@ -352,7 +354,9 @@
   width: 100%;
   border-radius: 50%;
 }
-
+.sender-avatar{
+  aspect-ratio: 1/1;
+}
 /* Состояние при выборе */
 .option-card input:checked + .card-content {
   border-color: var(--selected-green);

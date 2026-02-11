@@ -183,6 +183,7 @@ class EmployeeScreen {
         card.className = "employee-card"
         const img = document.createElement("img")
         img.src = employeeData.avatar
+        img.classList.add("avatar-ratio")
         const h3 = document.createElement("h3")
         h3.textContent = employeeData.fullName
         const p = document.createElement("p")
