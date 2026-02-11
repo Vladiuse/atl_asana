@@ -182,7 +182,7 @@ class EmployeeScreen {
         card.dataset.employeeId = employeeData.id
         card.className = "employee-card"
         const img = document.createElement("img")
-        img.src = employeeData.avatar || this.context.defaults.avatar
+        img.src = employeeData.avatar
         const h3 = document.createElement("h3")
         h3.textContent = employeeData.fullName
         const p = document.createElement("p")
@@ -545,7 +545,7 @@ class SendingPrivacyScreen {
     }
 
     show() {
-        this.senderAvatar.src = this.context.collections.employees.currentEmployee().avatar ??  this.context.defaults.avatar
+        this.senderAvatar.src = this.context.collections.employees.currentEmployee().avatar
         this.context.ui.bottomBar.show("Далее", IconFactory.arrowNext)
         this._chosePersonal()
         this.signatureInput.value = ""
@@ -572,12 +572,12 @@ class CheckFormScreen {
 
     _displayData() {
         var imgData = this.context.collections.valentineImages.getById(this.context.formState.imageId)
-        var recipientData = this.context.collections.employees.getById(this.context.formState.recipientId)
+        var recipient = this.context.collections.employees.getById(this.context.formState.recipientId)
         var text = this.context.formState.text
         this.imgElem.src = imgData.image
         this.textElem.innerText = text
-        this.recipientNameElem.innerText = recipientData.fullName
-        this.recipientAvatarElem.src = recipientData.avatar ?? this.context.defaults.avatar
+        this.recipientNameElem.innerText = recipient.fullName
+        this.recipientAvatarElem.src = recipient.avatar
         var senderName = this.context.formState.isAnonymously ? `анонимно от ${this.context.formState.anonymousSignature}` : `от Вашего имени`
         this.senderNameElem.innerText = senderName
     }
@@ -670,7 +670,7 @@ class MyValentineListScreen {
         li.className = "valentine-item"
         const img = document.createElement("img")
         img.className = "avatar"
-        img.src = recipient.avatar || this.context.defaults.avatar
+        img.src = recipient.avatar
         img.alt = "Avatar"
         const name = document.createElement("span")
         name.className = "name"
@@ -1135,7 +1135,15 @@ class EmployeeCollection {
     async loadAll() {
         const data = await this.apiClient.employeeList()
         this.items.clear()
-        data.forEach(emp => this.items.set(emp.id, new Employee(emp)))
+        console.log(data.avatar)
+        
+        data.forEach((empData) => {
+            var employee = new Employee(empData)
+            if (employee.avatar == null){
+                employee.avatar = this.context.defaults.avatar
+            }
+            this.items.set(empData.id, employee)
+        })
     }
 
     getById(id) {
