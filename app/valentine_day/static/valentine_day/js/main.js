@@ -282,7 +282,7 @@ class ChoseImageScreen {
             setTimeout(() => {
                 this.context.ui.bottomBar.disabled = false
                 this.context.ui.bottomBar.hideLoading()
-                var slideElem = this._createSlide(valentineImage)
+                var slideElem = this._createSlideForImage(valentineImage)
                 this._addSlideOfNewImage(slideElem)
                 this._clearLoadedImg()
                 this.context.ui.bottomBar.show("Далее", IconFactory.arrowNext)
@@ -300,7 +300,7 @@ class ChoseImageScreen {
         }
     }
 
-    _createSlide(imageData) {
+    _createSlideForImage(imageData) {
         var div = document.createElement("div")
         div.classList.add("swiper-slide")
         div.dataset.imageId = imageData.id
@@ -333,21 +333,7 @@ class ChoseImageScreen {
         return slide;
     }
 
-    _createSwiper(imagesData) {
-        console.log("_createSwiper")
-        if (this.swiper) {
-            this.swiper.destroy(true, true)
-            this.swiperWrapper.querySelectorAll(".swiper-slide").forEach(slide => {
-                slide.remove()
-            })
-        }
-        imagesData.forEach(imageData => {
-            var slide = this._createSlide(imageData)
-            this.swiperWrapper.appendChild(slide)
-        })
-
-        var uploadImageSlide = this._createUploadImageSlide()
-        console.log(uploadImageSlide)
+    _addEventsOnUploadImageSlide(uploadImageSlide){
         this.loadImgInput = uploadImageSlide.querySelector('#valentine-image-input')
         this.triggerBtn = uploadImageSlide.querySelector('#trigger-upload');
         this.previewImg = uploadImageSlide.querySelector('#image-preview');
@@ -356,7 +342,6 @@ class ChoseImageScreen {
         this.triggerBtn.addEventListener('click', () => this.loadImgInput.click());
         this.loadImgInput.addEventListener('change', (e) => {
             const files = e.target.files;
-
             if (files && files[0]) {
                 const reader = new FileReader();
                 reader.onload = (event) => {
@@ -373,6 +358,22 @@ class ChoseImageScreen {
             this._clearLoadedImg()
             this.context.ui.bottomBar.hide()
         })
+    }
+
+    _createSwiper(imagesData) {
+        if (this.swiper) {
+            this.swiper.destroy(true, true)
+            this.swiperWrapper.querySelectorAll(".swiper-slide").forEach(slide => {
+                slide.remove()
+            })
+        }
+        imagesData.forEach(imageData => {
+            var slide = this._createSlideForImage(imageData)
+            this.swiperWrapper.appendChild(slide)
+        })
+
+        var uploadImageSlide = this._createUploadImageSlide()
+        this._addEventsOnUploadImageSlide(uploadImageSlide)
         this.swiperWrapper.appendChild(uploadImageSlide)
 
         this.swiper = new Swiper('.swiper-container', {

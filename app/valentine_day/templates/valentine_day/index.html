@@ -18,9 +18,9 @@
     <script src="https://cdn.jsdelivr.net/npm/swiper@12/swiper-bundle.min.js"></script>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <script src="https://code.jquery.com/jquery-4.0.0.min.js" integrity="sha256-OaVG6prZf4v69dPg6PhVattBXkcOWQB62pdZ3ORyrao=" crossorigin="anonymous"></script>
-    <link rel="stylesheet" href="{%static 'valentine_day/css/styles.css' %}?v=26">
-    <link rel="stylesheet" href="{%static 'valentine_day/css/screens.css'%}?v=26">
-    <script src="{%static 'valentine_day/js/main.js'%}?v=26"></script>
+    <link rel="stylesheet" href="{%static 'valentine_day/css/styles.css' %}?v=27">
+    <link rel="stylesheet" href="{%static 'valentine_day/css/screens.css'%}?v=27">
+    <script src="{%static 'valentine_day/js/main.js'%}?v=27"></script>
 </head>
 
 <body>
@@ -132,69 +132,6 @@
             </div>
         </div>
     </div>
-
-    <style>
-        #load-image{
-            aspect-ratio: 1 /1;
-            background: var(--font-color);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-        }
-        #trigger-upload{
-  
-        }
-        .upload-container {
-            margin: 20px 0;
-            text-align: center;
-        }
-
-        .btn-upload {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 10px;
-            width: 100%;
-            padding: 12px;
-            background-color: #f8f9fa;
-            border: 2px solid black;
-            border-radius: 12px;
-            color: black;
-            font-weight: bold;
-            cursor: pointer;
-        }
-
-        #image-preview-container.preview-hidden {
-            display: none;
-        }
-
-        #image-preview-container {
-            position: relative;
-            margin-top: 15px;
-            display: inline-block;
-        }
-
-        #image-preview {
-            max-width: 200px;
-            max-height: 200px;
-            border-radius: 10px;
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-        }
-
-        .btn-remove {
-            position: absolute;
-            top: -10px;
-            right: -10px;
-            background: var(--red);
-            color: white;
-            border: none;
-            border-radius: 50%;
-            width: 30px;
-            height: 30px;
-            cursor: pointer;
-            font-size: 1.2rem;
-        }
-    </style>
     <div id="write-text" style="display: none;">
         <header class="screen-header">
             <h2 class="screen-title">3 / 4 Напиши текст</h2>
@@ -401,26 +338,17 @@
             document.getElementById("debug-window").style.display = "block"
         })
         function updateAppMetrics() {
-            // Находим элементы
             const widthEl = document.getElementById('js-width');
             const heightEl = document.getElementById('js-height');
             const platformEl = document.getElementById('js-platform');
-
-            // Берем актуальные размеры окна
             const w = window.innerWidth;
             const h = window.innerHeight;
-
-            // Выводим размеры
             if (widthEl) widthEl.innerText = w + 'px';
             if (heightEl) heightEl.innerText = h + 'px';
-
-            // Определяем платформу через Telegram SDK
             if (platformEl) {
                 if (window.Telegram && window.Telegram.WebApp) {
                     const platform = window.Telegram.WebApp.platform;
                     platformEl.innerText = platform.toUpperCase();
-
-                    // Маленький хак: добавим класс на body в зависимости от платформы
                     document.body.classList.toggle('is-desktop', platform === 'tdesktop' || platform === 'macos');
                 } else {
                     platformEl.innerText = 'Браузер (вне Telegram)';
@@ -428,18 +356,12 @@
             }
         }
 
-        // Запуск при полной загрузке DOM
         document.addEventListener('DOMContentLoaded', function () {
-            // Инициализация Telegram WebApp
             if (window.Telegram && window.Telegram.WebApp) {
                 window.Telegram.WebApp.ready();
-                window.Telegram.WebApp.expand(); // Разворачивает приложение на максимум
+                window.Telegram.WebApp.expand(); 
             }
-
-            // Первый расчет
             updateAppMetrics();
-
-            // Следим за изменением размера окна
             window.addEventListener('resize', updateAppMetrics);
         });
     </script>
