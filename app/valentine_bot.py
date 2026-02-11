@@ -95,7 +95,7 @@ def main() -> None:
     application = ApplicationBuilder().token(API_KEY).build()
 
     application.add_handler(CommandHandler("start", start))
-    application.add_handler(CommandHandler("test_link", start))
+    application.add_handler(CommandHandler("test_link", test_link))
     application.add_handler(MessageHandler(filters.TEXT, echo))
     print("Бот запускает сервер вебхуков...")
     # application.run_polling()
