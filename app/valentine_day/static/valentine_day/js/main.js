@@ -935,7 +935,7 @@ class ValentineApp {
         this.context.collections.my_valentines.loadAll()
         this.context.collections.received_valentines.loadAll()
         setTimeout(() => {
-            this.router.go("form/chose-image")
+            this.router.go("main")
         }, 2800)
     }
 }
