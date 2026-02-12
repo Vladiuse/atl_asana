@@ -1,3 +1,4 @@
+from encodings.punycode import T
 import logging
 
 from asana.client import AsanaApiClient
@@ -10,9 +11,10 @@ from django.http import HttpRequest
 from django.utils.html import format_html
 
 from .models import Creative, CreativeAdaptation, CreativeGeoData, CreativeProjectSection, Task
-from .services import CreativeProjectSectionService
+from .services import CreativeProjectSectionService, CreativeService
 
 asana_client = AsanaApiClient(api_key=settings.ASANA_API_KEY)
+creative_service = CreativeService(asana_api_client=asana_client)
 logging.basicConfig(level=logging.INFO)
 
 
@@ -31,12 +33,23 @@ class TaskAdmin(admin.ModelAdmin):  # type: ignore[type-arg]
     list_filter = ("status",)
     search_fields = ("task_id", "task_name", "assignee_id", "bayer_code")
     ordering = ("-created",)
+    actions = ("update_task_data", )
 
     @admin.display(description="url")
     def url_display(self, obj: Task) -> str:
         if obj.url:
             return format_html('<a href="{}" target="_blank">url</a>', obj.url)
         return "-"
+
+    @admin.action(description="Update task data")
+    def update_task_data(self, request: HttpRequest, queryset: QuerySet[Task]) -> None:
+        try:
+            for task in queryset:
+                task_dto = creative_service._get_task_dto(creative_task=task)  # noqa: SLF001
+                creative_service.update_task(creative_task=task, task_dto=task_dto)
+            self.message_user(request, f"Update {queryset.count()} tasks", messages.SUCCESS)
+        except AsanaApiClientError as error:
+            self.message_user(request, f"Error: {error}", messages.ERROR)
 
 
 @admin.register(Creative)

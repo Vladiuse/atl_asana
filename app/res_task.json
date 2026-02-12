@@ -1,0 +1,645 @@
+{
+  "gid": "1213110923114125",
+  "actual_time_minutes": null,
+  "assignee": {
+    "gid": "1209100409218185",
+    "name": "Виталий Середенко",
+    "resource_type": "user"
+  },
+  "assignee_status": "inbox",
+  "completed": false,
+  "completed_at": null,
+  "created_at": "2026-02-04T09:16:18.865Z",
+  "custom_fields": [
+    {
+      "gid": "1203594039867101",
+      "enabled": true,
+      "name": "Estimated time",
+      "description": "Asana-created. Estimate time to complete a task.",
+      "number_value": null,
+      "precision": 0,
+      "created_by": null,
+      "display_value": null,
+      "resource_subtype": "number",
+      "resource_type": "custom_field",
+      "is_formula_field": false,
+      "is_value_read_only": false,
+      "type": "number"
+    },
+    {
+      "gid": "1206157292184413",
+      "enabled": true,
+      "enum_options": [
+        {
+          "gid": "1206157292184414",
+          "color": "red",
+          "enabled": true,
+          "name": "Срочно",
+          "resource_type": "enum_option"
+        },
+        {
+          "gid": "1206157292184415",
+          "color": "yellow",
+          "enabled": true,
+          "name": "Вторично",
+          "resource_type": "enum_option"
+        },
+        {
+          "gid": "1206157292184416",
+          "color": "green",
+          "enabled": true,
+          "name": "Последняя очередь",
+          "resource_type": "enum_option"
+        }
+      ],
+      "enum_value": {
+        "gid": "1206157292184414",
+        "color": "red",
+        "enabled": true,
+        "name": "Срочно",
+        "resource_type": "enum_option"
+      },
+      "name": "Приоритет",
+      "description": "",
+      "created_by": {
+        "gid": "1210463348669045",
+        "name": "Ярослав Виноградов",
+        "resource_type": "user"
+      },
+      "display_value": "Срочно",
+      "resource_subtype": "enum",
+      "resource_type": "custom_field",
+      "is_formula_field": false,
+      "is_value_read_only": false,
+      "type": "enum"
+    },
+    {
+      "gid": "1211350107327424",
+      "enabled": true,
+      "enum_options": [
+        {
+          "gid": "1211350107327425",
+          "color": "green",
+          "enabled": true,
+          "name": "VGA team",
+          "resource_type": "enum_option"
+        },
+        {
+          "gid": "1211350107327426",
+          "color": "red",
+          "enabled": true,
+          "name": "MSE team",
+          "resource_type": "enum_option"
+        },
+        {
+          "gid": "1211350368779187",
+          "color": "orange",
+          "enabled": true,
+          "name": "Ace team",
+          "resource_type": "enum_option"
+        }
+      ],
+      "enum_value": {
+        "gid": "1211350107327425",
+        "color": "green",
+        "enabled": true,
+        "name": "VGA team",
+        "resource_type": "enum_option"
+      },
+      "name": "Подразделение",
+      "description": "",
+      "created_by": {
+        "gid": "1167812785960884",
+        "name": "Александра Тимкив",
+        "resource_type": "user"
+      },
+      "display_value": "VGA team",
+      "resource_subtype": "enum",
+      "resource_type": "custom_field",
+      "is_formula_field": false,
+      "is_value_read_only": false,
+      "type": "enum"
+    },
+    {
+      "gid": "1206393203953363",
+      "enabled": true,
+      "name": "Источник",
+      "description": "",
+      "created_by": {
+        "gid": "1210463348669045",
+        "name": "Ярослав Виноградов",
+        "resource_type": "user"
+      },
+      "display_value": "Facebook",
+      "resource_subtype": "text",
+      "resource_type": "custom_field",
+      "text_value": "Facebook",
+      "is_formula_field": false,
+      "is_value_read_only": false,
+      "type": "text"
+    },
+    {
+      "gid": "1203943994861111",
+      "enabled": true,
+      "enum_options": [
+        {
+          "gid": "1203943994861112",
+          "color": "green",
+          "enabled": true,
+          "name": "Статика",
+          "resource_type": "enum_option"
+        },
+        {
+          "gid": "1203943994861113",
+          "color": "blue-green",
+          "enabled": true,
+          "name": "Моушн",
+          "resource_type": "enum_option"
+        },
+        {
+          "gid": "1203943994861114",
+          "color": "purple",
+          "enabled": true,
+          "name": "Статика + Моушн",
+          "resource_type": "enum_option"
+        }
+      ],
+      "enum_value": {
+        "gid": "1203943994861113",
+        "color": "blue-green",
+        "enabled": true,
+        "name": "Моушн",
+        "resource_type": "enum_option"
+      },
+      "name": "Формат крео",
+      "description": "",
+      "created_by": {
+        "gid": "1210463348669045",
+        "name": "Ярослав Виноградов",
+        "resource_type": "user"
+      },
+      "display_value": "Моушн",
+      "resource_subtype": "enum",
+      "resource_type": "custom_field",
+      "is_formula_field": false,
+      "is_value_read_only": false,
+      "type": "enum"
+    },
+    {
+      "gid": "1206691152318049",
+      "enabled": true,
+      "name": "Код прошлой задачи",
+      "description": "",
+      "created_by": {
+        "gid": "1210463348669045",
+        "name": "Ярослав Виноградов",
+        "resource_type": "user"
+      },
+      "display_value": "Mf44ew",
+      "resource_subtype": "text",
+      "resource_type": "custom_field",
+      "text_value": "Mf44ew",
+      "is_formula_field": false,
+      "is_value_read_only": false,
+      "type": "text"
+    },
+    {
+      "gid": "1203945085557901",
+      "enabled": true,
+      "enum_options": [
+        {
+          "gid": "1203945085557902",
+          "color": "hot-pink",
+          "enabled": true,
+          "name": "Заполнена информация для дизайнера",
+          "resource_type": "enum_option"
+        },
+        {
+          "gid": "1203945085557903",
+          "color": "red",
+          "enabled": true,
+          "name": "Готовлю данные",
+          "resource_type": "enum_option"
+        }
+      ],
+      "enum_value": {
+        "gid": "1203945085557902",
+        "color": "hot-pink",
+        "enabled": true,
+        "name": "Заполнена информация для дизайнера",
+        "resource_type": "enum_option"
+      },
+      "name": "Статус для крео",
+      "description": "",
+      "created_by": {
+        "gid": "1210463348669045",
+        "name": "Ярослав Виноградов",
+        "resource_type": "user"
+      },
+      "display_value": "Заполнена информация для дизайнера",
+      "resource_subtype": "enum",
+      "resource_type": "custom_field",
+      "is_formula_field": false,
+      "is_value_read_only": false,
+      "type": "enum"
+    },
+    {
+      "gid": "1210915482034970",
+      "enabled": true,
+      "name": "Ссылка на работу",
+      "description": "Ссылка на креативы/фигму и так далее",
+      "created_by": {
+        "gid": "1212557872655678",
+        "name": "Владислав Кудряшов",
+        "resource_type": "user"
+      },
+      "display_value": "https://buildin.ai/69afa59a-44f5-4cde-9621-9fe6ae52b725",
+      "resource_subtype": "text",
+      "resource_type": "custom_field",
+      "text_value": "https://buildin.ai/69afa59a-44f5-4cde-9621-9fe6ae52b725",
+      "is_formula_field": false,
+      "is_value_read_only": false,
+      "type": "text"
+    },
+    {
+      "gid": "1211350116181008",
+      "enabled": true,
+      "enum_options": [
+        {
+          "gid": "1211350116181009",
+          "color": "green",
+          "enabled": true,
+          "name": "KOV",
+          "resource_type": "enum_option"
+        },
+        {
+          "gid": "1211350116181010",
+          "color": "red",
+          "enabled": true,
+          "name": "RAA",
+          "resource_type": "enum_option"
+        },
+        {
+          "gid": "1211350116181011",
+          "color": "orange",
+          "enabled": true,
+          "name": "MSE",
+          "resource_type": "enum_option"
+        },
+        {
+          "gid": "1211350116181012",
+          "color": "yellow-orange",
+          "enabled": true,
+          "name": "VGA",
+          "resource_type": "enum_option"
+        },
+        {
+          "gid": "1211350116181013",
+          "color": "yellow",
+          "enabled": true,
+          "name": "MDA",
+          "resource_type": "enum_option"
+        },
+        {
+          "gid": "1211350116181015",
+          "color": "blue-green",
+          "enabled": true,
+          "name": "KKY",
+          "resource_type": "enum_option"
+        },
+        {
+          "gid": "1211350116181016",
+          "color": "aqua",
+          "enabled": true,
+          "name": "MMI",
+          "resource_type": "enum_option"
+        },
+        {
+          "gid": "1211350116181017",
+          "color": "blue",
+          "enabled": true,
+          "name": "ZVA",
+          "resource_type": "enum_option"
+        },
+        {
+          "gid": "1211350116181019",
+          "color": "purple",
+          "enabled": true,
+          "name": "BSY",
+          "resource_type": "enum_option"
+        },
+        {
+          "gid": "1211350261219584",
+          "color": "magenta",
+          "enabled": true,
+          "name": "Ace_BAC",
+          "resource_type": "enum_option"
+        },
+        {
+          "gid": "1211350261219585",
+          "color": "hot-pink",
+          "enabled": true,
+          "name": "Ace_AYC",
+          "resource_type": "enum_option"
+        },
+        {
+          "gid": "1211350261219586",
+          "color": "pink",
+          "enabled": true,
+          "name": "Ace_LAC",
+          "resource_type": "enum_option"
+        },
+        {
+          "gid": "1211350261219587",
+          "color": "cool-gray",
+          "enabled": true,
+          "name": "Ace_ALC",
+          "resource_type": "enum_option"
+        },
+        {
+          "gid": "1211350261219588",
+          "color": "yellow-green",
+          "enabled": true,
+          "name": "Ace_EDG",
+          "resource_type": "enum_option"
+        },
+        {
+          "gid": "1211350261219589",
+          "color": "blue-green",
+          "enabled": true,
+          "name": "Ace_PAG",
+          "resource_type": "enum_option"
+        },
+        {
+          "gid": "1211350261219590",
+          "color": "green",
+          "enabled": true,
+          "name": "Ace_SGG",
+          "resource_type": "enum_option"
+        },
+        {
+          "gid": "1211350261219591",
+          "color": "yellow",
+          "enabled": true,
+          "name": "Ace_AJG",
+          "resource_type": "enum_option"
+        },
+        {
+          "gid": "1211350261219592",
+          "color": "yellow-orange",
+          "enabled": true,
+          "name": "Ace_FAG",
+          "resource_type": "enum_option"
+        },
+        {
+          "gid": "1211350261219593",
+          "color": "indigo",
+          "enabled": true,
+          "name": "Ace_BVG",
+          "resource_type": "enum_option"
+        },
+        {
+          "gid": "1211405401702702",
+          "color": "pink",
+          "enabled": true,
+          "name": "Ace_AAP",
+          "resource_type": "enum_option"
+        },
+        {
+          "gid": "1211405401702703",
+          "color": "yellow-green",
+          "enabled": true,
+          "name": "Ace_EMG",
+          "resource_type": "enum_option"
+        },
+        {
+          "gid": "1211405401702704",
+          "color": "yellow",
+          "enabled": true,
+          "name": "Ace_NSG",
+          "resource_type": "enum_option"
+        },
+        {
+          "gid": "1211405401702705",
+          "color": "purple",
+          "enabled": true,
+          "name": "Ace_MSC",
+          "resource_type": "enum_option"
+        },
+        {
+          "gid": "1211405401702706",
+          "color": "blue-green",
+          "enabled": true,
+          "name": "Ace_VAA",
+          "resource_type": "enum_option"
+        },
+        {
+          "gid": "1211405401702707",
+          "color": "pink",
+          "enabled": true,
+          "name": "Ace_BDV",
+          "resource_type": "enum_option"
+        },
+        {
+          "gid": "1211576913137769",
+          "color": "red",
+          "enabled": true,
+          "name": "BRY",
+          "resource_type": "enum_option"
+        },
+        {
+          "gid": "1211858420401160",
+          "color": "none",
+          "enabled": true,
+          "name": "SVS",
+          "resource_type": "enum_option"
+        },
+        {
+          "gid": "1212230487780432",
+          "color": "none",
+          "enabled": true,
+          "name": "SGM",
+          "resource_type": "enum_option"
+        },
+        {
+          "gid": "1212330980082434",
+          "color": "none",
+          "enabled": true,
+          "name": "AVK",
+          "resource_type": "enum_option"
+        },
+        {
+          "gid": "1212446676620632",
+          "color": "blue-green",
+          "enabled": true,
+          "name": "VVA",
+          "resource_type": "enum_option"
+        },
+        {
+          "gid": "1212446681641832",
+          "color": "aqua",
+          "enabled": true,
+          "name": "BPA",
+          "resource_type": "enum_option"
+        },
+        {
+          "gid": "1212446681641833",
+          "color": "orange",
+          "enabled": true,
+          "name": "OMN",
+          "resource_type": "enum_option"
+        },
+        {
+          "gid": "1213073036931144",
+          "color": "green",
+          "enabled": true,
+          "name": "SDA",
+          "resource_type": "enum_option"
+        },
+        {
+          "gid": "1213097852988460",
+          "color": "none",
+          "enabled": true,
+          "name": "NRR",
+          "resource_type": "enum_option"
+        },
+        {
+          "gid": "1213175185182062",
+          "color": "none",
+          "enabled": true,
+          "name": "DAV",
+          "resource_type": "enum_option"
+        }
+      ],
+      "enum_value": {
+        "gid": "1211350116181019",
+        "color": "purple",
+        "enabled": true,
+        "name": "BSY",
+        "resource_type": "enum_option"
+      },
+      "name": "Инициатор задачи",
+      "description": "",
+      "created_by": {
+        "gid": "1167812785960884",
+        "name": "Александра Тимкив",
+        "resource_type": "user"
+      },
+      "display_value": "BSY",
+      "resource_subtype": "enum",
+      "resource_type": "custom_field",
+      "is_formula_field": false,
+      "is_value_read_only": false,
+      "type": "enum"
+    },
+    {
+      "gid": "1210257909716713",
+      "enabled": true,
+      "name": "Ваш телеграм",
+      "description": "",
+      "created_by": {
+        "gid": "1167812785960884",
+        "name": "Александра Тимкив",
+        "resource_type": "user"
+      },
+      "display_value": "Belovsergo",
+      "resource_subtype": "text",
+      "resource_type": "custom_field",
+      "text_value": "Belovsergo",
+      "is_formula_field": false,
+      "is_value_read_only": false,
+      "type": "text"
+    },
+    {
+      "gid": "1203943994861107",
+      "enabled": false,
+      "name": "Инициалы Баера",
+      "description": "",
+      "created_by": {
+        "gid": "1210463348669045",
+        "name": "Ярослав Виноградов",
+        "resource_type": "user"
+      },
+      "display_value": "BSY",
+      "resource_subtype": "text",
+      "resource_type": "custom_field",
+      "text_value": "BSY",
+      "is_formula_field": false,
+      "is_value_read_only": false,
+      "type": "text"
+    }
+  ],
+  "due_at": null,
+  "due_on": "2026-02-05",
+  "followers": [
+    {
+      "gid": "1210152540226480",
+      "name": "Сергей Белов",
+      "resource_type": "user"
+    },
+    {
+      "gid": "1209100409218185",
+      "name": "Виталий Середенко",
+      "resource_type": "user"
+    }
+  ],
+  "hearted": false,
+  "hearts": [],
+  "liked": false,
+  "likes": [],
+  "memberships": [
+    {
+      "project": {
+        "gid": "1199190886721558",
+        "name": "VGA DESIGN DIV | Задачи дизайн",
+        "resource_type": "project"
+      },
+      "section": {
+        "gid": "1212456301012586",
+        "name": "Нужна оценка креатива",
+        "resource_type": "section"
+      }
+    },
+    {
+      "project": {
+        "gid": "1211350261721932",
+        "name": "Общий проект | DESIGN DIV | Задачи дизайн",
+        "resource_type": "project"
+      },
+      "section": {
+        "gid": "1212579560960207",
+        "name": "Нужна оценка креатива",
+        "resource_type": "section"
+      }
+    }
+  ],
+  "modified_at": "2026-02-11T14:53:43.918Z",
+  "name": "(70)Заказ креативов HaGOi6_K7Kza7_S6eveu_(BSY+USA+Tractor Supply)_05,02.26",
+  "notes": "Кол-во крео (уники+адаптации) : 1 уник + 2 адаптации ( В каждом видосе отличаются только первые 3 секунды, итого 3 видоса )\nФормат пикселей : Для фб\nДлительность : по озвучке + несколько секунд после\nПродукт/Оффер : Coleman Mini Bike https://www.tractorsupply.com/tsc/product/coleman-196cc-gas-powered-mini-bike-b200r-2258686\nПодход (Др/…) : throwing away\nЦА (примерный возраст, внешность, цвет кожи, пол) : 40+ М и Ж\nОзвучка (текст на англ + на нужном языке, м или ж голос, пример) : Мужской голос, 45+\nСубтитры снизу (Да/Нет, стиль, цвет, пример) : да\nТекстовая плашка сверху видео (Текст англ + нужный язык, Особенности) : нет \nПример/Референс (готового крео) :\nhttps://www.facebook.com/reel/1796065321063144/\nhttps://www.facebook.com/reel/1449970883518319/\n\nТекст: Tractor Supply is giving away 100 Coleman Powersports Mini Bikes 🎁\nTap the button below, complete the short form, and get your bike 👇\n\n\n",
+  "num_hearts": 0,
+  "num_likes": 0,
+  "parent": null,
+  "permalink_url": "https://app.asana.com/1/1167322787740055/project/1199190886721558/task/1213110923114125",
+  "projects": [
+    {
+      "gid": "1199190886721558",
+      "name": "VGA DESIGN DIV | Задачи дизайн",
+      "resource_type": "project"
+    },
+    {
+      "gid": "1211350261721932",
+      "name": "Общий проект | DESIGN DIV | Задачи дизайн",
+      "resource_type": "project"
+    }
+  ],
+  "resource_type": "task",
+  "start_at": null,
+  "start_on": null,
+  "tags": [],
+  "resource_subtype": "default_task",
+  "workspace": {
+    "gid": "1167322787740055",
+    "name": "Atlas Agency",
+    "resource_type": "workspace"
+  }
+}

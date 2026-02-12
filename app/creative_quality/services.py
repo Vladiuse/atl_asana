@@ -62,7 +62,7 @@ class CreativeService:
         work_url = None
         for field in task_data.get("custom_fields", []):
             if field["name"] == config.DESIGN_TASK_BAYER_CUSTOM_FIELD_NAME:
-                bayer_code = field.get("text_value", "")
+                bayer_code = field.get("display_value", "")
                 break
         for field in task_data.get("custom_fields", []):
             if field["name"] == config.DESIGN_TASK_LINK_ON_WORK_FIELD_NAME:
