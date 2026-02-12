@@ -413,6 +413,7 @@ class ChoseImageScreen {
                 this._showLoadImageSlide()
             } else {
                 this.context.ui.bottomBar.show("Далее", IconFactory.arrowNext)
+                this.context.ui.bottomBar.setClickHandler(this._submitImage.bind(this))
             }
         }
     }
