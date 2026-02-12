@@ -167,7 +167,7 @@ class BotMessageLogStatus(models.TextChoices):
     ERROR = "error", "Ошибка"
 
 class BotMessageLog(models.Model):
-    recipient_id = models.BigIntegerField(verbose_name="ID получателя")
+    chat_id = models.CharField(verbose_name="ID получателя")
     text = models.TextField(verbose_name="Текст сообщения")
     status = models.CharField(
         max_length=10,
@@ -182,4 +182,4 @@ class BotMessageLog(models.Model):
     created_at = models.DateTimeField(default=timezone.now, verbose_name="Время создания")
 
     def __str__(self) -> str:
-        return f"Сообщение для {self.recipient_id} ({self.status})"
+        return f"Сообщение для {self.chat_id} ({self.status})"

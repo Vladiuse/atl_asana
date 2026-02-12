@@ -122,13 +122,13 @@ class ValentineAdmin(admin.ModelAdmin):  # type: ignore[type-arg]
 class BotMessageLogAdmin(admin.ModelAdmin):  # type: ignore[type-arg]
     list_display = (
         "created_at",
-        "recipient_id",
+        "chat_id",
         "short_text",
         "status",
     )
-    list_filter = ("status", "recipient_id")
-    search_fields = ("recipient_id", "text", "error_text")
-    readonly_fields = ("created_at", "recipient_id", "text", "status", "error_text")
+    list_filter = ("status", "chat_id")
+    search_fields = ("chat_id", "text", "error_text")
+    readonly_fields = ("created_at", "chat_id", "text", "status", "error_text")
 
     @admin.display(description="Текст сообщения")
     def short_text(self, obj: BotMessageLog) -> str:
