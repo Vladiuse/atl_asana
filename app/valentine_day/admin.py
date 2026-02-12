@@ -16,6 +16,7 @@ class EmployeeAdmin(admin.ModelAdmin):  # type: ignore[type-arg]
         "position",
         "is_open_app",
         "image_tag",
+        "can_receive_valentine",
         "sub_1",
     )
     readonly_fields = ("user",)

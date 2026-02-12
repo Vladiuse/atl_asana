@@ -57,6 +57,9 @@ class Employee(models.Model):
         max_length=30,
         blank=True,
     )
+    can_receive_valentine = models.BooleanField(
+        default=True,
+    )
     created = models.DateTimeField(
         auto_now_add=True,
     )
