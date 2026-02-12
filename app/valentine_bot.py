@@ -79,7 +79,7 @@ async def handle_button_click(update: Update, context: ContextTypes.DEFAULT_TYPE
 
 ❤️Нажми «Сохранить»
 
-Иногда любовь бывает переменчива…. Ты можешь отозвать свою валентинку - просто удалив ее 💔 
+Иногда любовь бывает переменчива…. Ты можешь отозвать свою валентинку - просто удалив ее 💔
 
 Или удалить сообщение и отправить новое - ты  сегодня Валентин и все в твоих руках 🙌🏻
 """.strip()
@@ -88,7 +88,7 @@ async def handle_button_click(update: Update, context: ContextTypes.DEFAULT_TYPE
     await query.answer()
     if query.data == "start_instruction":
         # Ссылка для WebApp теперь тут
-        keyboard = [[InlineKeyboardButton(text="Открыть приложение", web_app=WebAppInfo(url=web_app_url))]]
+        keyboard = [[InlineKeyboardButton(text="💌 Отправить валентинку", web_app=WebAppInfo(url=web_app_url))]]
         reply_markup = InlineKeyboardMarkup(keyboard)
 
         # Отправляем второе сообщение
@@ -111,8 +111,7 @@ async def test_link(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     _ = context
     if update.message is None:
         return
-    web_app_url: str = "https://atl-asana.vim-store.ru/"
-    keyboard = [[InlineKeyboardButton(text="💌 Отправить валентинку", web_app=WebAppInfo(url=web_app_url))]]
+    keyboard = [[InlineKeyboardButton(text="💌 Выбрать свою любвинку", web_app=WebAppInfo(url=web_app_url))]]
     reply_markup = InlineKeyboardMarkup(keyboard)
     await update.message.reply_text(
         text="Test",
