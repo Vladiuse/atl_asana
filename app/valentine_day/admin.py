@@ -1,4 +1,6 @@
 from django.contrib import admin
+from django.db.models import Count, QuerySet
+from django.http import HttpRequest
 from django.utils.html import format_html
 
 from .models import Employee, Valentine, ValentineImage
@@ -15,12 +17,30 @@ class EmployeeAdmin(admin.ModelAdmin):  # type: ignore[type-arg]
         "surname",
         "position",
         "is_open_app",
+        "send_count",
+        "received_count",
         "image_tag",
         "can_receive_valentine",
         "sub_1",
     )
     readonly_fields = ("user",)
     list_filter = ("is_open_app",)
+
+    def get_queryset(self, request: HttpRequest) -> QuerySet[Employee]:
+        _ = request
+        qs = super().get_queryset(request=request).prefetch_related("sent_valentines", "received_valentines")
+        return qs.annotate(
+            send_count=Count("sent_valentines", distinct=True),
+            received=Count("received_valentines", distinct=True),
+        )
+
+    @admin.display(description="Отправил", ordering="send_count")
+    def send_count(self, obj: Employee) -> int:
+        return getattr(obj, "send_count", 0)
+
+    @admin.display(description="Получил", ordering="received")
+    def received_count(self, obj: Employee) -> int:
+        return getattr(obj, "received", 0)
 
     @admin.display(description="Img")
     def image_tag(self, obj: Employee) -> str:
