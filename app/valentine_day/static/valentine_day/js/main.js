@@ -801,12 +801,19 @@ class MainScreen {
         this.startButton = document.getElementById("start-button")
         this.openMyValentinesButton = document.getElementById("open-my-valentines")
 
-        this.startButton.addEventListener("click", () => {
-            this.router.go("form/chose-employee")
-        })
+        this.startButton.addEventListener("click", this._showCreateValentine.bind(this))
         this.openMyValentinesButton.addEventListener("click", () => {
             this.router.go("my-valentines-list")
         })
+    }
+
+    _showCreateValentine() {
+        if (this.context.api.client.allowSendValentines) {
+            this.router.go("form/chose-employee")
+        } else {
+            var errorMessage = `Больше нельзя отправить валентинку.\nДо встречи в следующие 14 февраля.`
+            this.router.go("error-screen", { message: errorMessage, showCloseButton: true })
+        }
     }
 
     show() {
@@ -935,6 +942,7 @@ class ValentineApp {
             var token = data.token
             this.context.api.client.employeeId = data.employee_id
             this.context.api.client.userId = data.user_id
+            this.context.api.client.allowSendValentines = data.allow_send_valentines
         } catch (e) {
             console.error("Cant get token", e.message);
             var manager = this.context.defaults.manager
@@ -962,6 +970,7 @@ class ApiClient {
         this.token = token
         this.employeeId = null
         this.userId = null
+        this.allowSendValentines = null
     }
 
     async employeeList() {
@@ -1180,7 +1189,7 @@ class EmployeeCollection {
             .filter(emp => {
                 const isNotSent = !usedRecipientIds.has(emp.id);
                 const isNotMe = emp.id !== this.apiClient.employeeId;
-                const canReceive = emp.canReceiveValentine === true; //
+                const canReceive = emp.canReceiveValentine === true;
                 return isNotSent && isNotMe && canReceive;
             });
     }

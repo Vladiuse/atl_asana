@@ -123,6 +123,7 @@ class GetTokenView(APIView):
             "token": token.key,
             "employee_id": employee.pk,
             "user_id": employee.user.pk,
+            "allow_send_valentines": config.ALLOW_SENDING_VALENTINES,
         }
         if employee.is_open_app is False:
             employee.is_open_app = True
