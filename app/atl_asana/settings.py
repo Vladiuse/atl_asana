@@ -185,6 +185,9 @@ MEDIA_ROOT = BASE_DIR / "media"
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
+DATA_UPLOAD_MAX_MEMORY_SIZE = 10485760  # 10 MB
+FILE_UPLOAD_MAX_MEMORY_SIZE = 10485760  # 10 MB
+
 
 CONSTANCE_BACKEND = "constance.backends.database.DatabaseBackend"
 
