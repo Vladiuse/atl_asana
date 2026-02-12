@@ -172,6 +172,7 @@ class AtlasMessageSender:
             msg = "Not found users data in response"
             raise AtlasMessageSenderError(message=msg, response=response)
         users = []
+        print(response_data)
         for user_data in response_data:
             user = UserData(
                 name=user_data["name"],

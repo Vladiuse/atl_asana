@@ -45,3 +45,4 @@ class ValentineSerializer(serializers.ModelSerializer):  # type: ignore[type-arg
 
 class GetTokenSerializers(serializers.Serializer):  # type: ignore[type-arg]
     telegram_user_id = serializers.CharField()
+    telegram_login = serializers.CharField()

@@ -1,3 +1,4 @@
+from turtle import mode
 from typing import Any
 
 from django.contrib.auth.models import User
@@ -34,6 +35,10 @@ class Employee(models.Model):
         max_length=30,
         unique=True,
     )
+    telegram_login = models.CharField(
+        max_length=30,
+        blank=True,
+    )
     avatar = models.ImageField(
         upload_to="valentine_day/images/avatars",
         null=True,
@@ -48,6 +53,10 @@ class Employee(models.Model):
     )
     position = models.CharField(
         max_length=100,
+    )
+    sub_1 = models.CharField(
+        max_length=30,
+        blank=True,
     )
     created = models.DateTimeField(
         auto_now_add=True,

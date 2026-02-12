@@ -6,7 +6,7 @@ from zoneinfo import ZoneInfo
 from constance import config
 from django.contrib.auth.models import User
 from django.core.files.base import ContentFile
-from django.db.models import QuerySet
+from django.db.models import Q, QuerySet
 from django.http import HttpRequest, HttpResponse
 from django.shortcuts import get_object_or_404, render
 from django.utils import timezone
@@ -116,7 +116,8 @@ class GetTokenView(APIView):
         serializer = GetTokenSerializers(data=request.query_params)
         serializer.is_valid(raise_exception=True)
         telegram_user_id = serializer.validated_data["telegram_user_id"]
-        employee = get_object_or_404(Employee, telegram_user_id=telegram_user_id)
+        telegram_login = serializer.validated_data["telegram_login"]
+        employee = get_object_or_404(Employee, Q(telegram_user_id=telegram_user_id) | Q(telegram_login=telegram_login))
         token = Token.objects.get(user=employee.user)
         data = {
             "token": token.key,
@@ -125,10 +126,14 @@ class GetTokenView(APIView):
         }
         if employee.is_open_app is False:
             employee.is_open_app = True
+            employee.sub_1 = telegram_user_id
             employee.save()
         return Response(data=data)
 
+
 register_heif_opener()
+
+
 class ValentineImageUploadView(APIView):
     def post(self, request: Request) -> Response:
         image_file = request.FILES.get("image")

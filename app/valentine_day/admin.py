@@ -6,9 +6,20 @@ from .models import Employee, Valentine, ValentineImage
 
 @admin.register(Employee)
 class EmployeeAdmin(admin.ModelAdmin):  # type: ignore[type-arg]
-    list_display = ("id", "telegram_user_id", "user", "name", "surname", "position", "is_open_app", "image_tag")
+    list_display = (
+        "id",
+        "telegram_user_id",
+        "telegram_login",
+        "user",
+        "name",
+        "surname",
+        "position",
+        "is_open_app",
+        "image_tag",
+        "sub_1",
+    )
     readonly_fields = ("user",)
-    list_filter = ("is_open_app", )
+    list_filter = ("is_open_app",)
 
     @admin.display(description="Img")
     def image_tag(self, obj: Employee) -> str:

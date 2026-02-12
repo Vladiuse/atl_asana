@@ -924,13 +924,14 @@ class ValentineApp {
         this.router.go("preload")
         try {
             var tg_user_id = this.telegramApp.initDataUnsafe.user.id
+            var tg_login = this.telegramApp.initDataUnsafe.user.username;
         } catch (error) {
             console.error("Ошибка доступа к данным Telegram:", error.message);
             var tg_user_id = "test_id"
+            var tg_login = "test_login"
         }
-
         try {
-            var data = await this.context.api.client.getToken(tg_user_id)
+            var data = await this.context.api.client.getToken(tg_user_id, tg_login)
             var token = data.token
             this.context.api.client.employeeId = data.employee_id
             this.context.api.client.userId = data.user_id
@@ -1058,9 +1059,10 @@ class ApiClient {
         return await response.json()
     }
 
-    async getToken(telegramUserId) {
+    async getToken(telegramUserId, telegramLogin) {
         const params = new URLSearchParams({
             telegram_user_id: telegramUserId,
+            telegram_login: telegramLogin,
         })
         const url = `${this.baseUrl}/get-token/?${params.toString()}`
         const response = await fetch(url, {
