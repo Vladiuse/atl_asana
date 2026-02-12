@@ -3,7 +3,7 @@ from django.db.models import Count, QuerySet
 from django.http import HttpRequest
 from django.utils.html import format_html
 
-from .models import Employee, Valentine, ValentineImage
+from .models import BotMessageLog, Employee, Valentine, ValentineImage
 
 
 @admin.register(Employee)
@@ -116,3 +116,23 @@ class ValentineAdmin(admin.ModelAdmin):  # type: ignore[type-arg]
         if obj.image.image:
             return format_html('<img src="{}" style="height:60px;"/>', obj.image.image.url)
         return "-"
+
+
+@admin.register(BotMessageLog)
+class BotMessageLogAdmin(admin.ModelAdmin):  # type: ignore[type-arg]
+    list_display = (
+        "created_at",
+        "recipient_id",
+        "short_text",
+        "status",
+    )
+    list_filter = ("status", "recipient_id")
+    search_fields = ("recipient_id", "text", "error_text")
+    readonly_fields = ("created_at", "recipient_id", "text", "status", "error_text")
+
+    @admin.display(description="Текст сообщения")
+    def short_text(self, obj: BotMessageLog) -> str:
+        max_length = 200
+        if len(obj.text) > max_length:
+            return f"{obj.text[:max_length]}..."
+        return obj.text

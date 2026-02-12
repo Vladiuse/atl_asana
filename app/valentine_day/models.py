@@ -6,6 +6,7 @@ from django.db import models
 from django.db.models import Q, QuerySet
 from rest_framework.authtoken.models import Token
 from transliterate import translit
+from django.utils import timezone
 
 
 class EmployeeQuerySet(models.QuerySet["Employee"]):
@@ -158,3 +159,27 @@ class Valentine(models.Model):
     def clean(self) -> None:
         if self.is_anonymously and self.anonymous_signature == "":
             raise ValidationError("При анонимной отправке нужно указать подпись")
+
+
+class Status(models.TextChoices):
+    PENDING = "pending", "Ожидание"
+    SUCCESS = "success", "Успешно"
+    ERROR = "error", "Ошибка"
+
+class BotMessageLog(models.Model):
+    recipient_id = models.BigIntegerField(verbose_name="ID получателя")
+    text = models.TextField(verbose_name="Текст сообщения")
+    status = models.CharField(
+        max_length=10,
+        choices=Status.choices,
+        default=Status.PENDING,
+        verbose_name="Статус",
+    )
+    error_text = models.TextField(
+        blank=True,
+        verbose_name="Текст ошибки",
+    )
+    created_at = models.DateTimeField(default=timezone.now, verbose_name="Время создания")
+
+    def __str__(self) -> str:
+        return f"Сообщение для {self.recipient_id} ({self.status})"
