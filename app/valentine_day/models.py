@@ -16,6 +16,9 @@ class EmployeeQuerySet(models.QuerySet["Employee"]):
             user.delete()
         return delete_result
 
+    def can_notify(self) -> "EmployeeQuerySet":
+        return self.filter(telegram_user_id__regex=r"^\d+$", is_open_app=True)
+
 
 class EmployeeManager(models.Manager):  # type: ignore[type-arg]
     def get_queryset(self) -> QuerySet["Employee"]:
@@ -81,6 +84,10 @@ class Employee(models.Model):
         delete_result = super().delete(*args, **kwargs)
         user.delete()
         return delete_result
+
+    @property
+    def can_notify(self) -> bool:
+        return bool(str(self.telegram_user_id).isdigit() and self.is_open_app)
 
 
 class ValentineImage(models.Model):
