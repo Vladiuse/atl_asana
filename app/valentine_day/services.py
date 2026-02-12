@@ -9,7 +9,7 @@ class TelegramSenderService:
         self.api_url = f"https://api.telegram.org/bot{self.token}/sendMessage"
 
     def send_message(self, chat_id: str, message: str) -> BotMessageLog:
-        log = BotMessageLog.objects.create(recipient_id=chat_id, text=message)
+        log = BotMessageLog.objects.create(chat_id=chat_id, text=message)
         payload = {"chat_id": chat_id, "text": message, "parse_mode": "HTML"}
         try:
             response = requests.post(self.api_url, json=payload, timeout=10)

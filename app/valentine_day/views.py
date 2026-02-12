@@ -23,7 +23,7 @@ from rest_framework.response import Response
 from rest_framework.reverse import reverse
 from rest_framework.serializers import BaseSerializer
 from rest_framework.views import APIView
-
+from .tasks import send_message_to_user
 from .models import Employee, Valentine, ValentineImage
 from .serializers import CustomerSerializer, GetTokenSerializers, ValentineImageSerializer, ValentineSerializer
 
@@ -84,7 +84,12 @@ class ValentineView(viewsets.ModelViewSet):  # type: ignore[type-arg]
     def perform_create(self, serializer: BaseSerializer[Valentine]) -> None:
         user: User = self.request.user  # type: ignore[assignment]
         employee = get_object_or_404(Employee, user=user)
-        serializer.save(sender=employee)
+        valentine = serializer.save(sender=employee)
+        if valentine.recipient.can_notify and config.SEND_TELEGRAM_NOTIFICATIONS:
+            send_message_to_user.delay(  # type: ignore[attr-defined]
+                chat_id=valentine.recipient.telegram_user_id,
+                message="💌 Вам пришла новая валентинка",
+            )
 
     @action(detail=False, methods=["get"], url_path="received")
     def received_valentines(self, request: Request) -> Response:
