@@ -25,6 +25,7 @@ DOMAIN_MESSAGE_API_KEY = os.environ["DOMAIN_MESSAGE_API_KEY"]
 MESSAGE_SENDER_HOST = os.environ["MESSAGE_SENDER_HOST"]
 ASANA_API_KEY = os.environ["ASANA_API_KEY"]
 GOOGLE_CREDENTIALS_PATH = os.environ["GOOGLE_APPLICATION_CREDENTIALS"]
+VALENTINE_BOT_API_KEY = os.environ["VALENTINE_BOT_API_KEY"]
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = os.environ.get("DJANGO_DEBUG", "false").lower() == "true"
