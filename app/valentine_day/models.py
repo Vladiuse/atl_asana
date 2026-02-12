@@ -161,7 +161,7 @@ class Valentine(models.Model):
             raise ValidationError("При анонимной отправке нужно указать подпись")
 
 
-class Status(models.TextChoices):
+class BotMessageLogStatus(models.TextChoices):
     PENDING = "pending", "Ожидание"
     SUCCESS = "success", "Успешно"
     ERROR = "error", "Ошибка"
@@ -171,8 +171,8 @@ class BotMessageLog(models.Model):
     text = models.TextField(verbose_name="Текст сообщения")
     status = models.CharField(
         max_length=10,
-        choices=Status.choices,
-        default=Status.PENDING,
+        choices=BotMessageLogStatus.choices,
+        default=BotMessageLogStatus.PENDING,
         verbose_name="Статус",
     )
     error_text = models.TextField(
