@@ -5,13 +5,21 @@ from pathlib import Path
 import aiofiles
 from dotenv import load_dotenv
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup, Update, WebAppInfo
-from telegram.ext import ApplicationBuilder, CommandHandler, ContextTypes, MessageHandler, filters
+from telegram.ext import (
+    ApplicationBuilder,
+    CallbackQueryHandler,
+    CommandHandler,
+    ContextTypes,
+    MessageHandler,
+    filters,
+)
 
 BASE_DIR = Path(__file__).resolve().parent
 load_dotenv(BASE_DIR.parent / ".env")
 
 HELLO_IMG_PATH = BASE_DIR / "valentine_day/static/valentine_day/img/main.png"
 API_KEY = os.environ["VALENTINE_BOT_API_KEY"]
+web_app_url: str = "https://atl-asana.vim-store.ru/valentine-day/"
 
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
@@ -20,7 +28,6 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     if update.message is None:
         return
     # URL вашего Mini App (замените на реальный)
-    web_app_url: str = "https://atl-asana.vim-store.ru/valentine-day/"
     welcome_text_1 = """
 У тебя тоже что-то внезапно закололо в области груди сегодня? Отмена паники! Это все шалости Святого Валентина, ведь сегодня он традиционно расчехлил свой колчан и пронзил твое сердечко!💘
 
@@ -30,7 +37,7 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
 
 Мы же с ним не согласны категорически, и подготовили для тебя самые лучшие открытки для твоего друллеги, а ещё - этот бот, который поможет тебе признаться в твоей любви совершенно анонимно, без подписок, и смс 🥹
 
-✨Анонимно.
+✨ Анонимно.
 ✨ Без объяснений.
 ✨ Без «это я, если что», <tg-spoiler>но можно и с ним!</tg-spoiler>
 
@@ -44,6 +51,23 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
 
 """.strip()
 
+    # Создание кнопки Mini App
+    keyboard = [[InlineKeyboardButton(text="💌 Отправить валентинку", callback_data="start_instruction")]]
+    reply_markup = InlineKeyboardMarkup(keyboard)
+    async with aiofiles.open(HELLO_IMG_PATH, "rb") as photo_file:
+        photo_bytes: bytes = await photo_file.read()
+        await update.message.reply_photo(
+            photo=photo_bytes,
+            caption=welcome_text_1,
+            parse_mode="HTML",
+            reply_markup=reply_markup,
+        )
+
+
+async def handle_button_click(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    _ = context
+    if update.callback_query is None:
+        return
     instruction_text = """
 <b>Как это сделать?</b>
 
@@ -59,19 +83,16 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
 
 Или удалить сообщение и отправить новое - ты  сегодня Валентин и все в твоих руках 🙌🏻
 """.strip()
+    query = update.callback_query
+    # Обязательно отвечаем на callback, чтобы у пользователя пропал "часик" на кнопке
+    await query.answer()
+    if query.data == "start_instruction":
+        # Ссылка для WebApp теперь тут
+        keyboard = [[InlineKeyboardButton(text="Открыть приложение", web_app=WebAppInfo(url=web_app_url))]]
+        reply_markup = InlineKeyboardMarkup(keyboard)
 
-    # Создание кнопки Mini App
-    keyboard = [[InlineKeyboardButton(text="💌 Отправить валентинку", web_app=WebAppInfo(url=web_app_url))]]
-    reply_markup = InlineKeyboardMarkup(keyboard)
-    async with aiofiles.open(HELLO_IMG_PATH, "rb") as photo_file:
-        photo_bytes: bytes = await photo_file.read()
-        await update.message.reply_photo(
-            photo=photo_bytes,
-            caption=welcome_text_1,
-            parse_mode="HTML",
-        )
-        await asyncio.sleep(15)
-        await update.message.reply_text(
+        # Отправляем второе сообщение
+        await query.message.reply_text(  # type: ignore[union-attr]
             text=instruction_text,
             parse_mode="HTML",
             reply_markup=reply_markup,
@@ -104,6 +125,7 @@ def main() -> None:
     application = ApplicationBuilder().token(API_KEY).build()
 
     application.add_handler(CommandHandler("start", start))
+    application.add_handler(CallbackQueryHandler(handle_button_click))
     application.add_handler(CommandHandler("test_link", test_link))
     application.add_handler(MessageHandler(filters.TEXT, echo))
     print("Бот запускает сервер вебхуков...")
