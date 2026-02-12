@@ -1132,6 +1132,7 @@ class Employee {
         this.surname = data.surname
         this.position = data.position
         this.avatar = data.avatar
+        this.canReceiveValentine = data.can_receive_valentine
     }
 
     get fullName() {
@@ -1179,7 +1180,8 @@ class EmployeeCollection {
             .filter(emp => {
                 const isNotSent = !usedRecipientIds.has(emp.id);
                 const isNotMe = emp.id !== this.apiClient.employeeId;
-                return isNotSent && isNotMe;
+                const canReceive = emp.canReceiveValentine === true; //
+                return isNotSent && isNotMe && canReceive;
             });
     }
 
