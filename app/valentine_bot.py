@@ -88,7 +88,7 @@ async def handle_button_click(update: Update, context: ContextTypes.DEFAULT_TYPE
     await query.answer()
     if query.data == "start_instruction":
         # Ссылка для WebApp теперь тут
-        keyboard = [[InlineKeyboardButton(text="💌 Отправить валентинку", web_app=WebAppInfo(url=web_app_url))]]
+        keyboard = [[InlineKeyboardButton(text="💌 Выбрать свою любвинку", web_app=WebAppInfo(url=web_app_url))]]
         reply_markup = InlineKeyboardMarkup(keyboard)
 
         # Отправляем второе сообщение
