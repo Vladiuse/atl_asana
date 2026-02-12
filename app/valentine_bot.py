@@ -69,12 +69,12 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
             photo=photo_bytes,
             caption=welcome_text_1,
             parse_mode="HTML",
-            reply_markup=reply_markup,
         )
         await asyncio.sleep(15)
         await update.message.reply_text(
             text=instruction_text,
             parse_mode="HTML",
+            reply_markup=reply_markup,
         )
 
 
