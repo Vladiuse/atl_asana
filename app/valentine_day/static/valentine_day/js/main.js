@@ -1191,7 +1191,7 @@ class EmployeeCollection {
                 const isNotSent = !usedRecipientIds.has(emp.id);
                 const isNotMe = emp.id !== this.apiClient.employeeId;
                 const canReceive = emp.canReceiveValentine === true;
-                return isNotSent && isNotMe && canReceive;
+                return isNotMe && canReceive;
             });
     }
 

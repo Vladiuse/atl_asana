@@ -140,7 +140,6 @@ class Valentine(models.Model):
     )
 
     class Meta:
-        unique_together = ("sender", "recipient")
         constraints = (
             models.CheckConstraint(
                 name="anonymous_requires_signature",

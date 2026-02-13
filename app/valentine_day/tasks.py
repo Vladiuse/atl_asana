@@ -31,3 +31,8 @@ def test_check_mail_notify() -> None:
 """.strip()
     for employee in Employee.objects.all().can_notify():  # type: ignore[attr-defined]
         send_message_to_user.delay(chat_id=employee.telegram_user_id, message=message)  # type: ignore[attr-defined]
+
+@shared_task
+def test_send_message_to_all(message: str) ->  None:
+    for employee in Employee.objects.all().can_notify():  # type: ignore[attr-defined]
+        send_message_to_user.delay(chat_id=employee.telegram_user_id, message=message)  # type: ignore[attr-defined]
