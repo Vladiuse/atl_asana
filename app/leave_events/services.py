@@ -4,7 +4,6 @@ from typing import Any
 
 from common.message_renderer import render_message
 from constance import config
-from django.shortcuts import get_object_or_404
 from django.utils import timezone
 from message_sender.client import Handlers
 from message_sender.models import ScheduledMessage
@@ -87,8 +86,7 @@ class LeaveNotificationService:
         return leave
 
     def _approved(self, leave_data: dict[str, Any]) -> Leave:
-        leave = get_object_or_404(
-            Leave,
+        leave = Leave.objects.get(
             employee=leave_data.pop("employee"),
             start_date=leave_data.pop("start_date"),
         )
@@ -116,11 +114,12 @@ class LeaveNotificationService:
             handler=self.handler,
             reference_id=f"leave-{leave.pk}",
         )
+        leave.status = LeaveStatus.APPROVED
+        leave.save()
         return leave
 
     def _delete(self, leave_data: dict[str, Any]) -> Leave:
-        leave = get_object_or_404(
-            Leave,
+        leave = Leave.objects.get(
             employee=leave_data.pop("employee"),
             start_date=leave_data.pop("start_date"),
         )
