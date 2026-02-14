@@ -8,7 +8,8 @@ from message_sender.serializers import ScheduledMessageSerializer
 from rest_framework import serializers
 from rest_framework.utils.serializer_helpers import ReturnDict
 
-from .models import LeaveNotification
+from .models import LeaveNotification, LeaveStatus, LeaveType
+from .services import LeaveData
 
 
 class LeaveNotificationSerializer(serializers.ModelSerializer):  # type: ignore[type-arg]
@@ -37,3 +38,18 @@ class LeaveNotificationSerializer(serializers.ModelSerializer):  # type: ignore[
 class LeaveNotificationDeleteSerializer(serializers.Serializer):  # type: ignore[type-arg]
     employee = serializers.CharField(max_length=254)
     start_date = serializers.DateField()
+
+
+class LeaveGoogleDataSerializer(serializers.Serializer):  # type: ignore[type-arg]
+    employee = serializers.CharField(max_length=254)
+    start_date = serializers.DateField()
+    status = serializers.ChoiceField(choices=LeaveStatus.choices)
+    type = serializers.ChoiceField(choices=LeaveType.choices)
+
+    def create_dataclass(self) -> LeaveData:
+        return LeaveData(
+            start_date=self.validated_data["start_date"],
+            employee=self.validated_data["employee"],
+            status=self.validated_data["status"],
+            type=self.validated_data["type"],
+        )
