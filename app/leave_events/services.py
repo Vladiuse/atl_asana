@@ -65,12 +65,12 @@ class LeaveNotificationService:
         return Handlers.HR_VACATION.value
 
     def _need_agreed(self, leave_data: dict[str, Any]) -> Leave:
-        leave, created = Leave.objects.get_or_create(
+        leave, created = Leave.objects.update_or_create(
             employee=leave_data.pop("employee"),
             start_date=leave_data.pop("start_date"),
             defaults=leave_data,
         )
-        if created:
+        if not created:
             leave.messages.delete()
         context = {
             "leave": leave,
