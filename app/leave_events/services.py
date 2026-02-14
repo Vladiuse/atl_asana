@@ -1,34 +1,51 @@
 from dataclasses import dataclass
-from datetime import date
+from datetime import date, datetime, timedelta
 from typing import Any
 
-from .models import LeaveStatus, LeaveType, Leave
+from common.message_renderer import render_message
+from constance import config
+from django.shortcuts import get_object_or_404
+from django.utils import timezone
+from message_sender.client import Handlers
+from message_sender.models import ScheduledMessage
+
+from .models import Leave, LeaveStatus, LeaveType
 
 PENDING_LEAVE_MESSAGE = """
 <b>Запланирован отпуск 📅</b>
 
-{{supervisor_tag}}<br>
+{{leave.supervisor_tag}}<br>
 {%if leave.type == leave_type.VACATION%}
-Сотрудник {{employee}} планирует отпуск в даты {{start_date}} - {{end_date}}<br>
+Сотрудник {{leave.employee}} планирует отпуск в даты {{leave.start_date}} - {{leave.end_date}}<br>
 {%else%}
-Сотрудник {{employee}} планирует отгул {{start_date}}<br>
+Сотрудник {{leave.employee}} планирует отгул {{leave.start_date}}<br>
 {%endif%}
 
-<b>Нужно согласование 🔔</b>
+<b>Нужно согласование 🔔</b><br>
+
+<a href="{{table_url}}">Таблица отпусков Atlas</a>
 """
 
 NOTIFICATION_MESSAGE = """
-<b>Запланирован {{leave_type|lower}}</b> 📅<br>
-{{supervisor_tag}}<br>
-Сотрудник {{employee}} согласовал {{leave_type|lower}} в даты {{start_date}} - {{end_date}}<br>
+<b>Запланирован {{leave.type|lower}}</b> 📅<br>
+{{leave.supervisor_tag}}<br>
+{%if leave.type == leave_type.VACATION%}
+Сотрудник {{leave.employee}} согласовал отпуск в даты {{leave.start_date}} - {{leave.end_date}}<br>
+{%else%}
+Сотрудник {{leave.employee}} согласовал отгул {{leave.start_date}}<br>
+{%endif%}
 <a href="{{table_url}}">Таблица отпусков Atlas</a>
 """
 
 REMIND_MESSAGE = """
-<b>Начало {{leave_type|lower}}a ⏳</b><br>
-{{supervisor_tag}}<br>
-Сотрудник {{employee}} уходит в {{leave_type|lower}} через 2 недели<br>
-Отпуск: {{start_date}} - {{end_date}}<br>
+<b>Начало {{leave.type|lower}}a ⏳</b><br>
+{{leave.supervisor_tag}}<br>
+Сотрудник {{leave.employee}} уходит в {{leave.type|lower}} через 2 недели<br>
+{%if leave.type == leave_type.VACATION%}
+Отпуск: {{leave.start_date}} - {{leave.end_date}}<br>
+{%else%}
+Отгул: {{leave.start_date}}<br>
+{%endif%}
 <a href="{{table_url}}">Таблица отпусков Atlas</a>
 """
 
@@ -42,10 +59,9 @@ class LeaveData:
 
 
 class LeaveNotificationService:
-    def _create_notification_message(leave: Leave, message_template: str) -> None:
-        pass
+    MESSAGE_HANDLER = Handlers.HR_VACATION.value
 
-    def need_agreed(self, leave_data: dict[str, Any]) -> None:
+    def need_agreed(self, leave_data: dict[str, Any]) -> Leave:
         leave, created = Leave.objects.get_or_create(
             employee=leave_data.pop("employee"),
             start_date=leave_data.pop("leave_data"),
@@ -53,19 +69,63 @@ class LeaveNotificationService:
         )
         if created:
             leave.messages.delete()
-        
-
-    def approved(self, leave_data: LeaveData) -> None:
-        pass
-
-    def delete(self, leave_data: LeaveData) -> None:
-        pass
-
-    def process_google_data(self, leave_data: LeaveData) -> None:
-        handlers_by_status = {
-            LeaveStatus.PENDING: self.need_agreed,
-            LeaveStatus.APPROVED: self.approved,
-            LeaveStatus.DELETED: self.delete,
+        context = {
+            "leave": leave,
+            "table_url": config.LEAVE_TABLE_URL,
         }
-        handler = handlers_by_status[leave_data.status]
+        text = render_message(template=PENDING_LEAVE_MESSAGE, context=context)
+        run_at = timezone.now() + timedelta(minutes=config.SEND_NOTIFICATION_DELAY)
+        ScheduledMessage.objects.create(
+            run_at=run_at,
+            text=text,
+            handler=self.MESSAGE_HANDLER,
+            reference_id=f"leave-{leave.pk}",
+        )
+        return leave
+
+    def approved(self, leave_data: dict[str, Any]) -> Leave:
+        leave = get_object_or_404(
+            Leave,
+            employee=leave_data.pop("employee"),
+            start_date=leave_data.pop("leave_data"),
+        )
+        context = {
+            "leave": leave,
+            "table_url": config.LEAVE_TABLE_URL,
+        }
+        run_at = timezone.now() + timedelta(minutes=config.SEND_NOTIFICATION_DELAY)
+        text = render_message(template=NOTIFICATION_MESSAGE, context=context)
+        ScheduledMessage.objects.create(
+                run_at=run_at,
+                text=text,
+                handler=self.MESSAGE_HANDLER,
+                reference_id=f"leave-{leave.pk}",
+            )
+
+        run_at = datetime.combine(
+            leave.start_date,
+            timezone.localtime(timezone.now()).time(),
+        ) - timedelta(days=config.SEND_REMINDER_DELAY)
+        text = render_message(template=REMIND_MESSAGE, context=context)
+        ScheduledMessage.objects.create(
+            run_at=run_at,
+            text=text,
+            handler=self.MESSAGE_HANDLER,
+            reference_id=f"leave-{leave.pk}",
+        )
+        return leave
+
+    def delete(self, leave_data: dict[str, Any]) -> None:
+        Leave.objects.filter(
+            employee=leave_data.pop("employee"),
+            start_date=leave_data.pop("leave_data"),
+        ).delete()
+
+    def process_google_data(self, leave_data: dict[str, Any]) -> None:
+        handlers_by_status = {
+            " LeaveStatus.PENDING": self.need_agreed,
+            "LeaveStatus.APPROVED": self.approved,
+            "LeaveStatus.DELETED": self.delete,
+        }
+        handler = handlers_by_status[leave_data["status"]]
         handler(leave_data=leave_data)

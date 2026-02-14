@@ -1,5 +1,4 @@
 from datetime import datetime, timedelta
-from turtle import Shape
 from typing import Any
 
 from common.message_renderer import render_message
@@ -38,7 +37,7 @@ class LeaveStatus(models.TextChoices):
     DELETED = "deleted", "Удалено"
 
 
-class LeaveNotificationQuerySet(models.QuerySet["LeaveNotification"]):
+class LeaveNotificationQuerySet(models.QuerySet["Leave"]):
     def delete(self, *args: Any, **kwargs: Any) -> tuple[int, dict[str, Any]]:  # noqa: ANN401
         _ = args, kwargs
         for obj in self:
