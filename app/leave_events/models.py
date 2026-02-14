@@ -35,10 +35,18 @@ class Leave(models.Model):
         max_length=30,
         choices=LeaveType,
     )
-    employee = models.CharField(max_length=254)
-    supervisor_tag = models.CharField(max_length=254)
+    employee = models.CharField(
+        max_length=254,
+    )
+    supervisor_tag = models.CharField(
+        max_length=254,
+    )
     start_date = models.DateField()
     end_date = models.DateField()
+    status = models.CharField(
+        max_length=30,
+        choices=LeaveStatus.choices,
+    )
     created = models.DateTimeField(
         auto_now_add=True,
     )
