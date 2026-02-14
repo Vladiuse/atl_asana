@@ -73,10 +73,11 @@ class TestApproved:
             service._approved(leave_data=leave_data)
 
     def test_exist_in_db(self, service: LeaveNotificationService) -> None:
+        start_date = date(3000, 1, 1)
         leave = Leave.objects.create(
             employee="xxx",
             supervisor_tag="xxx",
-            start_date=date(2000, 1, 1),
+            start_date=start_date,
             end_date=date(2000, 1, 1),
             type=LeaveType.DAY_OFF,
             status=LeaveStatus.PENDING,
@@ -90,7 +91,7 @@ class TestApproved:
         leave_data = {
             "employee": "xxx",
             "supervisor_tag": "xxx",
-            "start_date": date(2000, 1, 1),
+            "start_date": start_date,
             "end_date": date(2000, 1, 1),
             "type": LeaveType.DAY_OFF.value,
             "status": LeaveStatus.PENDING.value,

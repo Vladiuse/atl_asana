@@ -39,7 +39,7 @@ NOTIFICATION_MESSAGE = """
 REMIND_MESSAGE = """
 <b>Начало {{leave.type|lower}}a ⏳</b><br>
 {{leave.supervisor_tag}}<br>
-Сотрудник {{leave.employee}} уходит в {{leave.type|lower}} через 2 недели<br>
+Сотрудник {{leave.employee}} уходит в {{leave.type|lower}} через {{day_delta}} дней<br>
 {%if leave.type == leave_type.VACATION%}
 Отпуск: {{leave.start_date}} - {{leave.end_date}}<br>
 {%else%}
@@ -47,6 +47,7 @@ REMIND_MESSAGE = """
 {%endif%}
 <a href="{{table_url}}">Таблица отпусков Atlas</a>
 """
+DAYS_IN_WEEK = 7
 
 
 @dataclass
@@ -58,10 +59,51 @@ class LeaveData:
 
 
 class LeaveNotificationService:
-
     @property
     def handler(self) -> str:
         return Handlers.HR_VACATION.value
+
+    def _create_notification_message(self, leave: Leave) -> None:
+        context = {
+            "leave": leave,
+            "table_url": config.LEAVE_TABLE_URL,
+        }
+        run_at = timezone.now() + timedelta(minutes=config.SEND_NOTIFICATION_DELAY)
+        text = render_message(template=NOTIFICATION_MESSAGE, context=context)
+        ScheduledMessage.objects.create(
+            run_at=run_at,
+            text=text,
+            handler=self.handler,
+            reference_id=f"leave-{leave.pk}",
+        )
+
+    def _create_remind_message(self, leave: Leave) -> None:
+        now: datetime = timezone.localtime(timezone.now())
+        today: date = now.date()
+        days_until_leave = (leave.start_date - today).days
+        if days_until_leave >= DAYS_IN_WEEK * 2:
+            reminder_delay = 14
+        elif days_until_leave >= DAYS_IN_WEEK:
+            reminder_delay = 7
+        else:
+            reminder_delay = None
+        if reminder_delay is not None:
+            context = {
+                "leave": leave,
+                "day_delta": reminder_delay,
+                "table_url": config.LEAVE_TABLE_URL,
+            }
+            run_at = datetime.combine(
+                leave.start_date,
+                now.time(),
+            ) - timedelta(days=reminder_delay)
+            text = render_message(template=REMIND_MESSAGE, context=context)
+            ScheduledMessage.objects.create(
+                run_at=run_at,
+                text=text,
+                handler=self.handler,
+                reference_id=f"leave-{leave.pk}",
+            )
 
     def _need_agreed(self, leave_data: dict[str, Any]) -> Leave:
         leave, created = Leave.objects.update_or_create(
@@ -90,30 +132,8 @@ class LeaveNotificationService:
             employee=leave_data.pop("employee"),
             start_date=leave_data.pop("start_date"),
         )
-        context = {
-            "leave": leave,
-            "table_url": config.LEAVE_TABLE_URL,
-        }
-        run_at = timezone.now() + timedelta(minutes=config.SEND_NOTIFICATION_DELAY)
-        text = render_message(template=NOTIFICATION_MESSAGE, context=context)
-        ScheduledMessage.objects.create(
-                run_at=run_at,
-                text=text,
-                handler=self.handler,
-                reference_id=f"leave-{leave.pk}",
-            )
-
-        run_at = datetime.combine(
-            leave.start_date,
-            timezone.localtime(timezone.now()).time(),
-        ) - timedelta(days=config.SEND_REMINDER_DELAY)
-        text = render_message(template=REMIND_MESSAGE, context=context)
-        ScheduledMessage.objects.create(
-            run_at=run_at,
-            text=text,
-            handler=self.handler,
-            reference_id=f"leave-{leave.pk}",
-        )
+        self._create_notification_message(leave=leave)
+        self._create_remind_message(leave=leave)
         leave.status = LeaveStatus.APPROVED
         leave.save()
         return leave
