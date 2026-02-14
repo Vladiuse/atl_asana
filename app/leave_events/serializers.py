@@ -8,11 +8,10 @@ from message_sender.serializers import ScheduledMessageSerializer
 from rest_framework import serializers
 from rest_framework.utils.serializer_helpers import ReturnDict
 
-from .models import Leave, LeaveStatus, LeaveType
-from .services import LeaveData
+from .models import Leave
 
 
-class LeaveNotificationSerializer(serializers.ModelSerializer):  # type: ignore[type-arg]
+class LeaveSerializer(serializers.ModelSerializer):  # type: ignore[type-arg]
     messages = serializers.SerializerMethodField()
 
     class Meta:
@@ -33,23 +32,3 @@ class LeaveNotificationSerializer(serializers.ModelSerializer):  # type: ignore[
     def get_messages(self, obj: Leave) -> ReturnDict[Any, Any]:
         scheduled = ScheduledMessage.objects.filter(reference_id=f"leave-{obj.pk}")
         return ScheduledMessageSerializer(scheduled, many=True).data
-
-
-class LeaveNotificationDeleteSerializer(serializers.Serializer):  # type: ignore[type-arg]
-    employee = serializers.CharField(max_length=254)
-    start_date = serializers.DateField()
-
-
-class LeaveGoogleDataSerializer(serializers.Serializer):  # type: ignore[type-arg]
-    employee = serializers.CharField(max_length=254)
-    start_date = serializers.DateField()
-    status = serializers.ChoiceField(choices=LeaveStatus.choices)
-    type = serializers.ChoiceField(choices=LeaveType.choices)
-
-    def create_dataclass(self) -> LeaveData:
-        return LeaveData(
-            start_date=self.validated_data["start_date"],
-            employee=self.validated_data["employee"],
-            status=self.validated_data["status"],
-            type=self.validated_data["type"],
-        )
