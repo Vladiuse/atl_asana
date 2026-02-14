@@ -30,6 +30,12 @@ class LeaveType(models.TextChoices):
     DAY_OFF = "DAY_OFF", "Отгул"
 
 
+class LeaveStatus(models.TextChoices):
+    PENDING = "pending", "Нужно согласовать"
+    APPROVED = "approved", "Согласовано"
+    DELETED = "deleted", "Удалено"
+
+
 class LeaveNotificationQuerySet(models.QuerySet["LeaveNotification"]):
     def delete(self, *args: Any, **kwargs: Any) -> tuple[int, dict[str, Any]]:  # noqa: ANN401
         _ = args, kwargs
