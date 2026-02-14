@@ -37,47 +37,18 @@ class LeaveStatus(models.TextChoices):
     DELETED = "deleted", "Удалено"
 
 
-class LeaveNotificationQuerySet(models.QuerySet["Leave"]):
-    def delete(self, *args: Any, **kwargs: Any) -> tuple[int, dict[str, Any]]:  # noqa: ANN401
+class LeaveQuerySet(models.QuerySet["Leave"]):
+    def delete(self, *args: Any, **kwargs: Any) -> tuple[int, dict[str, int]]:  # noqa: ANN401
         _ = args, kwargs
+        count = 0
         for obj in self:
             obj.delete()
-        return len(self), {}
+            count += 1
+        return count, {}
 
 
-class LeaveNotificationManager(models.Manager):  # type: ignore[type-arg]
-    def get_queryset(self) -> LeaveNotificationQuerySet:
-        return LeaveNotificationQuerySet(self.model, using=self._db)
-
-    def create(self, **kwargs: Any) -> "Leave":  # noqa: ANN401
-        with transaction.atomic():
-            leave: Leave = super().create(**kwargs)
-            context = {
-                "table_url": TABLE_URL,
-                "leave_type": LeaveType(leave.type).label,
-                "supervisor_tag": leave.supervisor_tag,
-                "employee": leave.employee,
-                "start_date": leave.start_date.strftime("%d.%m.%Y"),
-                "end_date": leave.end_date.strftime("%d.%m.%Y"),
-            }
-            ScheduledMessage.objects.create(
-                run_at=timezone.now() + timedelta(minutes=config.SEND_NOTIFICATION_DELAY),
-                text=render_message(template=NOTIFICATION_MESSAGE, context=context),
-                handler=Handlers.HR_VACATION.value,
-                reference_id=f"leave-{leave.pk}",
-            )
-
-            run_at = datetime.combine(
-                leave.start_date,
-                timezone.localtime(timezone.now()).time(),
-            ) - timedelta(days=config.SEND_REMINDER_DELAY)
-            ScheduledMessage.objects.create(
-                run_at=run_at,
-                text=render_message(template=REMIND_MESSAGE, context=context),
-                handler=Handlers.HR_VACATION.value,
-                reference_id=f"leave-{leave.pk}",
-            )
-            return leave
+class LeaveManager(models.Manager.from_queryset(LeaveQuerySet)):  # type: ignore[misc]
+    pass
 
 
 class Leave(models.Model):
@@ -89,7 +60,7 @@ class Leave(models.Model):
     cancellable_until = models.DateTimeField()
     created = models.DateTimeField(auto_now_add=True)
 
-    objects = LeaveNotificationManager()
+    objects = LeaveManager()
 
     class Meta:
         unique_together = ("employee", "start_date")
