@@ -74,6 +74,3 @@ class Leave(models.Model):
     def delete(self, *args: Any, **kwargs: Any) -> tuple[int, dict[str, int]]:  # noqa: ANN401
         ScheduledMessage.objects.filter(reference_id=f"leave-{self.pk}").delete()
         return super().delete(*args, **kwargs)
-
-    def is_can_be_deleted(self) -> bool:
-        return self.cancellable_until > timezone.now()
