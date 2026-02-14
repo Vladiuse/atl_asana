@@ -23,6 +23,7 @@ class LeaveSerializer(serializers.ModelSerializer):  # type: ignore[type-arg]
             "start_date",
             "end_date",
             "messages",
+            "status",
         )
 
     def create(self, validated_data: dict[str, Any]) -> Leave:
