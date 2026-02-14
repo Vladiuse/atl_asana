@@ -1,0 +1,62 @@
+from datetime import date
+from unittest.mock import Mock
+
+import pytest
+from django.contrib.auth.models import User
+from django.urls import reverse
+from pytest_mock import MockerFixture
+from rest_framework import status
+from rest_framework.authtoken.models import Token
+from rest_framework.test import APIClient
+
+from leave_events.models import Leave, LeaveStatus, LeaveType
+from leave_events.services import LeaveNotificationService
+
+
+@pytest.fixture
+def user() -> User:
+    return User.objects.create_user(username="test_user", password="password123")  # noqa: S106
+
+
+@pytest.fixture
+def auth_client(user: User) -> APIClient:
+    client = APIClient()
+    token, _ = Token.objects.get_or_create(user=user)
+    client.credentials(HTTP_AUTHORIZATION=f"Bearer {token.key}")
+    return client
+
+
+@pytest.fixture
+def service() -> LeaveNotificationService:
+    return LeaveNotificationService()
+
+
+@pytest.mark.django_db
+class TestLeaveUpdateByStatusView:
+    @property
+    def url(self) -> str:
+        return reverse("leave_events:leave-notification-process-by-status")
+
+    def test_no_auth(self, api_client: APIClient) -> None:
+        response = api_client.post(self.url)
+        assert response.status_code == status.HTTP_401_UNAUTHORIZED
+
+    @pytest.mark.parametrize(
+        ("leave_status", "status_code"),
+        [
+            (LeaveStatus.DELETED, status.HTTP_404_NOT_FOUND),
+            (LeaveStatus.APPROVED, status.HTTP_404_NOT_FOUND),
+            (LeaveStatus.PENDING, status.HTTP_200_OK),
+        ],
+    )
+    def test_leave_not_exists(self, auth_client: APIClient, leave_status: LeaveStatus, status_code: int) -> None:
+        leave_data = {
+            "employee": "xxx",
+            "supervisor_tag": "xxx",
+            "start_date": date(2025, 1, 1).isoformat(),
+            "end_date": date(2025, 1, 1).isoformat(),
+            "type": LeaveType.DAY_OFF.value,
+            "status": leave_status.value,
+        }
+        response = auth_client.post(self.url, data=leave_data)
+        assert response.status_code == status_code
