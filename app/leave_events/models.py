@@ -57,7 +57,6 @@ class Leave(models.Model):
     supervisor_tag = models.CharField(max_length=254)
     start_date = models.DateField()
     end_date = models.DateField()
-    cancellable_until = models.DateTimeField()
     created = models.DateTimeField(auto_now_add=True)
 
     objects = LeaveManager()

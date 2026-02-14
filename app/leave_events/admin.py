@@ -11,7 +11,6 @@ class LeaveNotificationAdmin(admin.ModelAdmin):  # type: ignore[type-arg]
         "type",
         "start_date",
         "end_date",
-        "cancellable_until",
         "created",
     )
     list_filter = ("type",)
