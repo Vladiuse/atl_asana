@@ -4,6 +4,7 @@ from django.shortcuts import render
 from message_sender.models import ScheduledMessage
 from rest_framework.authentication import SessionAuthentication
 from rest_framework.decorators import action
+from rest_framework.exceptions import NotFound
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.request import Request
 from rest_framework.response import Response
@@ -25,7 +26,10 @@ class LeaveNotificationView(ModelViewSet):  # type: ignore[type-arg]
         serializer = LeaveSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         service = LeaveNotificationService()
-        leave = service.process_google_data(leave_data=serializer.validated_data)
+        try:
+            leave = service.process_google_data(leave_data=serializer.validated_data)
+        except Leave.DoesNotExist as error:
+            raise NotFound(detail="Отпуск не найден в базе") from error
         serializer = LeaveSerializer(leave)
         return Response(data=serializer.data)
 
