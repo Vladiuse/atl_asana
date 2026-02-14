@@ -1,4 +1,5 @@
 from datetime import datetime, timedelta
+from turtle import Shape
 from typing import Any
 
 from common.message_renderer import render_message
@@ -7,6 +8,7 @@ from django.db import models, transaction
 from django.utils import timezone
 from message_sender.client import Handlers
 from message_sender.models import ScheduledMessage
+from django.db.models import QuerySet
 
 TABLE_URL = "https://docs.google.com/spreadsheets/d/1bbo6WxBLGk24FeSRucCYkwuWu1cYafb_5XsVgBO1DnY/edit?gid=570923352#gid=570923352"
 NOTIFICATION_MESSAGE = """
@@ -48,9 +50,9 @@ class LeaveNotificationManager(models.Manager):  # type: ignore[type-arg]
     def get_queryset(self) -> LeaveNotificationQuerySet:
         return LeaveNotificationQuerySet(self.model, using=self._db)
 
-    def create(self, **kwargs: Any) -> "LeaveNotification":  # noqa: ANN401
+    def create(self, **kwargs: Any) -> "Leave":  # noqa: ANN401
         with transaction.atomic():
-            leave: LeaveNotification = super().create(**kwargs)
+            leave: Leave = super().create(**kwargs)
             context = {
                 "table_url": TABLE_URL,
                 "leave_type": LeaveType(leave.type).label,
@@ -79,7 +81,7 @@ class LeaveNotificationManager(models.Manager):  # type: ignore[type-arg]
             return leave
 
 
-class LeaveNotification(models.Model):
+class Leave(models.Model):
     type = models.CharField(max_length=30, choices=LeaveType)
     employee = models.CharField(max_length=254)
     supervisor_tag = models.CharField(max_length=254)
@@ -95,6 +97,10 @@ class LeaveNotification(models.Model):
 
     def __str__(self) -> str:
         return f"{self.employee}:{self.start_date}"
+
+    @property
+    def messages(self) -> QuerySet[ScheduledMessage]:
+        return ScheduledMessage.objects.filter(reference_id=f"leave-{self.pk}")
 
     def delete(self, *args: Any, **kwargs: Any) -> tuple[int, dict[str, int]]:  # noqa: ANN401
         ScheduledMessage.objects.filter(reference_id=f"leave-{self.pk}").delete()

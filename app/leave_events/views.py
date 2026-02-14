@@ -11,12 +11,12 @@ from rest_framework.request import Request
 from rest_framework.response import Response
 from rest_framework.viewsets import ModelViewSet
 
-from .models import LeaveNotification
+from .models import Leave
 from .serializers import LeaveNotificationDeleteSerializer, LeaveNotificationSerializer
 
 
 class LeaveNotificationView(ModelViewSet):  # type: ignore[type-arg]
-    queryset = LeaveNotification.objects.all()
+    queryset = Leave.objects.all()
     serializer_class = LeaveNotificationSerializer
     authentication_classes = (BearerAuthentication, SessionAuthentication)
     permission_classes = (IsAuthenticated,)
@@ -26,7 +26,7 @@ class LeaveNotificationView(ModelViewSet):  # type: ignore[type-arg]
         serializer = LeaveNotificationDeleteSerializer(data=request.query_params)
         serializer.is_valid(raise_exception=True)
         instance = get_object_or_404(
-            LeaveNotification,
+            Leave,
             start_date=serializer.validated_data["start_date"],
             employee=serializer.validated_data["employee"],
         )

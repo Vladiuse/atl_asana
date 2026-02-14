@@ -1,7 +1,21 @@
 from dataclasses import dataclass
 from datetime import date
+from typing import Any
 
-from .models import LeaveStatus, LeaveType
+from .models import LeaveStatus, LeaveType, Leave
+
+PENDING_LEAVE_MESSAGE = """
+<b>Запланирован отпуск 📅</b>
+
+{{supervisor_tag}}<br>
+{%if leave.type == leave_type.VACATION%}
+Сотрудник {{employee}} планирует отпуск в даты {{start_date}} - {{end_date}}<br>
+{%else%}
+Сотрудник {{employee}} планирует отгул {{start_date}}<br>
+{%endif%}
+
+<b>Нужно согласование 🔔</b>
+"""
 
 NOTIFICATION_MESSAGE = """
 <b>Запланирован {{leave_type|lower}}</b> 📅<br>
@@ -28,8 +42,18 @@ class LeaveData:
 
 
 class LeaveNotificationService:
-    def need_agreed(self, leave_data: LeaveData) -> None:
+    def _create_notification_message(leave: Leave, message_template: str) -> None:
         pass
+
+    def need_agreed(self, leave_data: dict[str, Any]) -> None:
+        leave, created = Leave.objects.get_or_create(
+            employee=leave_data.pop("employee"),
+            start_date=leave_data.pop("leave_data"),
+            defaults=leave_data,
+        )
+        if created:
+            leave.messages.delete()
+        
 
     def approved(self, leave_data: LeaveData) -> None:
         pass

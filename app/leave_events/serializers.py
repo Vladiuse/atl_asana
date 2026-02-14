@@ -8,7 +8,7 @@ from message_sender.serializers import ScheduledMessageSerializer
 from rest_framework import serializers
 from rest_framework.utils.serializer_helpers import ReturnDict
 
-from .models import LeaveNotification, LeaveStatus, LeaveType
+from .models import Leave, LeaveStatus, LeaveType
 from .services import LeaveData
 
 
@@ -16,7 +16,7 @@ class LeaveNotificationSerializer(serializers.ModelSerializer):  # type: ignore[
     messages = serializers.SerializerMethodField()
 
     class Meta:
-        model = LeaveNotification
+        model = Leave
         fields = (
             "type",
             "employee",
@@ -26,11 +26,11 @@ class LeaveNotificationSerializer(serializers.ModelSerializer):  # type: ignore[
             "messages",
         )
 
-    def create(self, validated_data: dict[str, Any]) -> LeaveNotification:
+    def create(self, validated_data: dict[str, Any]) -> Leave:
         validated_data["cancellable_until"] = timezone.now() + timedelta(minutes=config.SEND_NOTIFICATION_DELAY)
         return super().create(validated_data)
 
-    def get_messages(self, obj: LeaveNotification) -> ReturnDict[Any, Any]:
+    def get_messages(self, obj: Leave) -> ReturnDict[Any, Any]:
         scheduled = ScheduledMessage.objects.filter(reference_id=f"leave-{obj.pk}")
         return ScheduledMessageSerializer(scheduled, many=True).data
 

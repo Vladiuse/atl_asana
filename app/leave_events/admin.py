@@ -1,9 +1,9 @@
 from django.contrib import admin
 
-from .models import LeaveNotification
+from .models import Leave
 
 
-@admin.register(LeaveNotification)
+@admin.register(Leave)
 class LeaveNotificationAdmin(admin.ModelAdmin):  # type: ignore[type-arg]
     list_display = (
         "id",
