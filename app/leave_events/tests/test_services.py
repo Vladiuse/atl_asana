@@ -56,3 +56,45 @@ class TestLeaveServicePending:
         assert leave_orig.pk == leave.pk
         assert leave.status == LeaveStatus.PENDING.value
         assert leave.messages.count() == 1
+
+
+@pytest.mark.django_db
+class TestApproved:
+    def test_no_exist_in_db(self, service: LeaveNotificationService) -> None:
+        leave_data = {
+            "employee": "xxx",
+            "supervisor_tag": "xxx",
+            "start_date": date(2000, 1, 1),
+            "end_date": date(2000, 1, 1),
+            "type": LeaveType.DAY_OFF.value,
+            "status": LeaveStatus.PENDING.value,
+        }
+        with pytest.raises(Leave.DoesNotExist):
+            service._approved(leave_data=leave_data)
+
+    def test_exist_in_db(self, service: LeaveNotificationService) -> None:
+        leave = Leave.objects.create(
+            employee="xxx",
+            supervisor_tag="xxx",
+            start_date=date(2000, 1, 1),
+            end_date=date(2000, 1, 1),
+            type=LeaveType.DAY_OFF,
+            status=LeaveStatus.PENDING,
+        )
+        ScheduledMessage.objects.create(
+            text="x",
+            user_tag="x",
+            run_at=timezone.now(),
+            reference_id=f"leave-{leave.pk}",
+        )
+        leave_data = {
+            "employee": "xxx",
+            "supervisor_tag": "xxx",
+            "start_date": date(2000, 1, 1),
+            "end_date": date(2000, 1, 1),
+            "type": LeaveType.DAY_OFF.value,
+            "status": LeaveStatus.PENDING.value,
+        }
+        leave = service._approved(leave_data=leave_data)
+        assert leave.status == LeaveStatus.APPROVED
+        assert leave.messages.count() == 3
