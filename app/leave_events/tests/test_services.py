@@ -1,4 +1,4 @@
-from datetime import date
+from datetime import date, timedelta
 
 import pytest
 from django.utils import timezone
@@ -99,6 +99,42 @@ class TestApproved:
         leave = service._approved(leave_data=leave_data)
         assert leave.status == LeaveStatus.APPROVED
         assert leave.messages.count() == 3
+
+    @pytest.mark.parametrize(
+        ("days_delta", "message_count"),
+        [
+            (14, 2),
+            (7, 2),
+            (5, 1),
+        ],
+    )
+    def test_create_reminder(self, service: LeaveNotificationService, days_delta: int, message_count: int) -> None:
+        start_date = timezone.now().date() + timedelta(days=days_delta)
+        leave = Leave.objects.create(
+            employee="xxx",
+            supervisor_tag="xxx",
+            start_date=start_date,
+            end_date=date(2000, 1, 1),
+            type=LeaveType.DAY_OFF,
+            status=LeaveStatus.PENDING,
+        )
+        first_message = ScheduledMessage.objects.create(
+            text="x",
+            user_tag="x",
+            run_at=timezone.now(),
+            reference_id=f"leave-{leave.pk}",
+        )
+        leave_data = {
+            "employee": "xxx",
+            "supervisor_tag": "xxx",
+            "start_date": start_date,
+            "end_date": date(2000, 1, 1),
+            "type": LeaveType.DAY_OFF.value,
+            "status": LeaveStatus.PENDING.value,
+        }
+        leave = service._approved(leave_data=leave_data)
+        assert leave.status == LeaveStatus.APPROVED
+        assert leave.messages.exclude(pk=first_message.pk).count() == message_count
 
 
 @pytest.mark.django_db
