@@ -66,6 +66,7 @@ class LeaveNotificationService:
     def _create_notification_message(self, leave: Leave) -> None:
         context = {
             "leave": leave,
+            "leave_type": LeaveType,
             "table_url": config.LEAVE_TABLE_URL,
         }
         run_at = timezone.now() + timedelta(minutes=config.SEND_NOTIFICATION_DELAY)
@@ -90,6 +91,7 @@ class LeaveNotificationService:
         if reminder_delay is not None:
             context = {
                 "leave": leave,
+                "leave_type": LeaveType,
                 "day_delta": reminder_delay,
                 "table_url": config.LEAVE_TABLE_URL,
             }
@@ -115,6 +117,7 @@ class LeaveNotificationService:
             leave.messages.delete()
         context = {
             "leave": leave,
+            "leave_type": LeaveType,
             "table_url": config.LEAVE_TABLE_URL,
         }
         text = render_message(template=PENDING_LEAVE_MESSAGE, context=context)
