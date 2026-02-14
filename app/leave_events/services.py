@@ -64,10 +64,10 @@ class LeaveNotificationService:
     def handler(self) -> str:
         return Handlers.HR_VACATION.value
 
-    def need_agreed(self, leave_data: dict[str, Any]) -> Leave:
+    def _need_agreed(self, leave_data: dict[str, Any]) -> Leave:
         leave, created = Leave.objects.get_or_create(
             employee=leave_data.pop("employee"),
-            start_date=leave_data.pop("leave_data"),
+            start_date=leave_data.pop("start_date"),
             defaults=leave_data,
         )
         if created:
@@ -86,11 +86,11 @@ class LeaveNotificationService:
         )
         return leave
 
-    def approved(self, leave_data: dict[str, Any]) -> Leave:
+    def _approved(self, leave_data: dict[str, Any]) -> Leave:
         leave = get_object_or_404(
             Leave,
             employee=leave_data.pop("employee"),
-            start_date=leave_data.pop("leave_data"),
+            start_date=leave_data.pop("start_date"),
         )
         context = {
             "leave": leave,
@@ -118,11 +118,11 @@ class LeaveNotificationService:
         )
         return leave
 
-    def delete(self, leave_data: dict[str, Any]) -> Leave:
+    def _delete(self, leave_data: dict[str, Any]) -> Leave:
         leave = get_object_or_404(
             Leave,
             employee=leave_data.pop("employee"),
-            start_date=leave_data.pop("leave_data"),
+            start_date=leave_data.pop("start_date"),
         )
         leave.messages.delete()
         leave.delete()
@@ -130,9 +130,9 @@ class LeaveNotificationService:
 
     def process_google_data(self, leave_data: dict[str, Any]) -> Leave:
         handlers_by_status = {
-            " LeaveStatus.PENDING": self.need_agreed,
-            "LeaveStatus.APPROVED": self.approved,
-            "LeaveStatus.DELETED": self.delete,
+            LeaveStatus.PENDING: self._need_agreed,
+            LeaveStatus.APPROVED: self._approved,
+            LeaveStatus.DELETED: self._delete,
         }
         handler = handlers_by_status[leave_data["status"]]
         return handler(leave_data=leave_data)
