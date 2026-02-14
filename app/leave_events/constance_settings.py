@@ -10,9 +10,9 @@ CONSTANCE_CONFIG = {
         int,
     ),
     "LEAVE_TABLE_URL": (
-        str,
-        "Ссылка на табличку с отпусками",
         "https://docs.google.com/spreadsheets/d/1bbo6WxBLGk24FeSRucCYkwuWu1cYafb_5XsVgBO1DnY/edit?gid=570923352#gid=570923352",
+        "Ссылка на табличку с отпусками",
+        str,
     ),
 }
 
@@ -20,5 +20,6 @@ CONSTANCE_CONFIG_FIELDSETS = {
     "EMPLOYEE_LEAVE": (
         "SEND_NOTIFICATION_DELAY",
         "SEND_REMINDER_DELAY",
+        "LEAVE_TABLE_URL",
     ),
 }
