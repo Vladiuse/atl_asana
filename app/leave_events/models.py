@@ -1,29 +1,8 @@
-from datetime import datetime, timedelta
 from typing import Any
 
-from common.message_renderer import render_message
-from constance import config
-from django.db import models, transaction
-from django.utils import timezone
-from message_sender.client import Handlers
-from message_sender.models import ScheduledMessage
+from django.db import models
 from django.db.models import QuerySet
-
-TABLE_URL = "https://docs.google.com/spreadsheets/d/1bbo6WxBLGk24FeSRucCYkwuWu1cYafb_5XsVgBO1DnY/edit?gid=570923352#gid=570923352"
-NOTIFICATION_MESSAGE = """
-<b>Запланирован {{leave_type|lower}}</b> 📅<br>
-{{supervisor_tag}}<br>
-Сотрудник {{employee}} согласовал {{leave_type|lower}} в даты {{start_date}} - {{end_date}}<br>
-<a href="{{table_url}}">Таблица отпусков Atlas</a>
-"""
-
-REMIND_MESSAGE = """
-<b>Начало {{leave_type|lower}}a ⏳</b><br>
-{{supervisor_tag}}<br>
-Сотрудник {{employee}} уходит в {{leave_type|lower}} через 2 недели<br>
-Отпуск: {{start_date}} - {{end_date}}<br>
-<a href="{{table_url}}">Таблица отпусков Atlas</a>
-"""
+from message_sender.models import ScheduledMessage
 
 
 class LeaveType(models.TextChoices):
@@ -52,12 +31,17 @@ class LeaveManager(models.Manager.from_queryset(LeaveQuerySet)):  # type: ignore
 
 
 class Leave(models.Model):
-    type = models.CharField(max_length=30, choices=LeaveType)
+    type = models.CharField(
+        max_length=30,
+        choices=LeaveType,
+    )
     employee = models.CharField(max_length=254)
     supervisor_tag = models.CharField(max_length=254)
     start_date = models.DateField()
     end_date = models.DateField()
-    created = models.DateTimeField(auto_now_add=True)
+    created = models.DateTimeField(
+        auto_now_add=True,
+    )
 
     objects = LeaveManager()
 
