@@ -13,6 +13,7 @@ from rest_framework.viewsets import ModelViewSet
 
 from .models import Leave
 from .serializers import LeaveNotificationDeleteSerializer, LeaveNotificationSerializer
+from .services import LeaveNotificationService
 
 
 class LeaveNotificationView(ModelViewSet):  # type: ignore[type-arg]
@@ -37,6 +38,15 @@ class LeaveNotificationView(ModelViewSet):  # type: ignore[type-arg]
             "details": "Cant delete LeaveNotification",
         }
         return Response(status=status.HTTP_400_BAD_REQUEST, data=data)
+
+    @action(detail=False, methods=["post"], url_path="process-by-status")
+    def process_by_status(self, request: Request) -> Response:
+        serializer = LeaveNotificationDeleteSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        service = LeaveNotificationService()
+        leave = service.process_google_data(leave_data=serializer.validated_data)
+        serializer = LeaveNotificationDeleteSerializer(leave)
+        return Response(data=serializer.data)
 
 
 def messages_list(request: HttpRequest) -> HttpResponse:

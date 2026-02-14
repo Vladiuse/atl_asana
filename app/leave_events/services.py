@@ -59,7 +59,10 @@ class LeaveData:
 
 
 class LeaveNotificationService:
-    MESSAGE_HANDLER = Handlers.HR_VACATION.value
+
+    @property
+    def handler(self) -> str:
+        return Handlers.HR_VACATION.value
 
     def need_agreed(self, leave_data: dict[str, Any]) -> Leave:
         leave, created = Leave.objects.get_or_create(
@@ -78,7 +81,7 @@ class LeaveNotificationService:
         ScheduledMessage.objects.create(
             run_at=run_at,
             text=text,
-            handler=self.MESSAGE_HANDLER,
+            handler=self.handler,
             reference_id=f"leave-{leave.pk}",
         )
         return leave
@@ -98,7 +101,7 @@ class LeaveNotificationService:
         ScheduledMessage.objects.create(
                 run_at=run_at,
                 text=text,
-                handler=self.MESSAGE_HANDLER,
+                handler=self.handler,
                 reference_id=f"leave-{leave.pk}",
             )
 
@@ -110,22 +113,26 @@ class LeaveNotificationService:
         ScheduledMessage.objects.create(
             run_at=run_at,
             text=text,
-            handler=self.MESSAGE_HANDLER,
+            handler=self.handler,
             reference_id=f"leave-{leave.pk}",
         )
         return leave
 
-    def delete(self, leave_data: dict[str, Any]) -> None:
-        Leave.objects.filter(
+    def delete(self, leave_data: dict[str, Any]) -> Leave:
+        leave = get_object_or_404(
+            Leave,
             employee=leave_data.pop("employee"),
             start_date=leave_data.pop("leave_data"),
-        ).delete()
+        )
+        leave.messages.delete()
+        leave.delete()
+        return leave
 
-    def process_google_data(self, leave_data: dict[str, Any]) -> None:
+    def process_google_data(self, leave_data: dict[str, Any]) -> Leave:
         handlers_by_status = {
             " LeaveStatus.PENDING": self.need_agreed,
             "LeaveStatus.APPROVED": self.approved,
             "LeaveStatus.DELETED": self.delete,
         }
         handler = handlers_by_status[leave_data["status"]]
-        handler(leave_data=leave_data)
+        return handler(leave_data=leave_data)
