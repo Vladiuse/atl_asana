@@ -1,7 +1,6 @@
 # ruff: noqa: E501
 PENDING_LEAVE_MESSAGE = """
-<b>Запланирован {{leave.get_type_display|lower}} 📅</br>
-
+<b>Запланирован {{leave.get_type_display|lower}} 📅</b><br>
 {{leave.supervisor_tag}}<br>
 {%if leave.type == leave_type.VACATION%}
 Сотрудник {{leave.employee}} планирует отпуск в даты {{leave.start_date|date:"d.m.Y"}} - {{leave.end_date|date:"d.m.Y"}}<br>
