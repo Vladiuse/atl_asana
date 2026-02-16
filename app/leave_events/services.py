@@ -5,48 +5,11 @@ from typing import Any
 from common.message_renderer import render_message
 from constance import config
 from django.utils import timezone
-from message_sender.client import Handlers
 from message_sender.models import ScheduledMessage
 
+from .message_templates import NOTIFICATION_MESSAGE, PENDING_LEAVE_MESSAGE, REMIND_MESSAGE
 from .models import Leave, LeaveStatus, LeaveType
 
-PENDING_LEAVE_MESSAGE = """
-<b>Запланирован {{leave.get_type_display|lower}} 📅</b>
-
-{{leave.supervisor_tag}}<br>
-{%if leave.type == leave_type.VACATION%}
-Сотрудник {{leave.employee}} планирует отпуск в даты {{leave.start_date|date:"d.m.Y"}} - {{leave.end_date|date:"d.m.Y"}}<br>
-{%else%}
-Сотрудник {{leave.employee}} планирует отгул {{leave.start_date|date:"d.m.Y"}}<br>
-{%endif%}
-
-<b>Нужно согласование 🔔</b><br>
-
-<a href="{{table_url}}">Таблица отпусков Atlas</a>
-"""
-
-NOTIFICATION_MESSAGE = """
-<b>Запланирован {{leave.get_type_display|lower}}</b> 📅<br>
-{{leave.supervisor_tag}}<br>
-{%if leave.type == leave_type.VACATION%}
-Сотрудник {{leave.employee}} согласовал отпуск в даты {{leave.start_date|date:"d.m.Y"}} - {{leave.end_date|date:"d.m.Y"}}<br>
-{%else%}
-Сотрудник {{leave.employee}} согласовал отгул {{leave.start_date|date:"d.m.Y"}}<br>
-{%endif%}
-<a href="{{table_url}}">Таблица отпусков Atlas</a>
-"""
-
-REMIND_MESSAGE = """
-<b>Начало {{leave.get_type_display|lower}}a ⏳</b><br>
-{{leave.supervisor_tag}}<br>
-Сотрудник {{leave.employee}} уходит в {{leave.get_type_display|lower}} через {{day_delta}} дней<br>
-{%if leave.type == leave_type.VACATION%}
-Отпуск: {{leave.start_date|date:"d.m.Y"}} - {{leave.end_date|date:"d.m.Y"}}<br>
-{%else%}
-Отгул: {{leave.start_date|date:"d.m.Y"}}<br>
-{%endif%}
-<a href="{{table_url}}">Таблица отпусков Atlas</a>
-"""
 DAYS_IN_WEEK = 7
 
 
