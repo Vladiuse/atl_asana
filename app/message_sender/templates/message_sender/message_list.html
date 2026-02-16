@@ -59,9 +59,7 @@
                     <td>{{ message.run_at|date:"d.m.Y H:i" }}</td>
                     <td>{{ message.user_tag|default:"—" }}</td>
                     <td>{{ message.handler|default:"—" }}</td>
-                    <td style="max-width: 500px; word-wrap: break-word; white-space: pre-line;">
-                        {{ message.text }}
-                    </td>
+                    <td style="max-width: 500px; word-wrap: break-word; white-space: pre-line;">{{ message.text|safe }}</td>
                     <td>{{ message.reference_id|default:"—" }}</td>
                     <td>{{ message.created_at|date:"d.m.Y H:i" }}</td>
                 </tr>
