@@ -210,7 +210,7 @@ CONSTANCE_ADDITIONAL_FIELDS = {
         "django.forms.ChoiceField",
         {
             "widget": "django.forms.Select",
-            "choices": ((handler.value, handler.name) for handler in Handlers),
+            "choices": [(handler.value, handler.name) for handler in Handlers],
         },
     ),
 }
