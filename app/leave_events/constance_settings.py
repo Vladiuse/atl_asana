@@ -1,3 +1,5 @@
+from message_sender.client import Handlers
+
 CONSTANCE_CONFIG = {
     "SEND_NOTIFICATION_DELAY": (
         5,
@@ -14,6 +16,11 @@ CONSTANCE_CONFIG = {
         "Ссылка на табличку с отпусками",
         str,
     ),
+    "MESSAGE_HANDLER": (
+        Handlers.HR_VACATION.value,
+        "В какой чат отправлять уведомления",
+        "message_sender_handler",
+    )
 }
 
 CONSTANCE_CONFIG_FIELDSETS = {
@@ -21,5 +28,6 @@ CONSTANCE_CONFIG_FIELDSETS = {
         "SEND_NOTIFICATION_DELAY",
         "SEND_REMINDER_DELAY",
         "LEAVE_TABLE_URL",
+        "MESSAGE_HANDLER",
     ),
 }
