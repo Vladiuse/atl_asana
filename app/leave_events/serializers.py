@@ -5,16 +5,16 @@ from message_sender.serializers import ScheduledMessageSerializer
 from rest_framework import serializers
 from rest_framework.utils.serializer_helpers import ReturnDict
 
-from .models import Leave
+from .models import Leave, LeaveStatus, LeaveType
 
 
 class LeaveSerializer(serializers.Serializer):  # type: ignore[type-arg]
-    type = serializers.CharField(max_length=30)
+    type = serializers.ChoiceField(choices=LeaveType.choices)
     employee = serializers.CharField(max_length=254)
     supervisor_tag = serializers.CharField(max_length=254)
     start_date = serializers.DateField()
     end_date = serializers.DateField()
-    status = serializers.CharField(max_length=30)
+    status = serializers.ChoiceField(choices=LeaveStatus.choices)
     messages = serializers.SerializerMethodField(read_only=True)
 
     def get_messages(self, obj: Leave) -> ReturnDict[Any, Any]:
