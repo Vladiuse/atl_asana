@@ -17,3 +17,4 @@ class LeaveNotificationAdmin(admin.ModelAdmin):  # type: ignore[type-arg]
     search_fields = ("employee", "supervisor_tag")
     ordering = ("-created",)
     date_hierarchy = "start_date"
+

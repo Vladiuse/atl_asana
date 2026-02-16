@@ -11,13 +11,13 @@ from message_sender.models import ScheduledMessage
 from .models import Leave, LeaveStatus, LeaveType
 
 PENDING_LEAVE_MESSAGE = """
-<b>Запланирован отпуск 📅</b>
+<b>Запланирован {{leave.get_type_display|lower}} 📅</b>
 
 {{leave.supervisor_tag}}<br>
 {%if leave.type == leave_type.VACATION%}
-Сотрудник {{leave.employee}} планирует отпуск в даты {{leave.start_date}} - {{leave.end_date}}<br>
+Сотрудник {{leave.employee}} планирует отпуск в даты {{leave.start_date|date:"d.m.Y"}} - {{leave.end_date|date:"d.m.Y"}}<br>
 {%else%}
-Сотрудник {{leave.employee}} планирует отгул {{leave.start_date}}<br>
+Сотрудник {{leave.employee}} планирует отгул {{leave.start_date|date:"d.m.Y"}}<br>
 {%endif%}
 
 <b>Нужно согласование 🔔</b><br>
@@ -26,24 +26,24 @@ PENDING_LEAVE_MESSAGE = """
 """
 
 NOTIFICATION_MESSAGE = """
-<b>Запланирован {{leave.type|lower}}</b> 📅<br>
+<b>Запланирован {{leave.get_type_display|lower}}</b> 📅<br>
 {{leave.supervisor_tag}}<br>
 {%if leave.type == leave_type.VACATION%}
-Сотрудник {{leave.employee}} согласовал отпуск в даты {{leave.start_date}} - {{leave.end_date}}<br>
+Сотрудник {{leave.employee}} согласовал отпуск в даты {{leave.start_date|date:"d.m.Y"}} - {{leave.end_date|date:"d.m.Y"}}<br>
 {%else%}
-Сотрудник {{leave.employee}} согласовал отгул {{leave.start_date}}<br>
+Сотрудник {{leave.employee}} согласовал отгул {{leave.start_date|date:"d.m.Y"}}<br>
 {%endif%}
 <a href="{{table_url}}">Таблица отпусков Atlas</a>
 """
 
 REMIND_MESSAGE = """
-<b>Начало {{leave.type|lower}}a ⏳</b><br>
+<b>Начало {{leave.get_type_display|lower}}a ⏳</b><br>
 {{leave.supervisor_tag}}<br>
-Сотрудник {{leave.employee}} уходит в {{leave.type|lower}} через {{day_delta}} дней<br>
+Сотрудник {{leave.employee}} уходит в {{leave.get_type_display|lower}} через {{day_delta}} дней<br>
 {%if leave.type == leave_type.VACATION%}
-Отпуск: {{leave.start_date}} - {{leave.end_date}}<br>
+Отпуск: {{leave.start_date|date:"d.m.Y"}} - {{leave.end_date|date:"d.m.Y"}}<br>
 {%else%}
-Отгул: {{leave.start_date}}<br>
+Отгул: {{leave.start_date|date:"d.m.Y"}}<br>
 {%endif%}
 <a href="{{table_url}}">Таблица отпусков Atlas</a>
 """
@@ -61,7 +61,7 @@ class LeaveData:
 class LeaveNotificationService:
     @property
     def handler(self) -> str:
-        return Handlers.HR_VACATION.value
+        return config.MESSAGE_HANDLER
 
     def _create_notification_message(self, leave: Leave) -> None:
         context = {

@@ -75,3 +75,18 @@ class TestLeaveUpdateByStatusView:
         assert leave.supervisor_tag == "test_sup"
         assert leave.type == LeaveType.DAY_OFF
         assert leave.status == LeaveStatus.PENDING
+
+    def test_update_and_delete(self, auth_client: APIClient) -> None:
+        leave_data = {
+            "employee": "test_emp",
+            "supervisor_tag": "test_sup",
+            "start_date": date(2025, 1, 1).isoformat(),
+            "end_date": date(2025, 1, 1).isoformat(),
+            "type": LeaveType.DAY_OFF.value,
+            "status": LeaveStatus.PENDING.value,
+        }
+        response = auth_client.post(self.url, data=leave_data, format="json")
+        assert response.status_code == 200
+        leave_data["status"] = LeaveStatus.DELETED.value
+        response = auth_client.post(self.url, data=leave_data, format="json")
+        assert response.status_code == 200

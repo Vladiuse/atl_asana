@@ -7,6 +7,7 @@ from message_sender.client import AtlasMessageSender
 from message_sender.services import UserService
 
 from .models import AtlasUser, ScheduledMessage
+from django.utils.safestring import mark_safe
 
 message_sender = AtlasMessageSender(
     host=settings.MESSAGE_SENDER_HOST,
@@ -55,13 +56,17 @@ class ScheduledMessageAdmin(admin.ModelAdmin):  # type: ignore[type-arg]
         "run_at",
         "user_tag",
         "handler",
-        "text",
+        "text_preview",
         "created_at",
     )
     list_filter = ("status",)
     search_fields = ("user_tag", "handler", "text")
     ordering = ("-run_at",)
     readonly_fields = ("created_at",)
+
+    @admin.display(description="Text")
+    def text_preview(self, obj: ScheduledMessage) -> str:
+        return mark_safe(obj.text.replace("\n", "<br>"))  # noqa: S308
 
     fieldsets = (
         (None, {

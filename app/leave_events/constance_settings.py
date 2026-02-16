@@ -20,7 +20,7 @@ CONSTANCE_CONFIG = {
         Handlers.HR_VACATION.value,
         "В какой чат отправлять уведомления",
         "message_sender_handler",
-    )
+    ),
 }
 
 CONSTANCE_CONFIG_FIELDSETS = {
