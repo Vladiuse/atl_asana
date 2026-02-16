@@ -1,6 +1,6 @@
 # ruff: noqa: E501
 PENDING_LEAVE_MESSAGE = """
-<b>Запланирован {{leave.get_type_display|lower}} 📅</b>
+<b>Запланирован {{leave.get_type_display|lower}} 📅</br>
 
 {{leave.supervisor_tag}}<br>
 {%if leave.type == leave_type.VACATION%}
