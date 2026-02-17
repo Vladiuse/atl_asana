@@ -118,6 +118,7 @@ class AtlasMessageSender:
         timeout: int = REQUEST_TIMEOUT,
         *,
         require_all: bool = True,
+        html: bool = False,
     ) -> dict[str, str | list[str]]:
         """Send message by user tags.
 
@@ -128,6 +129,12 @@ class AtlasMessageSender:
             "text": message,
             "tags": user_tags,
         }
+        if html:
+            data.update(
+                {
+                    "parse_mode": "HTML",
+                },
+            )
         url = f"{self.base_url}/alert/custom"
         response = self.session.post(url, json=data, timeout=timeout)
         response.raise_for_status()
@@ -144,6 +151,7 @@ class AtlasMessageSender:
         timeout: int = REQUEST_TIMEOUT,
         *,
         require_all: bool = True,
+        html: bool = False,
     ) -> dict[str, str | list[str]]:
         """Send message to user by user tag.
 
@@ -158,6 +166,7 @@ class AtlasMessageSender:
             user_tags=[user_tag],
             timeout=timeout,
             require_all=require_all,
+            html=html,
         )
 
     def send_log_message(self, message: str) -> dict[str, str | list[str]]:
