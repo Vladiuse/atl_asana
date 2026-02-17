@@ -13,15 +13,13 @@ PENDING_LEAVE_MESSAGE = """
 <a href="{{table_url}}">Таблица отпусков Atlas</a>
 """
 
-NOTIFICATION_MESSAGE = """
-<b>Запланирован {{leave.get_type_display|lower}}</b> 📅<br>
-{{leave.supervisor_tag}}<br>
+NOTIFICATION_FOR_EMPLOYEE_MESSAGE = """
+Согласован {{leave.get_type_display|lower}} 📅
 {%if leave.type == leave_type.VACATION%}
-Сотрудник {{leave.employee}} согласовал отпуск в даты {{leave.start_date|date:"d.m.Y"}} - {{leave.end_date|date:"d.m.Y"}}<br>
+Твой отпуск в даты {{leave.start_date|date:"d.m.Y"}} - {{leave.end_date|date:"d.m.Y"}}- согласован ✅
 {%else%}
-Сотрудник {{leave.employee}} согласовал отгул {{leave.start_date|date:"d.m.Y"}}<br>
+Твой отгул {{leave.start_date|date:"d.m.Y"}} согласован ✅
 {%endif%}
-<a href="{{table_url}}">Таблица отпусков Atlas</a>
 """
 
 REMIND_MESSAGE = """

@@ -5,9 +5,9 @@ from typing import Any
 from common.message_renderer import render_message
 from constance import config
 from django.utils import timezone
-from message_sender.models import ScheduledMessage
+from message_sender.models import AtlasUser, ScheduledMessage
 
-from .message_templates import NOTIFICATION_MESSAGE, PENDING_LEAVE_MESSAGE, REMIND_MESSAGE
+from .message_templates import NOTIFICATION_FOR_EMPLOYEE_MESSAGE, PENDING_LEAVE_MESSAGE, REMIND_MESSAGE
 from .models import Leave, LeaveStatus, LeaveType
 
 DAYS_IN_WEEK = 7
@@ -26,18 +26,19 @@ class LeaveNotificationService:
     def handler(self) -> str:
         return config.MESSAGE_HANDLER
 
-    def _create_notification_message(self, leave: Leave) -> None:
+    def _create_notification_message(self, leave: Leave, employee: AtlasUser) -> None:
+        """Create message to inform employee of leave approval."""
         context = {
             "leave": leave,
             "leave_type": LeaveType,
             "table_url": config.LEAVE_TABLE_URL,
         }
         run_at = timezone.now() + timedelta(minutes=config.SEND_NOTIFICATION_DELAY)
-        text = render_message(template=NOTIFICATION_MESSAGE, context=context)
+        text = render_message(template=NOTIFICATION_FOR_EMPLOYEE_MESSAGE, context=context)
         ScheduledMessage.objects.create(
             run_at=run_at,
             text=text,
-            handler=self.handler,
+            user_tag=employee.tag,
             reference_id=f"leave-{leave.pk}",
         )
 
@@ -98,7 +99,8 @@ class LeaveNotificationService:
             employee=leave_data.pop("employee"),
             start_date=leave_data.pop("start_date"),
         )
-        self._create_notification_message(leave=leave)
+        employee = AtlasUser.objects.get(telegram=leave.telegram_login)
+        self._create_notification_message(leave=leave, employee=employee)
         self._create_remind_message(leave=leave)
         leave.status = LeaveStatus.APPROVED
         leave.save()
