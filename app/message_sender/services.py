@@ -41,7 +41,7 @@ class MessageSenderService:
                 handler = Handlers(message.handler)
                 self.message_sender.send_message(handler=handler, message=message.text, html=True)
             else:
-                self.message_sender.send_message_to_user(user_tag=message.user_tag, message=message.text)
+                self.message_sender.send_message_to_user(user_tag=message.user_tag, message=message.text, html=True)
             message.status = ScheduledMessageStatus.SENT
         except (ValueError, AtlasMessageSenderError):
             message.status = ScheduledMessageStatus.FAILED
