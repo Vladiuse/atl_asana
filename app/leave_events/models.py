@@ -38,6 +38,9 @@ class Leave(models.Model):
     employee = models.CharField(
         max_length=254,
     )
+    telegram_login = models.CharField(
+        max_length=254,
+    )
     supervisor_tag = models.CharField(
         max_length=254,
     )
