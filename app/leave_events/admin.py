@@ -8,7 +8,10 @@ class LeaveNotificationAdmin(admin.ModelAdmin):  # type: ignore[type-arg]
     list_display = (
         "id",
         "employee",
+        "telegram_login", 
+        "supervisor_tag",
         "type",
+        "status",
         "start_date",
         "end_date",
         "created",
