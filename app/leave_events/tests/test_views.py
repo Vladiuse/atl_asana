@@ -3,6 +3,7 @@ from datetime import date
 import pytest
 from django.contrib.auth.models import User
 from django.urls import reverse
+from message_sender.models import AtlasUser
 from rest_framework import status
 from rest_framework.authtoken.models import Token
 from rest_framework.test import APIClient
@@ -27,6 +28,18 @@ def auth_client(user: User) -> APIClient:
 @pytest.fixture
 def service() -> LeaveNotificationService:
     return LeaveNotificationService()
+
+
+@pytest.fixture(autouse=True)
+def atlas_user() -> AtlasUser:
+    return AtlasUser.objects.create(
+        name="Test User",
+        email="test@example.com",
+        role="tester",
+        tag="test_tag",
+        telegram="test_telegram_login",
+        username="test_username",
+    )
 
 
 @pytest.mark.django_db
@@ -55,6 +68,7 @@ class TestLeaveUpdateByStatusView:
             "end_date": date(2025, 1, 1).isoformat(),
             "type": LeaveType.DAY_OFF.value,
             "status": leave_status.value,
+            "telegram_login": "@test_telegram_login",
         }
         response = auth_client.post(self.url, data=leave_data)
         assert response.status_code == status_code
@@ -67,6 +81,7 @@ class TestLeaveUpdateByStatusView:
             "end_date": date(2025, 1, 1).isoformat(),
             "type": LeaveType.DAY_OFF.value,
             "status": LeaveStatus.PENDING.value,
+            "telegram_login": "@test_telegram_login",
         }
         response = auth_client.post(self.url, data=leave_data, format="json")
         assert response.status_code == 200
@@ -83,6 +98,7 @@ class TestLeaveUpdateByStatusView:
             "end_date": date(2025, 1, 1).isoformat(),
             "type": LeaveType.DAY_OFF.value,
             "status": LeaveStatus.PENDING.value,
+            "telegram_login": "@test_telegram_login",
         }
         response = auth_client.post(self.url, data=leave_data, format="json")
         assert response.status_code == 200
