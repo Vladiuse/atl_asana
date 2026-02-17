@@ -99,7 +99,7 @@ class LeaveNotificationService:
             employee=leave_data.pop("employee"),
             start_date=leave_data.pop("start_date"),
         )
-        employee = AtlasUser.objects.get(telegram=leave.telegram_login)
+        employee = AtlasUser.objects.get(telegram__iexact=leave.telegram_login)
         self._create_notification_message(leave=leave, employee=employee)
         self._create_remind_message(leave=leave)
         leave.status = LeaveStatus.APPROVED

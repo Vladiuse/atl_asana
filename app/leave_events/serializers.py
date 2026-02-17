@@ -25,6 +25,6 @@ class LeaveSerializer(serializers.Serializer):  # type: ignore[type-arg]
 
     def validate_telegram_login(self, value: str) -> str:
         value = value.removeprefix("@")
-        if not AtlasUser.objects.filter(telegram=value).exists():
+        if not AtlasUser.objects.filter(telegram__iexact=value).exists():
             raise ValidationError({"telegram_login": f"Unknown telegram login: @{value}"})
         return value
