@@ -14,9 +14,9 @@ PENDING_LEAVE_MESSAGE = """
 """
 
 NOTIFICATION_FOR_EMPLOYEE_MESSAGE = """
-Согласован {{leave.get_type_display|lower}} 📅
+<b>Согласован {{leave.get_type_display|lower}}</b> 📅<br>
 {%if leave.type == leave_type.VACATION%}
-Твой отпуск в даты {{leave.start_date|date:"d.m.Y"}} - {{leave.end_date|date:"d.m.Y"}}- согласован ✅
+Твой отпуск в даты {{leave.start_date|date:"d.m.Y"}} - {{leave.end_date|date:"d.m.Y"}} согласован ✅
 {%else%}
 Твой отгул {{leave.start_date|date:"d.m.Y"}} согласован ✅
 {%endif%}
