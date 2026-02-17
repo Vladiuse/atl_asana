@@ -1,7 +1,8 @@
+import telegram
 from common.auth import BearerAuthentication
 from django.http import HttpRequest, HttpResponse
 from django.shortcuts import render
-from message_sender.models import ScheduledMessage
+from message_sender.models import AtlasUser, ScheduledMessage
 from rest_framework.authentication import SessionAuthentication
 from rest_framework.decorators import action
 from rest_framework.exceptions import NotFound
@@ -30,6 +31,9 @@ class LeaveNotificationView(ModelViewSet):  # type: ignore[type-arg]
             leave = service.process_google_data(leave_data=serializer.validated_data)
         except Leave.DoesNotExist as error:
             raise NotFound(detail="Отпуск не найден в базе") from error
+        except AtlasUser.DoesNotExist as error:
+            telegram_login = serializer.validated_data["telegram_login"]
+            raise NotFound(detail=f"Пользователь атлас для отправки сообщения не найден: @{telegram_login}") from error
         serializer = LeaveSerializer(leave)
         return Response(data=serializer.data)
 
