@@ -79,6 +79,7 @@ INSTALLED_APPS = [
     "common.apps.CommonConfig",
     "leave_events.apps.LeaveEventsConfig",
     "valentine_day.apps.ValentineDayConfig",
+    "fake_message.apps.FakeMessageConfig",
 ]
 
 MIDDLEWARE = [
