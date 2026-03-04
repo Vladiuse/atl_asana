@@ -23,7 +23,7 @@ class UserService:
                         "email": user.email or "",
                         "role": user.role,
                         "tag": user.tag,
-                        "username": user.username,
+                        "username": user.username.strip(),
                     },
                 )
                 if created:

@@ -46,7 +46,7 @@ class AtlasUserAdmin(admin.ModelAdmin):  # type: ignore[type-arg]
         service = UserService(message_sender_client=message_sender)
         result = service.update_all_users()
         message = str(result)
-        self.message_user(request, message, level=messages.ERROR)
+        self.message_user(request, message, level=messages.SUCCESS)
 
 
 @admin.register(ScheduledMessage)

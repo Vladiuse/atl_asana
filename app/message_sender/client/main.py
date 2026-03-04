@@ -106,7 +106,6 @@ class AtlasMessageSender:
                 },
             )
         url = f"{self.base_url}/alert/custom"
-        print(data)
         response = self.session.post(url, json=data, timeout=timeout)
         response.raise_for_status()
         return response.json()
