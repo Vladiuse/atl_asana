@@ -69,6 +69,7 @@ INSTALLED_APPS = [
     "django_celery_beat",
     "constance",
     "corsheaders",
+    "django_filters",
     # apps
     "vga_lands.apps.VgaLandsConfig",
     "comment_notifier.apps.CommentNotifierConfig",
@@ -189,6 +190,12 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 DATA_UPLOAD_MAX_MEMORY_SIZE = 10485760  # 10 MB
 FILE_UPLOAD_MAX_MEMORY_SIZE = 10485760  # 10 MB
+
+REST_FRAMEWORK = {
+    "DEFAULT_FILTER_BACKENDS": [
+        "django_filters.rest_framework.DjangoFilterBackend",
+    ],
+}
 
 
 CONSTANCE_BACKEND = "constance.backends.database.DatabaseBackend"
