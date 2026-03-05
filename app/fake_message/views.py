@@ -1,6 +1,7 @@
 from common.auth import BearerAuthentication
 from django_filters.rest_framework import DjangoFilterBackend
-from rest_framework import mixins, viewsets
+from rest_framework import mixins
+from rest_framework.authentication import SessionAuthentication
 from rest_framework.decorators import api_view
 from rest_framework.pagination import PageNumberPagination
 from rest_framework.permissions import IsAuthenticated
@@ -45,5 +46,5 @@ class MessageView(mixins.ListModelMixin, GenericViewSet):  # type: ignore[type-a
     filter_backends = (DjangoFilterBackend,)
     filterset_fields = ("status", "tag")
     pagination_class = MessagePagination
-    authentication_classes = (BearerAuthentication,)
+    authentication_classes = (BearerAuthentication, SessionAuthentication)
     permission_classes = (IsAuthenticated,)
