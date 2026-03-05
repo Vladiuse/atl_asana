@@ -1,10 +1,13 @@
+from common.auth import BearerAuthentication
 from django_filters.rest_framework import DjangoFilterBackend
-from rest_framework import viewsets
+from rest_framework import mixins, viewsets
 from rest_framework.decorators import api_view
 from rest_framework.pagination import PageNumberPagination
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.request import Request
 from rest_framework.response import Response
 from rest_framework.reverse import reverse
+from rest_framework.viewsets import GenericViewSet
 
 from .models import Handlers, Message, MessageStatus, TgParseMode
 from .serializers import MessageSerializer
@@ -36,9 +39,11 @@ class MessagePagination(PageNumberPagination):
     max_page_size = 100
 
 
-class MessageView(viewsets.ModelViewSet):  # type: ignore[type-arg]
+class MessageView(mixins.ListModelMixin, GenericViewSet):  # type: ignore[type-arg]
     queryset = Message.objects.all()
     serializer_class = MessageSerializer
     filter_backends = (DjangoFilterBackend,)
     filterset_fields = ("status", "tag")
     pagination_class = MessagePagination
+    authentication_classes = (BearerAuthentication,)
+    permission_classes = (IsAuthenticated,)
