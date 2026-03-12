@@ -73,9 +73,13 @@ class AtlasMessageSender:
 
         """
         if not isinstance(user_tag, str):
-            raise TypeError("Incorrect tag type, must be str")
-        if user_tag == "":
-            raise ValueError("Tag cant be blank")
+            raise AtlasMessageSenderError(
+                "User tag must be a string",
+            )
+        if not user_tag:
+            raise AtlasMessageSenderError(
+                "User tag cannot be empty",
+            )
 
     @cached_property
     def base_url(self) -> str:
