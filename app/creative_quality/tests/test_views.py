@@ -6,7 +6,7 @@ from common.models import Country
 from django.test import Client
 from django.urls import reverse
 
-from creative_quality.models import Creative, CreativeGeoData, CreativeGeoDataStatus, Task
+from creative_quality.models import Creative, Task
 
 
 @pytest.fixture
@@ -76,67 +76,3 @@ class TestCreativeEstimateView:
         )
         response = client.post(url)
         assert response.status_code == HTTPStatus.NOT_FOUND
-
-
-@pytest.mark.django_db
-class TestCreativeGeoDataDetailView:
-    def test_post(
-        self,
-        creative_task: tuple[Creative, Task],
-        client: Client,
-        country_by: Country,
-        country_ru: Country,
-    ) -> None:
-        creative, task = creative_task
-        geo_data = CreativeGeoData.objects.create(creative=creative, hold=0, hook=0, ctr=0, country=country_by)
-        data = {
-            "hold": 1,
-            "hook": 2,
-            "ctr": 3,
-            "country": country_ru.pk,
-            "status": CreativeGeoDataStatus.ZASHEL.value,
-        }
-        url = reverse("creative_quality:creative_geo_data", kwargs={"geo_data_pk": geo_data.pk})
-        response = client.post(url, data=data)
-        assert response.status_code == HTTPStatus.FOUND
-        geo_data.refresh_from_db()
-        assert geo_data.hold == 1
-        assert geo_data.hook == 2
-        assert geo_data.ctr == 3
-        assert geo_data.country == country_ru
-        assert geo_data.status == CreativeGeoDataStatus.ZASHEL.value
-
-
-@pytest.mark.django_db
-class TestCreativeGeoDataCreateView:
-    def test_post(self, creative_task: tuple[Creative, Task], client: Client, country_ru: Country) -> None:
-        creative, task = creative_task
-        data = {
-            "hold": 1,
-            "hook": 2,
-            "ctr": 3,
-            "country": country_ru.pk,
-            "status": CreativeGeoDataStatus.NE_ZASHEL.value,
-        }
-        url = reverse("creative_quality:creative_geo_data_create", kwargs={"creative_pk": creative.pk})
-        response = client.post(url, data=data)
-        assert response.status_code == HTTPStatus.FOUND
-        assert creative.geo_data.count() == 1
-        geo_data = CreativeGeoData.objects.get(creative=creative)
-        assert geo_data.hold == 1
-        assert geo_data.hook == 2
-        assert geo_data.ctr == 3
-        assert geo_data.country == country_ru
-        assert geo_data.status == CreativeGeoDataStatus.NE_ZASHEL.value
-
-
-@pytest.mark.django_db
-class TestCreativeGeoDataDeleteView:
-    def test_delete(self, creative_task: tuple[Creative, Task], client: Client, country_by: Country) -> None:
-        creative, task = creative_task
-        geo_data = CreativeGeoData.objects.create(creative=creative, hold=0, hook=0, ctr=0, country=country_by)
-        url = reverse("creative_quality:creative_geo_data_delete", kwargs={"geo_data_pk": geo_data.pk})
-        response = client.post(url)
-        assert response.status_code == HTTPStatus.FOUND
-        with pytest.raises(CreativeGeoData.DoesNotExist):
-            CreativeGeoData.objects.get(pk=geo_data.pk)

@@ -16,7 +16,6 @@ from creative_quality.models import Creative, Task, TaskStatus
 from creative_quality.services import (
     CreativeService,
     SendEstimationMessageService,
-    TaskService,
 )
 
 SEND_REMINDER_TRY_COUNT = 3
@@ -31,10 +30,7 @@ def patch_constance() -> Generator[Any, Any, Any]:
 @pytest.fixture
 def creative_service() -> CreativeService:
     mock_asana = Mock(spec=AsanaApiClient)
-    mock_task_service = Mock(spec=TaskService, asana_api_client=mock_asana)
-    creative_service = CreativeService(asana_api_client=mock_asana)
-    creative_service.task_service = mock_task_service
-    return creative_service
+    return CreativeService(asana_api_client=mock_asana)
 
 
 @pytest.fixture
@@ -60,17 +56,6 @@ def fixed_now(monkeypatch: pytest.MonkeyPatch) -> datetime:
 
 @pytest.mark.django_db
 class TestCreativeService:
-    @pytest.mark.parametrize("task_status", list(TaskStatus))
-    def test_create_creative(self, creative_service: CreativeService, task_status: TaskStatus) -> None:
-        task = Task.objects.create(task_id="x", status=task_status)
-        creative_service.task_service.update.return_value = task  # type: ignore[attr-defined]
-        creative_service.create_creative(creative_task=task)
-        if task_status == TaskStatus.CREATED:
-            assert Creative.objects.count() == 1
-            assert Creative.objects.filter(task=task).exists()
-        else:
-            assert Creative.objects.count() == 0
-            assert not Creative.objects.filter(task=task).exists()
 
     def test_estimate_creative(self, creative_service: CreativeService) -> None:
         creative = Mock(spec=Creative)
