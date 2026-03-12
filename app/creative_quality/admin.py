@@ -1,4 +1,3 @@
-from encodings.punycode import T
 import logging
 
 from asana.client import AsanaApiClient
@@ -27,6 +26,7 @@ class TaskAdmin(admin.ModelAdmin):  # type: ignore[type-arg]
         "is_completed",
         "assignee_id",
         "bayer_code",
+        "is_complete",
         "created",
         "url_display",
     )

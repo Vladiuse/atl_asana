@@ -1,3 +1,5 @@
+from typing import Any
+
 from asana.models import AtlasAsanaUser
 from common.models import Country
 from constance import config
@@ -71,11 +73,18 @@ class Task(models.Model):
     load_failure_count = models.PositiveIntegerField(
         default=0,
     )
+    is_complete = models.BooleanField(
+        default=False,
+    )
 
     objects = TaskManager()
 
     def __str__(self) -> str:
         return self.task_id
+
+    def save(self, **kwargs: Any) -> None:  # noqa: ANN401
+        self.is_complete = bool(self.assignee_id != "" and self.bayer_code != "")
+        super().save(**kwargs)
 
     def get_assignee_display(self) -> str:
         value = self.assignee_id
@@ -112,6 +121,7 @@ class CreativeManager(models.Manager["Creative"]):
         return self.get_queryset().filter(
             status=CreativeStatus.NEED_ESTIMATE,
             next_reminder_at__lte=timezone.now(),
+            task__is_complete=True,
         )
 
     def need_send_to_gsheet(self) -> QuerySet["Creative"]:

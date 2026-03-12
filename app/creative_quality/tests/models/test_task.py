@@ -27,3 +27,15 @@ class TestTask:
         creative.refresh_from_db()
         assert task.status == TaskStatus.DELETED
         assert creative.status == CreativeStatus.CANCELED
+
+    @pytest.mark.parametrize(("bayer_code", "assignee_id", "is_complete"), [
+        ("xxx","xxx", True),
+        ("","xxx", False),
+        ("xxx","", False),
+        ("","", False),
+    ])
+    def test_is_compete(self, bayer_code: str, assignee_id: str, is_complete: bool) -> None:
+        task = Task(task_id="1", bayer_code=bayer_code, assignee_id=assignee_id)
+        task.save()
+        task.refresh_from_db()
+        assert task.is_complete == is_complete
