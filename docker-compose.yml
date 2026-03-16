@@ -1,3 +1,7 @@
+networks:
+  shared-net:
+    external: true
+
 services:
   redis:
     image: redis:7
@@ -58,6 +62,8 @@ services:
       - /etc/letsencrypt:/etc/letsencrypt:ro
     depends_on:
       - atl-asana-web
+    networks:
+      - shared-net
 
   valentine-bot:
     build: .
