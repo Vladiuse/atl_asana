@@ -29,6 +29,8 @@ services:
       - db
     expose:
       - 8000
+    networks:
+      - shared-net
   celery_worker:
     build: .
     command: celery -A atl_asana worker -l info
@@ -82,5 +84,7 @@ services:
         max-file: "3"
     expose:
       - "8000"
+    networks:
+      - shared-net
 volumes:
   atl_asana_pgdata:
