@@ -66,7 +66,7 @@ services:
       - atl-asana-web
     networks:
       - shared-net
-
+      - default
   valentine-bot:
     build: .
     command: python valentine_bot.py
