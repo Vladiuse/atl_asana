@@ -4,8 +4,8 @@ from typing import TypeAlias
 from common.exception import AppExceptionError
 
 from asana.models import AsanaWebhookRequestData, ProcessingStatus
-from asana.webhook_handlers.abstract import WebhookHandlerResult
-from asana.webhook_handlers.registry import WEBHOOK_HANDLER_REGISTRY, WebhookHandlerInfo
+from asana.webhook_actions.abstract import WebhookHandlerResult
+from asana.webhook_actions.registry import WEBHOOK_HANDLER_REGISTRY, WebhookHandlerInfo
 
 HandlerName: TypeAlias = str
 

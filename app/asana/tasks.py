@@ -4,7 +4,7 @@ from typing import Any
 from celery import Task, shared_task
 from django.conf import settings
 
-from asana.webhook_handlers import WebhookDispatcher
+from asana.webhook_actions import WebhookDispatcher
 
 from .client import AsanaApiClient
 from .models import AsanaWebhookRequestData

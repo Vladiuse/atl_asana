@@ -2,7 +2,7 @@ from typing import Any
 
 from django.core.management.base import BaseCommand
 
-from asana.webhook_handlers.synchronizer import WebhookHandlerRegistrySynchronizer
+from asana.webhook_actions.synchronizer import WebhookHandlerRegistrySynchronizer
 
 
 class Command(BaseCommand):

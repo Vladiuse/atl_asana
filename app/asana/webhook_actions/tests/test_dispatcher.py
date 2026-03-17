@@ -2,9 +2,9 @@ import pytest
 
 from asana.constants import AsanaResourceType
 from asana.models import AsanaWebhook, AsanaWebhookRequestData, ProcessingStatus, WebhookHandler
-from asana.webhook_handlers.abstract import BaseWebhookHandler, WebhookHandlerResult
-from asana.webhook_handlers.dispatcher import WebhookDispatcher, WebhookDispatcherResult
-from asana.webhook_handlers.registry import WEBHOOK_HANDLER_REGISTRY, WebhookHandlerInfo
+from asana.webhook_actions.abstract import BaseWebhookHandler, WebhookHandlerResult
+from asana.webhook_actions.dispatcher import WebhookDispatcher, WebhookDispatcherResult
+from asana.webhook_actions.registry import WEBHOOK_HANDLER_REGISTRY, WebhookHandlerInfo
 
 
 class FakeBaseWebhookHandler(BaseWebhookHandler):

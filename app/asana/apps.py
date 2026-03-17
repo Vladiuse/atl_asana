@@ -9,9 +9,9 @@ class AsanaConfig(AppConfig):
     name = "asana"
 
     def ready(self) -> None:
-        from asana import webhook_handlers
+        from asana import webhook_actions
 
-        package = webhook_handlers
+        package = webhook_actions
 
         # load handlers from common module
         for _, module_name, _ in pkgutil.iter_modules(package.__path__):

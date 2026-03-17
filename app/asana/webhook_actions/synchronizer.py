@@ -3,7 +3,7 @@ import logging
 from django.db import transaction
 
 from asana.models import WebhookHandler
-from asana.webhook_handlers.registry import WEBHOOK_HANDLER_REGISTRY
+from asana.webhook_actions.registry import WEBHOOK_HANDLER_REGISTRY
 
 
 class WebhookHandlerRegistrySynchronizer:
