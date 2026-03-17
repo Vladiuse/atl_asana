@@ -20,3 +20,7 @@ class Position(models.TextChoices):
 class AsanaResourceType(models.TextChoices):
     PROJECT = "project", "Проект"
     SECTION = "section", "Секция"
+    TASK = "task", "Задача"
+
+class EventType(Enum):
+    ADDED = "added"
