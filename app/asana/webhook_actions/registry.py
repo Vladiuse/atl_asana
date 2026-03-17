@@ -1,33 +1,33 @@
 from dataclasses import dataclass
 from typing import Callable
 
-from .abstract import BaseWebhookHandler
+from .abstract import BaseWebhookAction
 
 
 @dataclass
-class WebhookHandlerInfo:
+class WebhookActionInfo:
     name: str
     description: str
-    webhook_handler_class: type[BaseWebhookHandler]
+    webhook_handler_class: type[BaseWebhookAction]
 
 
-WEBHOOK_HANDLER_REGISTRY: dict[str, WebhookHandlerInfo] = {}
+WEBHOOK_ACTION_REGISTRY: dict[str, WebhookActionInfo] = {}
 
 
-def register_webhook_handler(
+def register_webhook_action(
     name: str,
     description: str,
-) -> Callable[[type[BaseWebhookHandler]], type[BaseWebhookHandler]]:
-    def wrap(cls: type[BaseWebhookHandler]) -> type[BaseWebhookHandler]:
-        if name in WEBHOOK_HANDLER_REGISTRY:
+) -> Callable[[type[BaseWebhookAction]], type[BaseWebhookAction]]:
+    def wrap(cls: type[BaseWebhookAction]) -> type[BaseWebhookAction]:
+        if name in WEBHOOK_ACTION_REGISTRY:
             msg = f"Webhook handler name {name} already registered"
             raise RuntimeError(msg)
-        sender_info = WebhookHandlerInfo(
+        sender_info = WebhookActionInfo(
             name=name,
             description=description,
             webhook_handler_class=cls,
         )
-        WEBHOOK_HANDLER_REGISTRY[name] = sender_info
+        WEBHOOK_ACTION_REGISTRY[name] = sender_info
         return cls
 
     return wrap

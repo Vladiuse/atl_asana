@@ -2,25 +2,25 @@ import pytest
 
 from asana.constants import AsanaResourceType
 from asana.models import AsanaWebhook, AsanaWebhookRequestData, ProcessingStatus, WebhookHandler
-from asana.webhook_actions.abstract import BaseWebhookHandler, WebhookHandlerResult
+from asana.webhook_actions.abstract import BaseWebhookAction, WebhookActionResult
 from asana.webhook_actions.dispatcher import WebhookDispatcher, WebhookDispatcherResult
-from asana.webhook_actions.registry import WEBHOOK_HANDLER_REGISTRY, WebhookHandlerInfo
+from asana.webhook_actions.registry import WEBHOOK_ACTION_REGISTRY, WebhookActionInfo
 
 
-class FakeBaseWebhookHandler(BaseWebhookHandler):
-    result = WebhookHandlerResult(
+class FakeBaseWebhookHandler(BaseWebhookAction):
+    result = WebhookActionResult(
         is_success=True,
         is_target_event=True,
     )
 
-    def handle(self, webhook_data: AsanaWebhookRequestData) -> WebhookHandlerResult:
+    def handle(self, webhook_data: AsanaWebhookRequestData) -> WebhookActionResult:
         _ = webhook_data
         return self.result
 
 
 class SuccessTargetHandler(FakeBaseWebhookHandler):
     name = "success_target"
-    result = WebhookHandlerResult(
+    result = WebhookActionResult(
         is_success=True,
         is_target_event=True,
     )
@@ -28,7 +28,7 @@ class SuccessTargetHandler(FakeBaseWebhookHandler):
 
 class SuccessNotTargetHandler(FakeBaseWebhookHandler):
     name = "success_not_target"
-    result = WebhookHandlerResult(
+    result = WebhookActionResult(
         is_success=True,
         is_target_event=False,
     )
@@ -36,7 +36,7 @@ class SuccessNotTargetHandler(FakeBaseWebhookHandler):
 
 class ErrorHandler(FakeBaseWebhookHandler):
     name = "error_handler"
-    result = WebhookHandlerResult(
+    result = WebhookActionResult(
         is_success=False,
         is_target_event=False,
         error="error",
@@ -46,7 +46,7 @@ class ErrorHandler(FakeBaseWebhookHandler):
 class RaiseErrorHandler(FakeBaseWebhookHandler):
     name = "raise_error_handler"
 
-    def handle(self, webhook_data: AsanaWebhookRequestData) -> WebhookHandlerResult:
+    def handle(self, webhook_data: AsanaWebhookRequestData) -> WebhookActionResult:
         _ = webhook_data
         msg = "boom"
         raise TypeError(msg)
@@ -57,14 +57,14 @@ TEST_HANDLERS = (SuccessTargetHandler, SuccessNotTargetHandler, ErrorHandler, Ra
 
 @pytest.fixture(autouse=True)
 def test_handler_register(monkeypatch: pytest.MonkeyPatch) -> None:
-    WEBHOOK_HANDLER_REGISTRY.clear()
+    WEBHOOK_ACTION_REGISTRY.clear()
     for handler_class in TEST_HANDLERS:
-        info = WebhookHandlerInfo(
+        info = WebhookActionInfo(
             name=handler_class.name,
             description="",
             webhook_handler_class=handler_class,
         )
-        monkeypatch.setitem(WEBHOOK_HANDLER_REGISTRY, handler_class.name, info)
+        monkeypatch.setitem(WEBHOOK_ACTION_REGISTRY, handler_class.name, info)
 
 
 @pytest.mark.django_db

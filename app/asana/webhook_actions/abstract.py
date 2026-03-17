@@ -5,13 +5,13 @@ from asana.models import AsanaWebhookRequestData
 
 
 @dataclass(frozen=True)
-class WebhookHandlerResult:
+class WebhookActionResult:
     is_target_event: bool
     is_success: bool
     error: str | None = None
 
 
-class BaseWebhookHandler(ABC):
+class BaseWebhookAction(ABC):
     @abstractmethod
-    def handle(self, webhook_data: AsanaWebhookRequestData) -> WebhookHandlerResult:
+    def handle(self, webhook_data: AsanaWebhookRequestData) -> WebhookActionResult:
         pass

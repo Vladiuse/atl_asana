@@ -4,15 +4,15 @@ from typing import TypeAlias
 from common.exception import AppExceptionError
 
 from asana.models import AsanaWebhookRequestData, ProcessingStatus
-from asana.webhook_actions.abstract import WebhookHandlerResult
-from asana.webhook_actions.registry import WEBHOOK_HANDLER_REGISTRY, WebhookHandlerInfo
+from asana.webhook_actions.abstract import WebhookActionResult
+from asana.webhook_actions.registry import WEBHOOK_ACTION_REGISTRY, WebhookActionInfo
 
 HandlerName: TypeAlias = str
 
 
 @dataclass
 class WebhookDispatcherResult:
-    handler_results: dict[HandlerName, WebhookHandlerResult] = field(default_factory=dict)
+    handler_results: dict[HandlerName, WebhookActionResult] = field(default_factory=dict)
     errors: dict[HandlerName, str] = field(default_factory=dict)
 
 
@@ -26,13 +26,13 @@ class WebhookDispatcher:
             webhook_data.save(update_fields=["status"])
             return result
         for handler in handlers:
-            handler_info: WebhookHandlerInfo | None = WEBHOOK_HANDLER_REGISTRY.get(handler.name)
+            handler_info: WebhookActionInfo | None = WEBHOOK_ACTION_REGISTRY.get(handler.name)
             try:
                 if not handler_info:
                     msg = f"Cant find webhook handler with name '{handler.name}'"
                     raise AppExceptionError(msg)
                 handler_class = handler_info.webhook_handler_class
-                handler_result: WebhookHandlerResult = handler_class().handle(webhook_data=webhook_data)
+                handler_result: WebhookActionResult = handler_class().handle(webhook_data=webhook_data)
                 result.handler_results[handler.name] = handler_result
             # need for isolate handlers if it raises error
             except Exception as exc:  # noqa: BLE001
@@ -50,4 +50,4 @@ class WebhookDispatcher:
 
     # for tests only
     def get_registry_dict(self) -> dict:  # type: ignore[type-arg]
-        return WEBHOOK_HANDLER_REGISTRY
+        return WEBHOOK_ACTION_REGISTRY

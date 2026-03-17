@@ -4,19 +4,19 @@ from creative_quality.models import CreativeProjectSection, Task
 
 from asana.models import AsanaWebhookRequestData
 
-from .abstract import BaseWebhookHandler, WebhookHandlerResult
-from .registry import register_webhook_handler
+from .abstract import BaseWebhookAction, WebhookActionResult
+from .registry import register_webhook_action
 
 
-@register_webhook_handler(
+@register_webhook_action(
     name="AddCreativeTaskForEstimation",
     description="Карточка с креативом добавлен в колонку для оценки креатива",
 )
-class CreativeTaskForEstimation(BaseWebhookHandler):
+class CreativeTaskForEstimation(BaseWebhookAction):
     def get_target_sections_ids(self) -> set[str]:
         return set(CreativeProjectSection.objects.values_list("section_id", flat=True))
 
-    def handle(self, webhook_data: AsanaWebhookRequestData) -> WebhookHandlerResult:
+    def handle(self, webhook_data: AsanaWebhookRequestData) -> WebhookActionResult:
         target_sections_ids = self.get_target_sections_ids()
         event_data = webhook_data.payload
         is_created = False
@@ -31,7 +31,7 @@ class CreativeTaskForEstimation(BaseWebhookHandler):
                     )
                     if created:
                         is_created = True
-        return WebhookHandlerResult(is_success=True, is_target_event=is_created)
+        return WebhookActionResult(is_success=True, is_target_event=is_created)
 
     def _is_target_event(self, event_data: dict[str, Any]) -> bool:
         # is task moved to section
