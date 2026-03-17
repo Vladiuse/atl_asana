@@ -8,9 +8,10 @@ from creative_quality.constance_settings import CONSTANCE_CONFIG_FIELDSETS as CR
 from dotenv import load_dotenv
 from leave_events.constance_settings import CONSTANCE_CONFIG as EMPLOYEE_LEAVE_CONFIG
 from leave_events.constance_settings import CONSTANCE_CONFIG_FIELDSETS as EMPLOYEE_LEAVE_FIELDSETS
+from message_sender.client import Handlers
 from valentine_day.constance_settings import CONSTANCE_CONFIG as VALENTINE_CONFIG
 from valentine_day.constance_settings import CONSTANCE_CONFIG_FIELDSETS as VALENTINE_FIELDSETS
-from message_sender.client import Handlers
+
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
