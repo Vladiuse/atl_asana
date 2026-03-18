@@ -4,7 +4,7 @@ from typing import TYPE_CHECKING, Any
 
 from asana.client import AsanaApiClient
 from asana.client.exception import AsanaApiClientError, AsanaForbiddenError, AsanaNotFoundError
-from asana.constants import AsanaResourceType
+from asana.constants import AsanaResourceType, AtlasProject
 from asana.models import AsanaWebhookRequestData
 from asana.webhook_actions.abstract import WebhookActionResult
 from common.message_renderer import render_message
@@ -30,6 +30,7 @@ class OffboardingTaskCreateService:
             if (
                 event["resource"]["resource_type"] == AsanaResourceType.TASK
                 and event["parent"]["resource_type"] == AsanaResourceType.PROJECT
+                and event["parent"]["gid"] == AtlasProject.OFFBOARDING
             ):
                 task_id = event["resource"]["gid"]
                 need_notify_at = timezone.now() + timedelta(minutes=config.DELAY_FOR_FEED_CARD)
