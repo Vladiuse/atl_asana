@@ -11,7 +11,6 @@ from common.message_renderer import render_message
 from constance import config
 from django.utils import timezone
 from message_sender.client import AtlasMessageSender, Handlers
-from message_sender.client.exceptions import AtlasMessageSenderError
 from message_sender.tasks import send_log_message_task
 
 from .exceptions import OffboardingAppError
@@ -45,11 +44,11 @@ class OffboardingTaskCreateService:
 
 class NotifyOffboardingTaskService:
     MESSAGE_TEMPLATE = """
-    Offboarding
+    Offboarding:<br>
 
     {{data.fio}}
     {{data.tag}}
-    {{data.position}}
+    {{data.position}}<br>
 
     Asana: {{data.url}}
 """
@@ -90,7 +89,8 @@ class NotifyOffboardingTaskService:
             task.save()
             msg = f"⚠️ Cant process offboarding asana task, id - {task.asana_task_id}\n{error}"
             send_log_message_task.delay(message=msg)  # type: ignore[attr-defined]
-        except (AsanaApiClientError, AtlasMessageSenderError):
+        except AsanaApiClientError:
+            logger.exception("Cant process offboarding asana task, id - %s", task.asana_task_id)
             task.status = OffboardingTask.Status.ERROR
             task.save()
             raise  # need for retry in action
@@ -137,9 +137,7 @@ class OffboardingFinanceNotifierService:
 
     def is_target_subtask_completed(self, subtasks: list[dict[str, Any]], target_names: set[str]) -> bool:
         """Check list of subtask and return True if all target subtasks are completed."""
-        completed_task_names = {
-            task_item["name"] for task_item in subtasks if task_item["completed"]
-        }
+        completed_task_names = {task_item["name"] for task_item in subtasks if task_item["completed"]}
         return completed_task_names == target_names
 
     def handle_webhook(self, webhook_data: AsanaWebhookRequestData) -> WebhookActionResult:
