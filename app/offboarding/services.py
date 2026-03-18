@@ -1,13 +1,11 @@
 import logging
-from dataclasses import dataclass
 from datetime import timedelta
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
 from asana.client import AsanaApiClient
 from asana.client.exception import AsanaForbiddenError, AsanaNotFoundError
 from asana.constants import AsanaResourceType
 from asana.models import AsanaWebhookRequestData
-from asana.utils import get_field_value_from_task
 from asana.webhook_actions.abstract import WebhookActionResult
 from common.message_renderer import render_message
 from constance import config
@@ -16,9 +14,13 @@ from message_sender.client import AtlasMessageSender, Handlers
 from message_sender.tasks import send_log_message_task
 
 from .exceptions import OffboardingAppError
+from .extractors import extract_offboarding_task_data
 from .models import OffboardingTask
 
 logger = logging.getLogger(__name__)
+
+if TYPE_CHECKING:
+    from .dto import TaskData
 
 
 class OffboardingTaskCreateService:
@@ -51,29 +53,9 @@ class NotifyOffboardingTaskService:
     Asana: {{data.url}}
 """
 
-    @dataclass
-    class TaskData:
-        fio: str
-        position: str
-        tag: str
-        url: str
-
     def __init__(self, message_sender: AtlasMessageSender, asana_client: AsanaApiClient):
         self.message_sender = message_sender
         self.asana_client = asana_client
-
-    def _get_task_data(self, asana_task_id: str) -> TaskData:
-        task_data: dict[str, Any] = self.asana_client.get_task(task_id=asana_task_id)
-        fio = get_field_value_from_task(field_name="ФИО", task_data=task_data)
-        tag = get_field_value_from_task(field_name="ТЭГ", task_data=task_data)
-        position = get_field_value_from_task(field_name="Должность", task_data=task_data)
-        url = task_data["permalink_url"]
-        if not all([fio, tag, position]):
-            raise OffboardingAppError("Not all required fields are filled")
-        assert fio is not None  #  noqa: S101
-        assert tag is not None  #  noqa: S101
-        assert position is not None  #  noqa: S101
-        return self.TaskData(fio=fio, position=position, tag=tag, url=url)
 
     def notify(self, task: OffboardingTask) -> None:
         """Notify about creation new offboarding task.
@@ -84,9 +66,10 @@ class NotifyOffboardingTaskService:
 
         """
         try:
-            task_data = self._get_task_data(asana_task_id=task.asana_task_id)
+            task_data: dict[str, Any] = self.asana_client.get_task(task_id=task.asana_task_id)
+            task_dto: TaskData = extract_offboarding_task_data(task_data)
             context = {
-                "data": task_data,
+                "data": task_dto,
             }
             message = render_message(
                 template=self.MESSAGE_TEMPLATE,
@@ -157,8 +140,7 @@ class OffboardingFinanceNotifier:
             return WebhookActionResult(is_success=True, is_target_event=False)
         assert complete_task_id is not None  # noqa: S101
         task_data = self.asana_client.get_task(task_id=complete_task_id)
-        is_sub_task = self._is_task_sub_task(task_data=task_data)
-        if is_sub_task is False:
+        if self._is_task_sub_task(task_data=task_data) is False:
             return WebhookActionResult(is_success=True, is_target_event=False)
         subtasks = self.asana_client.get_sub_tasks(task_id=task_data["gid"], opt_fields=["name", "completed"])
         is_target_subtasks_completed = self.is_target_subtask_completed(
@@ -167,5 +149,17 @@ class OffboardingFinanceNotifier:
         )
         if is_target_subtasks_completed is False:
             return WebhookActionResult(is_success=True, is_target_event=False)
-        # context = 
-        return WebhookActionResult
+        task_dto: TaskData = extract_offboarding_task_data(task_data)
+        context = {
+            "data": task_dto,
+            "tg_login_name_remind": config.PAYROLL_RESPONSIBLE_TELEGRAM_LOGIN,
+        }
+        message = render_message(
+            template=self.MESSAGE_TEMPLATE,
+            context=context,
+        )
+        self.message_sender.send_message(message=message, handler=Handlers.KVA_USER)
+        return WebhookActionResult(
+            is_target_event=True,
+            is_success=True,
+        )
