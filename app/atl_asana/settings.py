@@ -264,3 +264,41 @@ CONSTANCE_CONFIG_FIELDSETS = {
     **VALENTINE_FIELDSETS,
     **OFFBOARDING_CONSTANCE_CONFIG_FIELDSETS,
 }
+
+
+Path.mkdir(BASE_DIR / "logs", exist_ok=True)
+
+LOGGING = {
+    "version": 1,
+    "disable_existing_loggers": False,
+    "formatters": {
+        "default": {
+            "format": "{asctime} | {levelname:<8} | {name} | {message}",
+            "style": "{",
+        },
+    },
+    "handlers": {
+        "console": {
+            "class": "logging.StreamHandler",
+            "level": "INFO",
+            "formatter": "default",
+        },
+        "file.offboarding": {
+            "class": "logging.FileHandler",
+            "filename": BASE_DIR / "logs" / "offboarding.log",
+            "level": "DEBUG",
+            "formatter": "default",
+        },
+    },
+    "loggers": {
+        "root": {
+            "handlers": ["console"],
+            "level": "INFO",
+        },
+        "offboarding": {
+            "handlers": ["console", "file.offboarding"],
+            "propagate": False,
+            "level": "DEBUG",
+        },
+    },
+}
