@@ -37,7 +37,7 @@ class OffboardingTaskCreateService:
                 target_event_found = True
 
         return WebhookActionResult(
-            is_success=target_event_found,
+            is_success=True,
             is_target_event=target_event_found,
         )
 

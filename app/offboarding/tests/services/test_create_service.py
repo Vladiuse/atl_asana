@@ -17,7 +17,7 @@ NOT_TARGET_RESOURCE = {
             "resource": {"gid": "1213717492740875", "resource_type": "XXX", "resource_subtype": "default_task"},
             "created_at": "2026-03-17T10:11:18.514Z",
         },
-    ]
+    ],
 }
 
 @pytest.mark.django_db
@@ -34,7 +34,11 @@ class TestCreateService:
         service = OffboardingTaskCreateService()
         mock_webhook = Mock(spec=AsanaWebhookRequestData)
         mock_webhook.payload = event_data
-        service.create_from_webhook(webhook_data=mock_webhook)
+        result = service.create_from_webhook(webhook_data=mock_webhook)
         assert OffboardingTask.objects.exists() == is_must_create
+        assert result.is_success is True
         if is_must_create:
-            OffboardingTask.objects.filter(asana_task_id=RESOURCE_ID).exists()
+            assert OffboardingTask.objects.filter(asana_task_id=RESOURCE_ID).exists() is True
+            assert result.is_target_event is True
+        else:
+            assert result.is_target_event is False
