@@ -90,7 +90,7 @@ class NotifyOffboardingTaskService:
             send_log_message_task.delay(message=msg)  # type: ignore[attr-defined]
 
 
-class OffboardingFinanceNotifier:
+class OffboardingFinanceNotifierService:
     """Handles notifications about employee's financial settlement on offboarding."""
 
     MESSAGE_TEMPLATE = """
