@@ -1,5 +1,5 @@
 from common.exception import AppExceptionError
 
 
-class OffboardingError(AppExceptionError):
+class OffboardingAppError(AppExceptionError):
     """Common exception for offboarding app."""
