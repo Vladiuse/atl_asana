@@ -138,6 +138,8 @@ class OffboardingFinanceNotifierService:
     def is_target_subtask_completed(self, subtasks: list[dict[str, Any]], target_names: set[str]) -> bool:
         """Check list of subtask and return True if all target subtasks are completed."""
         completed_task_names = {task_item["name"] for task_item in subtasks if task_item["completed"] is False}
+        logger.debug("Target subtasks names: %s", target_names)
+        logger.debug("Not completed subtasks: %s", completed_task_names)
         return completed_task_names == target_names
 
     def handle_webhook(self, webhook_data: AsanaWebhookRequestData) -> WebhookActionResult:
@@ -150,6 +152,7 @@ class OffboardingFinanceNotifierService:
 
         """
         logger.debug("webhook_data: %", str(webhook_data))
+        logger.debug("webhook_data events: %", webhook_data.payload)
         complete_task_id = self._get_completed_subtask_id(webhook_data=webhook_data)
         if complete_task_id is None:
             return WebhookActionResult(is_success=True, is_target_event=False)
