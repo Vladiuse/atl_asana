@@ -113,8 +113,8 @@ class OffboardingFinanceNotifier:
         names = config.TARGET_SUB_TASKS_NAMES.split(",")
         return {s.strip() for s in names}
 
-    def _is_completed_task_sub_task(self, webhook_data: AsanaWebhookRequestData) -> None | str:
-        """Return task id if completed task in events is subtask."""
+    def _get_completed_subtask_id(self, webhook_data: AsanaWebhookRequestData) -> None | str:
+        """Return task id if completed task in events is subtask or return None."""
         for event in webhook_data.payload["events"]:
             if (
                 event["resource"]["resource_type"] == AsanaResourceType.TASK
@@ -125,20 +125,29 @@ class OffboardingFinanceNotifier:
         return None
 
     def _is_task_sub_task(self, task_data: dict[str, Any]) -> bool:
-        """Determine whether the task is subtask."""
+        """Determine whether the task is a subtask."""
         parent = task_data["parent"]
         return parent is not None and parent["resource_type"] == AsanaResourceType.TASK
 
     def is_target_subtask_completed(self, subtasks: list[dict[str, Any]], target_names: set[str]) -> bool:
-        """Check list of subtask and return True if complete all subtasks against target."""
-        completed_task_names = [task_item["name"] for task_item in subtasks if task_item["completed"] if True]
-        return set(completed_task_names) == target_names
+        """Check list of subtask and return True if all target subtasks are completed."""
+        completed_task_names = {
+            task_item["name"] for task_item in subtasks if task_item["completed"]
+        }
+        return completed_task_names == target_names
 
     def handle_webhook(self, webhook_data: AsanaWebhookRequestData) -> WebhookActionResult:
-        complete_task_id = self._is_completed_task_sub_task(webhook_data=webhook_data)
+        """Check webhook data and send message if it target event.
+
+        Raises:
+            AsanaApiClientError: if cant get data from asana
+            AtlasMessageSenderError: if can't send message
+            OffboardingAppError: if task dont have full data.
+
+        """
+        complete_task_id = self._get_completed_subtask_id(webhook_data=webhook_data)
         if complete_task_id is None:
             return WebhookActionResult(is_success=True, is_target_event=False)
-        assert complete_task_id is not None  # noqa: S101
         task_data = self.asana_client.get_task(task_id=complete_task_id)
         if self._is_task_sub_task(task_data=task_data) is False:
             return WebhookActionResult(is_success=True, is_target_event=False)
