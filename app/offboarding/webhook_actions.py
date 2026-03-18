@@ -37,28 +37,3 @@ class NotifyTaskCreateAction(BaseWebhookAction):
     def handle(self, webhook_data: AsanaWebhookRequestData) -> WebhookActionResult:
         service = OffboardingTaskCreateService()
         return self._execute_service(service=service, webhook_data=webhook_data)
-
-
-@register_webhook_action(
-    name="NotifyOffboardingFinance",
-    description="Offboarding project: Оповещает что нужно рассчитать сотрудника",
-)
-class NotifyOffboardingFinanceAction(BaseWebhookAction):
-    @retry(
-        exceptions=(AsanaApiClientError, AtlasMessageSenderError),
-        tries=3,
-        delay=60,
-    )
-    def _execute_service(
-        self,
-        service: OffboardingFinanceNotifierService,
-        webhook_data: AsanaWebhookRequestData,
-    ) -> WebhookActionResult:
-        return service.handle_webhook(webhook_data)
-
-    def handle(self, webhook_data: AsanaWebhookRequestData) -> WebhookActionResult:
-        service = OffboardingFinanceNotifierService(
-            message_sender=message_sender,
-            asana_client=asana_api_client,
-        )
-        return self._execute_service(service=service, webhook_data=webhook_data)
