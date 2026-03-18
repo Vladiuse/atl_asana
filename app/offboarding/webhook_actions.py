@@ -22,8 +22,21 @@ message_sender = AtlasMessageSender(
     description="Offboarding project: Оповещение о новой карточки в проекте в чат HR",
 )
 class NotifyTaskCreateAction(BaseWebhookAction):
+    @retry(
+        exceptions=(AsanaApiClientError, AtlasMessageSenderError),
+        tries=3,
+        delay=60,
+    )
+    def _execute_service(
+        self,
+        service: OffboardingTaskCreateService,
+        webhook_data: AsanaWebhookRequestData,
+    ) -> WebhookActionResult:
+        return service.create_from_webhook(webhook_data)
+
     def handle(self, webhook_data: AsanaWebhookRequestData) -> WebhookActionResult:
-        return OffboardingTaskCreateService().create_from_webhook(webhook_data=webhook_data)
+        service = OffboardingTaskCreateService()
+        return self._execute_service(service=service, webhook_data=webhook_data)
 
 
 @register_webhook_action(
