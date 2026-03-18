@@ -142,10 +142,13 @@ class AsanaApiClient:
         return self.update_task(task_id=task_id, data={"completed": True}, opt_fields=["completed", "name"])
 
     @asana_error_handler
-    def get_sub_tasks(self, task_id: str) -> list[dict[str, Any]]:
+    def get_sub_tasks(self, task_id: str, opt_fields: list[str] | None = None) -> list[dict[str, Any]]:
+        if opt_fields is None:
+            opt_fields = []
         response = requests.get(
             f"{self.API_ENDPOINT}tasks/{task_id}/subtasks",
             headers=self._auth_headers,
+            params={"opt_fields": opt_fields},
             timeout=self.timeout,
         )
         response.raise_for_status()
