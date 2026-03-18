@@ -105,3 +105,67 @@ class NotifyOffboardingTaskService:
             task.save()
             msg = f"⚠️ Cant process offboarding asana task, id - {task.asana_task_id}\n{error}"
             send_log_message_task.delay(message=msg)  # type: ignore[attr-defined]
+
+
+class OffboardingFinanceNotifier:
+    """Handles notifications about employee's financial settlement on offboarding."""
+
+    MESSAGE_TEMPLATE = """
+    {{tg_login_name_remind}}
+    Offboarding
+
+    {{data.fio}}
+    {{data.tag}}
+    {{data.position}}
+
+    Сделать расчет по зп
+    Asana: {{data.url}}
+"""
+
+    def __init__(self, message_sender: AtlasMessageSender, asana_client: AsanaApiClient):
+        self.message_sender = message_sender
+        self.asana_client = asana_client
+
+    def _get_target_subtasks_names(self) -> set[str]:
+        names = config.TARGET_SUB_TASKS_NAMES.split(",")
+        return {s.strip() for s in names}
+
+    def _is_completed_task_sub_task(self, webhook_data: AsanaWebhookRequestData) -> None | str:
+        """Return task id if completed task in events is subtask."""
+        for event in webhook_data.payload["events"]:
+            if (
+                event["resource"]["resource_type"] == AsanaResourceType.TASK
+                and event["parent"]["resource_type"] == AsanaResourceType.SECTION
+                and event["parent"]["gid"] == config.OFFBOARDING_COMPLETE_SECTION_ID
+            ):
+                return event["resource"]["gid"]
+        return None
+
+    def _is_task_sub_task(self, task_data: dict[str, Any]) -> bool:
+        """Determine whether the task is subtask."""
+        parent = task_data["parent"]
+        return parent is not None and parent["resource_type"] == AsanaResourceType.TASK
+
+    def is_target_subtask_completed(self, subtasks: list[dict[str, Any]], target_names: set[str]) -> bool:
+        """Check list of subtask and return True if complete all subtasks against target."""
+        completed_task_names = [task_item["name"] for task_item in subtasks if task_item["completed"] if True]
+        return set(completed_task_names) == target_names
+
+    def handle_webhook(self, webhook_data: AsanaWebhookRequestData) -> WebhookActionResult:
+        complete_task_id = self._is_completed_task_sub_task(webhook_data=webhook_data)
+        if complete_task_id is None:
+            return WebhookActionResult(is_success=True, is_target_event=False)
+        assert complete_task_id is not None  # noqa: S101
+        task_data = self.asana_client.get_task(task_id=complete_task_id)
+        is_sub_task = self._is_task_sub_task(task_data=task_data)
+        if is_sub_task is False:
+            return WebhookActionResult(is_success=True, is_target_event=False)
+        subtasks = self.asana_client.get_sub_tasks(task_id=task_data["gid"], opt_fields=["name", "completed"])
+        is_target_subtasks_completed = self.is_target_subtask_completed(
+            subtasks=subtasks,
+            target_names=self._get_target_subtasks_names(),
+        )
+        if is_target_subtasks_completed is False:
+            return WebhookActionResult(is_success=True, is_target_event=False)
+        # context = 
+        return WebhookActionResult
