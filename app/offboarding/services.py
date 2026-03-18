@@ -3,7 +3,7 @@ from datetime import timedelta
 from typing import TYPE_CHECKING, Any
 
 from asana.client import AsanaApiClient
-from asana.client.exception import AsanaForbiddenError, AsanaNotFoundError
+from asana.client.exception import AsanaApiClientError, AsanaForbiddenError, AsanaNotFoundError
 from asana.constants import AsanaResourceType
 from asana.models import AsanaWebhookRequestData
 from asana.webhook_actions.abstract import WebhookActionResult
@@ -11,6 +11,7 @@ from common.message_renderer import render_message
 from constance import config
 from django.utils import timezone
 from message_sender.client import AtlasMessageSender, Handlers
+from message_sender.client.exceptions import AtlasMessageSenderError
 from message_sender.tasks import send_log_message_task
 
 from .exceptions import OffboardingAppError
@@ -68,6 +69,7 @@ class NotifyOffboardingTaskService:
         try:
             task_data: dict[str, Any] = self.asana_client.get_task(task_id=task.asana_task_id)
             task_dto: TaskData = extract_offboarding_task_data(task_data)
+            logger.debug("Task id: %s, %s", task.asana_task_id, task_dto)
             context = {
                 "data": task_dto,
             }
@@ -88,6 +90,10 @@ class NotifyOffboardingTaskService:
             task.save()
             msg = f"⚠️ Cant process offboarding asana task, id - {task.asana_task_id}\n{error}"
             send_log_message_task.delay(message=msg)  # type: ignore[attr-defined]
+        except (AsanaApiClientError, AtlasMessageSenderError):
+            task.status = OffboardingTask.Status.ERROR
+            task.save()
+            raise  # need for retry in action
 
 
 class OffboardingFinanceNotifierService:
