@@ -137,7 +137,7 @@ class OffboardingFinanceNotifierService:
 
     def is_target_subtask_completed(self, subtasks: list[dict[str, Any]], target_names: set[str]) -> bool:
         """Check list of subtask and return True if all target subtasks are completed."""
-        completed_task_names = {task_item["name"] for task_item in subtasks if task_item["completed"]}
+        completed_task_names = {task_item["name"] for task_item in subtasks if task_item["completed"] is False}
         return completed_task_names == target_names
 
     def handle_webhook(self, webhook_data: AsanaWebhookRequestData) -> WebhookActionResult:
@@ -149,6 +149,7 @@ class OffboardingFinanceNotifierService:
             OffboardingAppError: if task dont have full data.
 
         """
+        logger.debug("webhook_data: %", str(webhook_data))
         complete_task_id = self._get_completed_subtask_id(webhook_data=webhook_data)
         if complete_task_id is None:
             return WebhookActionResult(is_success=True, is_target_event=False)
@@ -156,6 +157,7 @@ class OffboardingFinanceNotifierService:
         if self._is_task_sub_task(task_data=task_data) is False:
             return WebhookActionResult(is_success=True, is_target_event=False)
         subtasks = self.asana_client.get_sub_tasks(task_id=task_data["gid"], opt_fields=["name", "completed"])
+        logger.debug("Subtasks: %s", subtasks)
         is_target_subtasks_completed = self.is_target_subtask_completed(
             subtasks=subtasks,
             target_names=self._get_target_subtasks_names(),
@@ -163,6 +165,7 @@ class OffboardingFinanceNotifierService:
         if is_target_subtasks_completed is False:
             return WebhookActionResult(is_success=True, is_target_event=False)
         task_dto: TaskData = extract_offboarding_task_data(task_data)
+        logger.debug("TaskData: %s", task_dto)
         context = {
             "data": task_dto,
             "tg_login_name_remind": config.PAYROLL_RESPONSIBLE_TELEGRAM_LOGIN,
