@@ -30,7 +30,7 @@ class OffboardingTaskCreateService:
             if (
                 event["resource"]["resource_type"] == AsanaResourceType.TASK
                 and event["parent"]["resource_type"] == AsanaResourceType.PROJECT
-                and event["parent"]["gid"] == AtlasProject.OFFBOARDING
+                and event["parent"]["gid"] == AtlasProject.OFFBOARDING.value
             ):
                 task_id = event["resource"]["gid"]
                 need_notify_at = timezone.now() + timedelta(minutes=config.DELAY_FOR_FEED_CARD)
