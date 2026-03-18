@@ -9,6 +9,8 @@ from dotenv import load_dotenv
 from leave_events.constance_settings import CONSTANCE_CONFIG as EMPLOYEE_LEAVE_CONFIG
 from leave_events.constance_settings import CONSTANCE_CONFIG_FIELDSETS as EMPLOYEE_LEAVE_FIELDSETS
 from message_sender.client import Handlers
+from offboarding.constance_settings import CONSTANCE_CONFIG as OFFBOARDING_CONFIG
+from offboarding.constance_settings import CONSTANCE_CONFIG_FIELDSETS as OFFBOARDING_CONSTANCE_CONFIG_FIELDSETS
 from valentine_day.constance_settings import CONSTANCE_CONFIG as VALENTINE_CONFIG
 from valentine_day.constance_settings import CONSTANCE_CONFIG_FIELDSETS as VALENTINE_FIELDSETS
 
@@ -246,6 +248,7 @@ CONSTANCE_CONFIG = {
     **CREATIVE_ESTIMATE_CONSTANCE_CONFIG,
     **EMPLOYEE_LEAVE_CONFIG,
     **VALENTINE_CONFIG,
+    **OFFBOARDING_CONFIG,
 }
 
 
@@ -259,4 +262,5 @@ CONSTANCE_CONFIG_FIELDSETS = {
     **CREATIVE_ESTIMATE_FIELDSETS,
     **EMPLOYEE_LEAVE_FIELDSETS,
     **VALENTINE_FIELDSETS,
+    **OFFBOARDING_CONSTANCE_CONFIG_FIELDSETS,
 }
