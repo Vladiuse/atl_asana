@@ -13,12 +13,18 @@ CONSTANCE_CONFIG = {
         "Сделать расчет по зп,Провести Exit интервью",
         "Название сабтасок которые должны остаться, когда все остальные завершены для отправки оповещения",
         str,
-    )
+    ),
+    "PAYROLL_RESPONSIBLE_TELEGRAM_LOGIN": (
+        "@xxx",
+        "Телеграм логин ответственного за расчет сотрудника при оффбординге",
+        str,
+    ),
 }
 
 CONSTANCE_CONFIG_FIELDSETS = {
     "OFFBOARDING": (
         "DELAY_FOR_FEED_CARD",
         "OFFBOARDING_COMPLETE_SECTION_ID",
+        "PAYROLL_RESPONSIBLE_TELEGRAM_LOGIN",
     ),
 }
