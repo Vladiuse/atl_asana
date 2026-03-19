@@ -11,7 +11,6 @@ from common.message_renderer import render_message
 from constance import config
 from django.utils import timezone
 from message_sender.client import AtlasMessageSender, Handlers
-from message_sender.tasks import send_log_message_task
 
 from .exceptions import OffboardingAppError
 from .extractors import extract_offboarding_task_data
@@ -65,7 +64,7 @@ class OffboardingTaskCompleteService:
         )
 
 
-class NotifyOffboardingTaskService:
+class NotifyOffboardingCreateTaskService:
     MESSAGE_TEMPLATE = """
     Offboarding:<br>
 
@@ -86,7 +85,7 @@ class NotifyOffboardingTaskService:
         Raises:
             AsanaApiClientError: if cant get data from asana
             AtlasMessageSenderError: if can't send message
-
+            OffboardingAppError: if task fields not filled
         """
         try:
             task_data: dict[str, Any] = self.asana_client.get_task(task_id=task.asana_task_id)
@@ -110,13 +109,7 @@ class NotifyOffboardingTaskService:
             logger.exception("Cant process offboarding asana task, id - %s", task.asana_task_id)
             task.status = OffboardingTask.Status.ERROR
             task.save()
-            msg = f"⚠️ Cant process offboarding asana task, id - {task.asana_task_id}\n{error}"
-            send_log_message_task.delay(message=msg)  # type: ignore[attr-defined]
-        except AsanaApiClientError:
-            logger.exception("Cant process offboarding asana task, id - %s", task.asana_task_id)
-            task.status = OffboardingTask.Status.ERROR
-            task.save()
-            raise  # need for retry in action
+            raise error
 
 
 class OffboardingFinanceNotifierService:
@@ -142,7 +135,7 @@ class OffboardingFinanceNotifierService:
         names = config.TARGET_SUB_TASKS_NAMES.split(",")
         return {s.strip() for s in names}
 
-    def is_target_subtask_completed(self, subtasks: list[dict[str, Any]], target_names: set[str]) -> bool:
+    def _is_target_subtask_completed(self, subtasks: list[dict[str, Any]], target_names: set[str]) -> bool:
         """Check list of subtask and return True if all target subtasks are completed."""
         completed_task_names = {task_item["name"] for task_item in subtasks if task_item["completed"] is False}
         logger.debug("Target subtasks names: %s", target_names)
@@ -169,14 +162,16 @@ class OffboardingFinanceNotifierService:
             logger.warning("Task deleted, task_id: %s, %s", task.asana_task_id, str(error))
             return
         logger.debug("Task %s Subtasks: %s", task.asana_task_id, subtasks)
-        is_target_subtasks_completed = self.is_target_subtask_completed(
+        is_target_subtasks_completed = self._is_target_subtask_completed(
             subtasks=subtasks,
             target_names=self._get_target_subtasks_names(),
         )
         if is_target_subtasks_completed is False:
             return
         task_data = self.asana_client.get_task(task_id=task.asana_task_id)
-        task_dto: TaskData = extract_offboarding_task_data(task_data)
+        try:
+            task_dto: TaskData = extract_offboarding_task_data(task_data)
+        except 
         logger.debug("TaskData: %s", task_dto)
         context = {
             "data": task_dto,
