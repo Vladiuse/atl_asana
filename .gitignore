@@ -183,3 +183,4 @@ app/static/
 /app/media/
 service_account.json
 **/scripts/**/x.py
+**/scripts/**/x_*.py
