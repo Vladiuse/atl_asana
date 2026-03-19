@@ -24,6 +24,10 @@ if TYPE_CHECKING:
 
 
 class OffboardingTaskCreateService:
+    def create_task(self, task_id: str) -> OffboardingTask:
+        need_notify_at = timezone.now() + timedelta(minutes=config.DELAY_FOR_FEED_CARD)
+        return OffboardingTask.objects.create(asana_task_id=task_id, notified_created_at=need_notify_at)
+
     def create_from_webhook(self, webhook_data: AsanaWebhookRequestData) -> WebhookActionResult:
         target_event_found = False
         for event in webhook_data.payload["events"]:
@@ -33,8 +37,7 @@ class OffboardingTaskCreateService:
                 and event["parent"]["gid"] == AtlasProject.OFFBOARDING.value
             ):
                 task_id = event["resource"]["gid"]
-                need_notify_at = timezone.now() + timedelta(minutes=config.DELAY_FOR_FEED_CARD)
-                OffboardingTask.objects.create(asana_task_id=task_id, notified_created_at=need_notify_at)
+                self.create_task(task_id=task_id)
                 target_event_found = True
 
         return WebhookActionResult(
