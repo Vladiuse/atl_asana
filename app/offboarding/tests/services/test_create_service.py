@@ -6,26 +6,33 @@ from asana.models import AsanaWebhookRequestData
 
 from offboarding.models import OffboardingTask
 from offboarding.services import OffboardingTaskCreateService
-from offboarding.tests.fixtures_data import CREATE_SUB_TASK_EVENT, CREATE_TASK_EVENT, RESOURCE_ID
+from offboarding.tests.fixtures_data import (
+    CREATE_SUB_TASK_EVENT,
+    CREATE_TASK_EVENT,
+    CREATE_TASK_EVENT_CORRECT_PROJECT,
+    RESOURCE_ID,
+)
 
 NOT_TARGET_RESOURCE = {
     "events": [
         {
             "user": {"gid": "1213537811762722", "resource_type": "user"},
             "action": "XXX",
-            "parent": {"gid": "1213717492740873", "resource_type": "task", "resource_subtype": "default_task"},
+            "parent": {"gid": "123123123", "resource_type": "task", "resource_subtype": "default_task"},
             "resource": {"gid": "1213717492740875", "resource_type": "XXX", "resource_subtype": "default_task"},
             "created_at": "2026-03-17T10:11:18.514Z",
         },
     ],
 }
 
+
 @pytest.mark.django_db
 class TestCreateService:
     @pytest.mark.parametrize(
         ("event_data", "is_must_create"),
         [
-            (CREATE_TASK_EVENT, True),
+            (CREATE_TASK_EVENT_CORRECT_PROJECT, True),
+            (CREATE_TASK_EVENT, False),
             (CREATE_SUB_TASK_EVENT, False),
             (NOT_TARGET_RESOURCE, False),
         ],
