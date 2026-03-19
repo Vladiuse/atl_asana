@@ -8,7 +8,7 @@ def get_asana_profile_url_by_id(profile_id: str, workspace_id: str) -> str:
     return f"https://app.asana.com/1/{workspace_id}/profile/{profile_id}"
 
 
-def _is_task_sub_task(task_data: dict[str, Any]) -> bool:
+def is_task_sub_task(task_data: dict[str, Any]) -> bool:
     """Determine whether the task is a subtask."""
     parent = task_data["parent"]
     return parent is not None and parent["resource_type"] == AsanaResourceType.TASK
