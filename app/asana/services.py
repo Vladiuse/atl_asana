@@ -2,6 +2,7 @@ import re
 
 from django.db.models import QuerySet
 
+from .constants import Position
 from .models import AtlasAsanaUser
 
 
@@ -14,6 +15,14 @@ def get_user_profile_url_mention_map(asana_users: QuerySet[AtlasAsanaUser] | lis
             },
         )
     return result
+
+
+def map_messenger_position_to_asana(messenger_position: str) -> Position | None:
+    return {
+        "bayer": Position.BUYER,
+        "buyer": Position.BUYER,
+        "farmer": Position.FARMER,
+    }.get(messenger_position.lower())
 
 
 class AsanaCommentPrettifier:
