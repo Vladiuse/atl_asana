@@ -10,7 +10,7 @@ from asana.webhook_actions.abstract import WebhookActionResult
 from common.message_renderer import render_message
 from constance import config
 from django.utils import timezone
-from message_sender.client import AtlasMessageSender, Handlers
+from message_sender.client import AtlasMessageSender
 
 from .exceptions import OffboardingAppError
 from .extractors import extract_offboarding_task_data
@@ -99,7 +99,7 @@ class NotifyOffboardingCreateTaskService:
                 template=self.MESSAGE_TEMPLATE,
                 context=context,
             )
-            self.message_sender.send_message(message=message, handler=Handlers.KVA_USER)
+            self.message_sender.send_message(message=message, handler=config.OFFBOARDING_NOTIFY_HANDLER)
             task.notified_created = True
             task.save()
         except (AsanaNotFoundError, AsanaForbiddenError) as error:
@@ -117,14 +117,14 @@ class OffboardingFinanceNotifierService:
     """Handles notifications about employee's financial settlement on offboarding."""
 
     MESSAGE_TEMPLATE = """
-    {{tg_login_name_remind}}
-    Offboarding
+    {{tg_login_name_remind}}<br>
+    Offboarding<br>
 
     {{data.fio}}
     {{data.tag}}
-    {{data.position}}
+    {{data.position}}<br>
 
-    Сделать расчет по зп
+    Сделать расчет по зп<br>
     Asana: {{data.url}}
 """
 
@@ -154,7 +154,7 @@ class OffboardingFinanceNotifierService:
             OffboardingAppError: if task dont have full data.
 
         """
-        logger.debug("Check subtasks of %s", task.asana_task_id)
+        logger.info("Check subtasks of %s", task.asana_task_id)
         try:
             subtasks = self.asana_client.get_sub_tasks(task_id=task.asana_task_id, opt_fields=["name", "completed"])
         except (AsanaForbiddenError, AsanaNotFoundError) as error:
@@ -168,12 +168,13 @@ class OffboardingFinanceNotifierService:
             target_names=self._get_target_subtasks_names(),
         )
         if is_target_subtasks_completed is False:
+            logger.debug("Exit, no not completed target subtasks")
             return
         task_data = self.asana_client.get_task(task_id=task.asana_task_id)
         try:
             task_dto: TaskData = extract_offboarding_task_data(task_data)
         except OffboardingAppError:
-            logger.exception("Cant process offboarding asana task, id - %s", task.asana_task_id)
+            logger.exception("Cant process offboarding asana task on payroll, id - %s", task.asana_task_id)
             task.status = OffboardingTask.Status.ERROR
             task.save()
             raise
@@ -186,7 +187,7 @@ class OffboardingFinanceNotifierService:
             template=self.MESSAGE_TEMPLATE,
             context=context,
         )
-        self.message_sender.send_message(message=message, handler=Handlers.KVA_USER)
-        logger.debug("Task %s Notified", task.asana_task_id)
+        self.message_sender.send_message(message=message, handler=config.OFFBOARDING_NOTIFY_HANDLER)
+        logger.info("Task %s Notified", task.asana_task_id)
         task.notified_need_payroll = True
         task.save()
