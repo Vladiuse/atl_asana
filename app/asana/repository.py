@@ -2,6 +2,7 @@ import logging
 from typing import Any
 
 from common.exception import AppExceptionError
+from message_sender.models import AtlasUser
 
 from asana.client import AsanaApiClient
 
@@ -18,6 +19,10 @@ class AsanaUserRepository:
         membership_id = membership_data["gid"]
         name = membership_data["user"]["name"]
         email = user_data.get("email") or ""
+        try:
+            owner = AtlasUser.objects.get(email=email)
+        except AtlasUser.DoesNotExist:
+            owner = None
         photo = user_data["photo"].get("image_128x128", "") if user_data["photo"] else ""
         return AtlasAsanaUser.objects.create(
             membership_id=membership_id,
@@ -25,6 +30,7 @@ class AsanaUserRepository:
             user_id=user_id,
             avatar_url=photo,
             email=email,
+            owner=owner,
         )
 
     def _create_by_membership_id(self, membership_id: str) -> AtlasAsanaUser:
