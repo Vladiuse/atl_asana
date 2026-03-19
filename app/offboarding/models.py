@@ -11,12 +11,13 @@ class OffboardingTask(models.Model):
     asana_task_id = models.CharField(
         max_length=30,
     )
-    is_complete = models.BooleanField(
+    notified_created_at = models.DateTimeField()
+    notified_created = models.BooleanField(
         default=False,
     )
-    notified_created_at = models.DateTimeField()
-    notified_created = models.BooleanField(default=False,)
-    notified_need_payroll = models.BooleanField(default=False,)
+    notified_need_payroll = models.BooleanField(
+        default=False,
+    )
     status = models.CharField(
         max_length=20,
         choices=Status.choices,
