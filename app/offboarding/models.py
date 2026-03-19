@@ -11,6 +11,9 @@ class OffboardingTask(models.Model):
     asana_task_id = models.CharField(
         max_length=30,
     )
+    is_complete = models.BooleanField(
+        default=False,
+    )
     notify_at = models.DateTimeField()
     status = models.CharField(
         max_length=20,
