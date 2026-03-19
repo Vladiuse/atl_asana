@@ -8,7 +8,7 @@ from message_sender.client import AtlasMessageSender
 from message_sender.client.exceptions import AtlasMessageSenderError
 from retry import retry
 
-from .services import OffboardingFinanceNotifierService, OffboardingTaskCreateService
+from .services import OffboardingTaskCreateService
 
 asana_api_client = AsanaApiClient(api_key=settings.ASANA_API_KEY)
 message_sender = AtlasMessageSender(
