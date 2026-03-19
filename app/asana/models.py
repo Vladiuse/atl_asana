@@ -26,7 +26,7 @@ class AtlasAsanaUser(models.Model):
     position = models.CharField(
         blank=True,
         max_length=32,
-        choices=Position,
+        choices=Position.choices,
         verbose_name="Позиция",
     )
 
