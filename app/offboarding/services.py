@@ -34,7 +34,7 @@ class OffboardingTaskCreateService:
             ):
                 task_id = event["resource"]["gid"]
                 need_notify_at = timezone.now() + timedelta(minutes=config.DELAY_FOR_FEED_CARD)
-                OffboardingTask.objects.create(asana_task_id=task_id, notify_at=need_notify_at)
+                OffboardingTask.objects.create(asana_task_id=task_id, notified_created_at=need_notify_at)
                 target_event_found = True
 
         return WebhookActionResult(
@@ -78,7 +78,7 @@ class NotifyOffboardingTaskService:
                 context=context,
             )
             self.message_sender.send_message(message=message, handler=Handlers.KVA_USER)
-            task.status = OffboardingTask.Status.NOTIFIED
+            task.notified_created = True
             task.save()
         except (AsanaNotFoundError, AsanaForbiddenError) as error:
             task.status = OffboardingTask.Status.DELETED
@@ -120,22 +120,6 @@ class OffboardingFinanceNotifierService:
         names = config.TARGET_SUB_TASKS_NAMES.split(",")
         return {s.strip() for s in names}
 
-    def _get_completed_subtask_id(self, webhook_data: AsanaWebhookRequestData) -> None | str:
-        """Return task id if completed task in events is subtask or return None."""
-        for event in webhook_data.payload["events"]:
-            if (
-                event["resource"]["resource_type"] == AsanaResourceType.TASK
-                and event["parent"]["resource_type"] == AsanaResourceType.SECTION
-                and event["parent"]["gid"] == config.OFFBOARDING_COMPLETE_SECTION_ID
-            ):
-                return event["resource"]["gid"]
-        return None
-
-    def _is_task_sub_task(self, task_data: dict[str, Any]) -> bool:
-        """Determine whether the task is a subtask."""
-        parent = task_data["parent"]
-        return parent is not None and parent["resource_type"] == AsanaResourceType.TASK
-
     def is_target_subtask_completed(self, subtasks: list[dict[str, Any]], target_names: set[str]) -> bool:
         """Check list of subtask and return True if all target subtasks are completed."""
         completed_task_names = {task_item["name"] for task_item in subtasks if task_item["completed"] is False}
@@ -143,8 +127,10 @@ class OffboardingFinanceNotifierService:
         logger.debug("Not completed subtasks: %s", completed_task_names)
         return completed_task_names == target_names
 
-    def handle_webhook(self, webhook_data: AsanaWebhookRequestData) -> WebhookActionResult:
-        """Check webhook data and send message if it target event.
+    def notify(self, task: OffboardingTask) -> None:
+        """Notify if left few target subtasks.
+
+        All of subtasks must be completed, against few target subtasks.
 
         Raises:
             AsanaApiClientError: if cant get data from asana
@@ -152,22 +138,22 @@ class OffboardingFinanceNotifierService:
             OffboardingAppError: if task dont have full data.
 
         """
-        logger.debug("webhook_data: %", str(webhook_data))
-        logger.debug("webhook_data events: %", webhook_data.payload)
-        complete_task_id = self._get_completed_subtask_id(webhook_data=webhook_data)
-        if complete_task_id is None:
-            return WebhookActionResult(is_success=True, is_target_event=False)
-        task_data = self.asana_client.get_task(task_id=complete_task_id)
-        if self._is_task_sub_task(task_data=task_data) is False:
-            return WebhookActionResult(is_success=True, is_target_event=False)
-        subtasks = self.asana_client.get_sub_tasks(task_id=task_data["gid"], opt_fields=["name", "completed"])
-        logger.debug("Subtasks: %s", subtasks)
+        logger.debug("Check subtasks of %s", task.asana_task_id)
+        try:
+            subtasks = self.asana_client.get_sub_tasks(task_id=task.asana_task_id, opt_fields=["name", "completed"])
+        except (AsanaForbiddenError, AsanaNotFoundError) as error:
+            task.status = OffboardingTask.Status.DELETED
+            task.save()
+            logger.warning("Task deleted, task_id: %s, %s", task.asana_task_id, str(error))
+            return
+        logger.debug("Task %s Subtasks: %s", task.asana_task_id, subtasks)
         is_target_subtasks_completed = self.is_target_subtask_completed(
             subtasks=subtasks,
             target_names=self._get_target_subtasks_names(),
         )
         if is_target_subtasks_completed is False:
-            return WebhookActionResult(is_success=True, is_target_event=False)
+            return
+        task_data = self.asana_client.get_task(task_id=task.asana_task_id)
         task_dto: TaskData = extract_offboarding_task_data(task_data)
         logger.debug("TaskData: %s", task_dto)
         context = {
@@ -179,7 +165,6 @@ class OffboardingFinanceNotifierService:
             context=context,
         )
         self.message_sender.send_message(message=message, handler=Handlers.KVA_USER)
-        return WebhookActionResult(
-            is_target_event=True,
-            is_success=True,
-        )
+        logger.debug("Task %s Notified", task.asana_task_id)
+        task.notified_need_payroll = True
+        task.save()
