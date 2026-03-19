@@ -14,7 +14,7 @@ class OffboardingTask(models.Model):
     is_complete = models.BooleanField(
         default=False,
     )
-    notify_at = models.DateTimeField()
+    notified_created_at = models.DateTimeField()
     notified_created = models.BooleanField(default=False)
     notified_completed = models.BooleanField(default=False)
     status = models.CharField(
