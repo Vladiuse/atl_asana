@@ -8,6 +8,7 @@ from asana.client import AsanaApiClient
 
 from .constants import ATLAS_WORKSPACE_ID
 from .models import AtlasAsanaUser
+from .services import map_messenger_position_to_asana
 
 
 class AsanaUserRepository:
@@ -21,8 +22,10 @@ class AsanaUserRepository:
         email = user_data.get("email") or ""
         try:
             owner = AtlasUser.objects.get(email=email)
+            position = map_messenger_position_to_asana(messenger_position=owner.role)
         except AtlasUser.DoesNotExist:
             owner = None
+            position = None
         photo = user_data["photo"].get("image_128x128", "") if user_data["photo"] else ""
         return AtlasAsanaUser.objects.create(
             membership_id=membership_id,
@@ -31,6 +34,7 @@ class AsanaUserRepository:
             avatar_url=photo,
             email=email,
             owner=owner,
+            position=position if position else "",
         )
 
     def _create_by_membership_id(self, membership_id: str) -> AtlasAsanaUser:
