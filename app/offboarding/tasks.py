@@ -6,8 +6,8 @@ from django.conf import settings
 from message_sender.client.exceptions import AtlasMessageSenderError
 from message_sender.client.main import AtlasMessageSender
 
-from .services import NotifyOffboardingCreateTaskService
-from .use_cases import NotifyCreatedTasksUseCase
+from .services import NotifyOffboardingCreateTaskService, OffboardingFinanceNotifierService
+from .use_cases import NotifyCreatedTasksUseCase, NotifyIfNeedPayRollUseCase
 
 asana_api_client = AsanaApiClient(api_key=settings.ASANA_API_KEY)
 message_sender = AtlasMessageSender(
@@ -17,9 +17,23 @@ message_sender = AtlasMessageSender(
 
 
 @shared_task(bind=True, max_retries=2, default_retry_delay=60)
-def mark_asana_task_completed_task(self: CeleryTask) -> None:
+def notify_offboarding_task_create_task(
+    self: CeleryTask,  # type: ignore[type-arg]
+) -> None:
     notify_service = NotifyOffboardingCreateTaskService(message_sender=message_sender, asana_client=asana_api_client)
     use_case = NotifyCreatedTasksUseCase(notify_service=notify_service)
+    try:
+        use_case.execute()
+    except (AsanaApiClientError, AtlasMessageSenderError) as error:
+        self.retry(exc=error)
+
+
+@shared_task(bind=True, max_retries=2, default_retry_delay=60)
+def notify_offboarding_payroll_task(
+    self: CeleryTask,  # type: ignore[type-arg]
+) -> None:
+    notify_service = OffboardingFinanceNotifierService(message_sender=message_sender, asana_client=asana_api_client)
+    use_case = NotifyIfNeedPayRollUseCase(notify_service=notify_service)
     try:
         use_case.execute()
     except (AsanaApiClientError, AtlasMessageSenderError) as error:
