@@ -3,7 +3,7 @@ from datetime import timedelta
 from typing import TYPE_CHECKING, Any
 
 from asana.client import AsanaApiClient
-from asana.client.exception import AsanaApiClientError, AsanaForbiddenError, AsanaNotFoundError
+from asana.client.exception import AsanaForbiddenError, AsanaNotFoundError
 from asana.constants import AsanaResourceType, AtlasProject
 from asana.models import AsanaWebhookRequestData
 from asana.webhook_actions.abstract import WebhookActionResult
@@ -86,6 +86,7 @@ class NotifyOffboardingCreateTaskService:
             AsanaApiClientError: if cant get data from asana
             AtlasMessageSenderError: if can't send message
             OffboardingAppError: if task fields not filled
+
         """
         try:
             task_data: dict[str, Any] = self.asana_client.get_task(task_id=task.asana_task_id)
@@ -105,11 +106,11 @@ class NotifyOffboardingCreateTaskService:
             task.status = OffboardingTask.Status.DELETED
             task.save()
             logger.warning("Task deleted, task_id: %s, %s", task.asana_task_id, str(error))
-        except OffboardingAppError as error:
+        except OffboardingAppError:
             logger.exception("Cant process offboarding asana task, id - %s", task.asana_task_id)
             task.status = OffboardingTask.Status.ERROR
             task.save()
-            raise error
+            raise
 
 
 class OffboardingFinanceNotifierService:
@@ -171,7 +172,11 @@ class OffboardingFinanceNotifierService:
         task_data = self.asana_client.get_task(task_id=task.asana_task_id)
         try:
             task_dto: TaskData = extract_offboarding_task_data(task_data)
-        except 
+        except OffboardingAppError:
+            logger.exception("Cant process offboarding asana task, id - %s", task.asana_task_id)
+            task.status = OffboardingTask.Status.ERROR
+            task.save()
+            raise
         logger.debug("TaskData: %s", task_dto)
         context = {
             "data": task_dto,
