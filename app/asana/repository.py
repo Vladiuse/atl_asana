@@ -1,4 +1,5 @@
 import logging
+from dataclasses import dataclass
 from typing import Any
 
 from common.exception import AppExceptionError
@@ -12,6 +13,12 @@ from .services import map_messenger_position_to_asana
 
 
 class AsanaUserRepository:
+    @dataclass(frozen=True)
+    class UpdateUsersResult:
+        created_user_ids: list[int]
+        created_count: int
+        deleted_count: int
+
     def __init__(self, api_client: AsanaApiClient):
         self.api_client = api_client
 
@@ -101,7 +108,7 @@ class AsanaUserRepository:
         else:
             return user
 
-    def update_all(self) -> dict[str, int]:
+    def update_all(self) -> UpdateUsersResult:
         """Update all users.
 
         Raises:
@@ -114,18 +121,22 @@ class AsanaUserRepository:
         logging.info("Memberships in asana: %s", len(atlas_asana_memberships))
         exist_memberships_in_db = [str(i) for i in AtlasAsanaUser.objects.values_list("membership_id", flat=True)]
         actual_memberships_ids = [membership_data["gid"] for membership_data in atlas_asana_memberships]
-        deleted_count, deleted_by_model = (
-            AtlasAsanaUser.objects.exclude(membership_id__in=actual_memberships_ids).delete()
-        )
+        deleted_count, deleted_by_model = AtlasAsanaUser.objects.exclude(
+            membership_id__in=actual_memberships_ids
+        ).delete()
         logging.info("Deleted: %s", deleted_count)
         logging.info("Memberships in DB: %s", len(exist_memberships_in_db))
-        new_created = 0
+        created_user_ids = []
         for membership_data in atlas_asana_memberships:
             membership_id = membership_data["gid"]
             if membership_data["gid"] not in exist_memberships_in_db:
                 logging.info("Detect new Memberships: %s", membership_id)
                 user_data = self.api_client.get_user(user_id=membership_data["user"]["gid"])
-                self._create_user_by_data(membership_data=membership_data, user_data=user_data)
-                new_created += 1
-        logging.info("New created: %s", new_created)
-        return {"new_created": new_created, "deleted_count": deleted_count}
+                user = self._create_user_by_data(membership_data=membership_data, user_data=user_data)
+                created_user_ids.append(user.pk)
+        logging.info("New created: %s", len(created_user_ids))
+        return self.UpdateUsersResult(
+            created_user_ids=created_user_ids,
+            created_count=len(created_user_ids),
+            deleted_count=deleted_count,
+        )
