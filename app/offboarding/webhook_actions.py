@@ -8,7 +8,7 @@ from message_sender.client import AtlasMessageSender
 from message_sender.client.exceptions import AtlasMessageSenderError
 from retry import retry
 
-from .services import OffboardingTaskCreateService
+from .services import OffboardingTaskCompleteService, OffboardingTaskCreateService
 
 asana_api_client = AsanaApiClient(api_key=settings.ASANA_API_KEY)
 message_sender = AtlasMessageSender(
@@ -37,3 +37,13 @@ class NotifyTaskCreateAction(BaseWebhookAction):
     def handle(self, webhook_data: AsanaWebhookRequestData) -> WebhookActionResult:
         service = OffboardingTaskCreateService()
         return self._execute_service(service=service, webhook_data=webhook_data)
+
+
+@register_webhook_action(
+    name="OffboardingTaskCompleteAction",
+    description="Offboarding project: Помечает таск завершенным",
+)
+class OffboardingTaskCompleteAction(BaseWebhookAction):
+    def handle(self, webhook_data: AsanaWebhookRequestData) -> WebhookActionResult:
+        service = OffboardingTaskCompleteService()
+        return service.detect_is_complete(webhook_data=webhook_data)

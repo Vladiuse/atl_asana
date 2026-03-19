@@ -43,6 +43,25 @@ class OffboardingTaskCreateService:
         )
 
 
+class OffboardingTaskCompleteService:
+    def detect_is_complete(self, webhook_data: AsanaWebhookRequestData) -> WebhookActionResult:
+        target_event_found = False
+        for event in webhook_data.payload["events"]:
+            if (
+                event["resource"]["resource_type"] == AsanaResourceType.TASK
+                and event["parent"]["resource_type"] == AsanaResourceType.SECTION
+                and event["parent"]["gid"] == config.OFFBOARDING_COMPLETE_SECTION_ID
+            ):
+                task_id = event["resource"]["gid"]
+                OffboardingTask.objects.filter(asana_task_id=task_id).update(status=OffboardingTask.Status.COMPLETED)
+                target_event_found = True
+                logger.debug("Complete task %s, webhook_data: %s", task_id, webhook_data)
+        return WebhookActionResult(
+            is_success=True,
+            is_target_event=target_event_found,
+        )
+
+
 class NotifyOffboardingTaskService:
     MESSAGE_TEMPLATE = """
     Offboarding:<br>
