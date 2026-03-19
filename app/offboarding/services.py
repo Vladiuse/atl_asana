@@ -10,7 +10,7 @@ from asana.webhook_actions.abstract import WebhookActionResult
 from common.message_renderer import render_message
 from constance import config
 from django.utils import timezone
-from message_sender.client import AtlasMessageSender
+from message_sender.client import AtlasMessageSender, Handlers
 
 from .exceptions import OffboardingAppError
 from .extractors import extract_offboarding_task_data
@@ -99,7 +99,7 @@ class NotifyOffboardingCreateTaskService:
                 template=self.MESSAGE_TEMPLATE,
                 context=context,
             )
-            self.message_sender.send_message(message=message, handler=config.OFFBOARDING_NOTIFY_HANDLER)
+            self.message_sender.send_message(message=message, handler=Handlers(config.OFFBOARDING_NOTIFY_HANDLER))
             task.notified_created = True
             task.save()
         except (AsanaNotFoundError, AsanaForbiddenError) as error:
@@ -187,7 +187,7 @@ class OffboardingFinanceNotifierService:
             template=self.MESSAGE_TEMPLATE,
             context=context,
         )
-        self.message_sender.send_message(message=message, handler=config.OFFBOARDING_NOTIFY_HANDLER)
+        self.message_sender.send_message(message=message, handler=Handlers(config.OFFBOARDING_NOTIFY_HANDLER))
         logger.info("Task %s Notified", task.asana_task_id)
         task.notified_need_payroll = True
         task.save()
