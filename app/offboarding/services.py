@@ -70,7 +70,8 @@ class NotifyOffboardingCreateTaskService:
 
     ФИО: {{data.fio}}
     TAG: {{data.tag}}
-    Должность: {{data.position}}<br>
+    Должность: {{data.position}}
+    Дата увольнения: {{data.fired_date|date:"d.m.Y"}}<br>
 
     Asana: {{data.url}}
 """
@@ -122,7 +123,8 @@ class OffboardingFinanceNotifierService:
 
     ФИО: {{data.fio}}
     TAG: {{data.tag}}
-    Должность: {{data.position}}<br>
+    Должность: {{data.position}}
+    Дата увольнения: {{data.fired_date|date:"d.m.Y"}}<br>
 
     Сделать расчет по зп<br>
     Asana: {{data.url}}

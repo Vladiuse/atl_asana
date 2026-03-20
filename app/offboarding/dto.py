@@ -1,4 +1,5 @@
 from dataclasses import dataclass
+from datetime import date
 
 
 @dataclass
@@ -7,3 +8,4 @@ class TaskData:
     position: str
     tag: str
     url: str
+    fired_date: date
