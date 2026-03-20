@@ -120,13 +120,13 @@ class OffboardingFinanceNotifierService:
     MESSAGE_TEMPLATE = """
     {{tg_login_name_remind}}<br>
     Offboarding<br>
+    <b>Offboarding - Сделать расчет по зп</b> 💵<br>
 
     ФИО: {{data.fio}}
     TAG: {{data.tag}}
     Должность: {{data.position}}
     Дата увольнения: {{data.fired_date|date:"d.m.Y"}}<br>
 
-    Сделать расчет по зп<br>
     Asana: {{data.url}}
 """
 
@@ -189,7 +189,11 @@ class OffboardingFinanceNotifierService:
             template=self.MESSAGE_TEMPLATE,
             context=context,
         )
-        self.message_sender.send_message(message=message, handler=Handlers(config.OFFBOARDING_NOTIFY_HANDLER))
+        self.message_sender.send_message(
+            message=message,
+            handler=Handlers(config.OFFBOARDING_NOTIFY_HANDLER),
+            html=True,
+        )
         logger.info("Task %s Notified", task.asana_task_id)
         task.notified_need_payroll = True
         task.save()
