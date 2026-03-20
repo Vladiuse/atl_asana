@@ -1,3 +1,4 @@
+from datetime import date
 from typing import Any
 
 from .constants import AsanaResourceType
@@ -21,9 +22,32 @@ def get_field_value_from_task(
     *,
     raise_if_not_found: bool = False,
 ) -> str | None:
+    """Return "text_value" of custom field of asana task."""
     for custom_field in task_data["custom_fields"]:
         if field_name == custom_field["name"]:
             return custom_field["text_value"]
+    if raise_if_not_found:
+        msg = f'Field "{field_name}" not found in asana task data'
+        raise FieldNotFoundError(msg)
+    return default_value
+
+
+def get_date_field_value_from_task(
+    field_name: str,
+    task_data: dict[str, Any],
+    default_value: date | None = None,
+    *,
+    raise_if_not_found: bool = False,
+) -> date | None:
+    """Return date of custom field of asana task."""
+    for custom_field in task_data["custom_fields"]:
+        if (
+            field_name == custom_field["name"]
+            and custom_field["type"] == "date"
+            and custom_field["date_value"] is not None
+        ):
+            date_str = custom_field["date_value"]["date"]
+            return date.fromisoformat(date_str)
     if raise_if_not_found:
         msg = f'Field "{field_name}" not found in asana task data'
         raise FieldNotFoundError(msg)
