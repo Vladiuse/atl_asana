@@ -119,7 +119,6 @@ class OffboardingFinanceNotifierService:
 
     MESSAGE_TEMPLATE = """
     {{tg_login_name_remind}}<br>
-    Offboarding<br>
     <b>Offboarding - Сделать расчет по зп</b> 💵<br>
 
     ФИО: {{data.fio}}
