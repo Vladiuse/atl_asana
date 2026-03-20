@@ -140,8 +140,8 @@ class CreativeService:
         """
         try:
             self.asana_api_client.mark_task_completed(task_id=task.task_id)
-            task.is_completed = True
-            task.save(update_fields=["is_completed"])
+            task.is_completed_in_asana = True
+            task.save(update_fields=["is_completed_in_asana"])
         except (AsanaNotFoundError, AsanaForbiddenError):
             task.mark_deleted()
 

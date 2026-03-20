@@ -23,7 +23,7 @@ class TaskAdmin(admin.ModelAdmin):  # type: ignore[type-arg]
         "task_id",
         "task_name",
         "status",
-        "is_completed",
+        "is_completed_in_asana",
         "assignee_id",
         "bayer_code",
         "is_complete",

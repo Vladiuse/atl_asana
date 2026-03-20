@@ -37,7 +37,7 @@ class Task(models.Model):
         max_length=20,
         unique=True,
     )
-    is_completed = models.BooleanField(
+    is_completed_in_asana = models.BooleanField(
         default=False,
     )
     task_name = models.CharField(
