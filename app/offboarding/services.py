@@ -68,9 +68,9 @@ class NotifyOffboardingCreateTaskService:
     MESSAGE_TEMPLATE = """
     Offboarding:<br>
 
-    {{data.fio}}
-    {{data.tag}}
-    {{data.position}}<br>
+    ФИО: {{data.fio}}
+    TAG: {{data.tag}}
+    Должность: {{data.position}}<br>
 
     Asana: {{data.url}}
 """
@@ -120,9 +120,9 @@ class OffboardingFinanceNotifierService:
     {{tg_login_name_remind}}<br>
     Offboarding<br>
 
-    {{data.fio}}
-    {{data.tag}}
-    {{data.position}}<br>
+    ФИО: {{data.fio}}
+    TAG: {{data.tag}}
+    Должность: {{data.position}}<br>
 
     Сделать расчет по зп<br>
     Asana: {{data.url}}
