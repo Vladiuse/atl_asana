@@ -169,17 +169,18 @@ class TestApproved:
         service: LeaveNotificationService,
         days_delta: int,
         message_count: int,
-        atlas_user: AtlasUser,
+        supervisor_chat: SupervisorNotificationChat,
     ) -> None:
+        _ = supervisor_chat
         start_date = timezone.now().date() + timedelta(days=days_delta)
         leave = Leave.objects.create(
             employee="xxx",
-            supervisor_tag="xxx",
+            supervisor_tag="test_telegram_login",
             start_date=start_date,
             end_date=date(2000, 1, 1),
             type=LeaveType.DAY_OFF,
             status=LeaveStatus.PENDING,
-            telegram_login=atlas_user.telegram,
+            telegram_login="test_telegram_login",
         )
         first_message = ScheduledMessage.objects.create(
             text="x",
@@ -189,12 +190,12 @@ class TestApproved:
         )
         leave_data = {
             "employee": "xxx",
-            "supervisor_tag": "xxx",
+            "supervisor_tag": "test_telegram_login",
             "start_date": start_date,
             "end_date": date(2000, 1, 1),
             "type": LeaveType.DAY_OFF.value,
             "status": LeaveStatus.PENDING.value,
-            "telegram_login": atlas_user.telegram,
+            "telegram_login": "test_telegram_login",
         }
         leave = service._approved(leave_data=leave_data)
         assert leave.status == LeaveStatus.APPROVED
