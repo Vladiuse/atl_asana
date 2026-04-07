@@ -2,8 +2,8 @@ from typing import Any
 
 from django.db import models
 from django.db.models import QuerySet
-from message_sender.models import ScheduledMessage, AtlasUser
 from message_sender.client import Handlers
+from message_sender.models import AtlasUser, ScheduledMessage
 
 
 class LeaveType(models.TextChoices):

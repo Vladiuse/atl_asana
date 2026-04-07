@@ -2,8 +2,9 @@ from datetime import date, timedelta
 
 import pytest
 from django.utils import timezone
-from message_sender.models import AtlasUser, ScheduledMessage
 from message_sender.client import Handlers
+from message_sender.models import AtlasUser, ScheduledMessage
+
 from leave_events.models import Leave, LeaveStatus, LeaveType, SupervisorNotificationChat
 from leave_events.services import LeaveNotificationService
 
