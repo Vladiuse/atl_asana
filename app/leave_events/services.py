@@ -5,10 +5,12 @@ from typing import Any
 from common.message_renderer import render_message
 from constance import config
 from django.utils import timezone
+from message_sender.client import Handlers
 from message_sender.models import AtlasUser, ScheduledMessage
 
+from .exceptions import LeaveEventError
 from .message_templates import NOTIFICATION_FOR_EMPLOYEE_MESSAGE, PENDING_LEAVE_MESSAGE, REMIND_MESSAGE
-from .models import Leave, LeaveStatus, LeaveType
+from .models import Leave, LeaveStatus, LeaveType, SupervisorNotificationChat
 
 DAYS_IN_WEEK = 7
 
@@ -22,9 +24,22 @@ class LeaveData:
 
 
 class LeaveNotificationService:
-    @property
-    def handler(self) -> str:
-        return config.MESSAGE_HANDLER
+    def _get_handler(self, leave: Leave) -> Handlers:
+        """Return handler for message sender from leave record.
+
+        Raises:
+            LeaveEventError: if chat handler for supervisor not in db.
+
+        """
+        supervisor = AtlasUser.objects.get(telegram__iexact=leave.supervisor_tag)
+        try:
+            supervisor_chat = SupervisorNotificationChat.objects.get(supervisor=supervisor)
+        except SupervisorNotificationChat.DoesNotExist as error:
+            raise LeaveEventError(
+                f"Cant found chat for user {supervisor} with telegram login @{leave.supervisor_tag}",
+            ) from error
+        else:
+            return Handlers(supervisor_chat.chat)
 
     def _create_notification_message(self, leave: Leave, employee: AtlasUser) -> None:
         """Create message to inform employee of leave approval."""
@@ -43,6 +58,7 @@ class LeaveNotificationService:
         )
 
     def _create_remind_message(self, leave: Leave) -> None:
+        handler = self._get_handler(leave=leave)
         now: datetime = timezone.localtime(timezone.now())
         today: date = now.date()
         days_until_leave = (leave.start_date - today).days
@@ -67,7 +83,7 @@ class LeaveNotificationService:
             ScheduledMessage.objects.create(
                 run_at=run_at,
                 text=text,
-                handler=self.handler,
+                handler=handler.value,
                 reference_id=f"leave-{leave.pk}",
             )
 
@@ -77,6 +93,7 @@ class LeaveNotificationService:
             start_date=leave_data.pop("start_date"),
             defaults=leave_data,
         )
+        handler = self._get_handler(leave=leave)
         if not created:
             leave.messages.delete()
         context = {
@@ -89,7 +106,7 @@ class LeaveNotificationService:
         ScheduledMessage.objects.create(
             run_at=run_at,
             text=text,
-            handler=self.handler,
+            handler=handler.value,
             reference_id=f"leave-{leave.pk}",
         )
         return leave

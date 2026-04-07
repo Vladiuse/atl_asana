@@ -1,16 +1,16 @@
-import telegram
 from common.auth import BearerAuthentication
 from django.http import HttpRequest, HttpResponse
 from django.shortcuts import render
 from message_sender.models import AtlasUser, ScheduledMessage
 from rest_framework.authentication import SessionAuthentication
 from rest_framework.decorators import action
-from rest_framework.exceptions import NotFound
+from rest_framework.exceptions import APIException, NotFound
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.request import Request
 from rest_framework.response import Response
 from rest_framework.viewsets import ModelViewSet
 
+from .exceptions import LeaveEventError
 from .models import Leave
 from .serializers import LeaveSerializer
 from .services import LeaveNotificationService
@@ -34,6 +34,10 @@ class LeaveNotificationView(ModelViewSet):  # type: ignore[type-arg]
         except AtlasUser.DoesNotExist as error:
             telegram_login = serializer.validated_data["telegram_login"]
             raise NotFound(detail=f"Пользователь атлас для отправки сообщения не найден: @{telegram_login}") from error
+        except LeaveEventError as error:
+            raise APIException(detail=str(error)) from error
+        except Exception as error:
+            raise APIException(detail="Unknown error") from error
         serializer = LeaveSerializer(leave)
         return Response(data=serializer.data)
 
