@@ -103,11 +103,16 @@ class TestLeaveUpdateByStatusView:
         assert leave.type == LeaveType.DAY_OFF
         assert leave.status == LeaveStatus.PENDING
 
-    def test_update_and_delete(self, auth_client: APIClient) -> None:
+    def test_update_and_delete(
+        self,
+        auth_client: APIClient,
+        supervisor_chat: SupervisorNotificationChat,
+    ) -> None:
         """Create leave in DB and then try to delete."""
+        _ = supervisor_chat
         leave_data = {
             "employee": "test_emp",
-            "supervisor_tag": "test_sup",
+            "supervisor_tag": "@test_telegram_login",
             "start_date": date(2025, 1, 1).isoformat(),
             "end_date": date(2025, 1, 1).isoformat(),
             "type": LeaveType.DAY_OFF.value,
