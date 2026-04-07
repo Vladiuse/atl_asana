@@ -34,6 +34,12 @@ class Handlers(Enum):
     ONBOARDING = "onboarding"
     HR_VACATION = "hr_vacation"
     LUCK_STAR_ACCOUNTS = "luckstar_accounts"
+    KVA_CHAT_TEST = "kva_chat_test"
+    HR__TECH_DEP = "HR__TECH_DEP"
+    HR__DIZ_DEP = "HR__DIZ_DEP"
+    HR__FARM_DEP = "HR__FARM_DEP"
+    HR__BIZ_DEV = "HR__BIZ_DEV"
+    HR__VGA_TEAM = "HR__VGA_TEAM"
 
 
 class UserTag(Enum):
