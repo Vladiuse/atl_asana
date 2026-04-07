@@ -1,26 +1,8 @@
 import pytest
-from message_sender.models import AtlasUser
 from rest_framework.exceptions import ValidationError
 
 from leave_events.models import LeaveStatus, SupervisorNotificationChat
 from leave_events.serializers import LeaveSerializer
-
-
-@pytest.fixture
-def atlas_user() -> AtlasUser:
-    return AtlasUser.objects.create(
-        name="Test User",
-        email="test@example.com",
-        role="tester",
-        tag="test_tag",
-        telegram="test_telegram_login",
-        username="test_username",
-    )
-
-
-@pytest.fixture
-def supervisor_chat(atlas_user: AtlasUser) -> SupervisorNotificationChat:
-    return SupervisorNotificationChat.objects.create(supervisor=atlas_user, chat="CHAT")
 
 
 @pytest.mark.django_db

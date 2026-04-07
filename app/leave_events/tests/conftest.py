@@ -1,8 +1,9 @@
 from datetime import date
 
 import pytest
+from message_sender.models import AtlasUser
 
-from leave_events.models import Leave, LeaveType
+from leave_events.models import Leave, LeaveType, SupervisorNotificationChat
 
 
 @pytest.fixture
@@ -25,3 +26,20 @@ def leave_day_off() -> Leave:
         end_date=date(2000, 2, 2),
         type=LeaveType.DAY_OFF,
     )
+
+
+@pytest.fixture
+def atlas_user() -> AtlasUser:
+    return AtlasUser.objects.create(
+        name="Test User",
+        email="test@example.com",
+        role="tester",
+        tag="test_tag",
+        telegram="test_telegram_login",
+        username="test_username",
+    )
+
+
+@pytest.fixture
+def supervisor_chat(atlas_user: AtlasUser) -> SupervisorNotificationChat:
+    return SupervisorNotificationChat.objects.create(supervisor=atlas_user, chat="CHAT")
