@@ -3,7 +3,6 @@ from datetime import date
 import pytest
 from django.contrib.auth.models import User
 from django.urls import reverse
-from message_sender.models import AtlasUser
 from rest_framework import status
 from rest_framework.authtoken.models import Token
 from rest_framework.test import APIClient
@@ -124,3 +123,21 @@ class TestLeaveUpdateByStatusView:
         leave_data["status"] = LeaveStatus.DELETED.value
         response = auth_client.post(self.url, data=leave_data, format="json")
         assert response.status_code == 200
+
+    def test_no_supervisor_chat(
+        self,
+        auth_client: APIClient,
+        supervisor_chat: SupervisorNotificationChat,
+    ) -> None:
+        supervisor_chat.delete()
+        leave_data = {
+            "employee": "test_emp",
+            "supervisor_tag": "@test_telegram_login",
+            "start_date": date(2025, 1, 1).isoformat(),
+            "end_date": date(2025, 1, 1).isoformat(),
+            "type": LeaveType.DAY_OFF.value,
+            "status": LeaveStatus.PENDING.value,
+            "telegram_login": "@test_telegram_login",
+        }
+        response = auth_client.post(self.url, data=leave_data, format="json")
+        assert response.status_code == status.HTTP_400_BAD_REQUEST
