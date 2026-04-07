@@ -40,7 +40,6 @@ def atlas_user() -> AtlasUser:
         username="test_username",
     )
 
-
 @pytest.fixture
 def supervisor_chat(atlas_user: AtlasUser) -> SupervisorNotificationChat:
     return SupervisorNotificationChat.objects.create(supervisor=atlas_user, chat=Handlers.KVA_USER.value)

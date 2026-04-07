@@ -3,7 +3,7 @@ from datetime import date, timedelta
 import pytest
 from django.utils import timezone
 from message_sender.models import AtlasUser, ScheduledMessage
-
+from message_sender.client import Handlers
 from leave_events.models import Leave, LeaveStatus, LeaveType, SupervisorNotificationChat
 from leave_events.services import LeaveNotificationService
 
@@ -31,7 +31,9 @@ def atlas_user() -> AtlasUser:
 @pytest.mark.django_db
 class TestLeaveServicePending:
     def test_no_exist_in_db(
-        self, service: LeaveNotificationService, supervisor_chat: SupervisorNotificationChat,
+        self,
+        service: LeaveNotificationService,
+        supervisor_chat: SupervisorNotificationChat,
     ) -> None:
         """Leave no exist in db/ must be created."""
         _ = supervisor_chat
@@ -48,16 +50,21 @@ class TestLeaveServicePending:
         assert Leave.objects.count() == 1
         assert ScheduledMessage.objects.filter(reference_id=f"leave-{leave.pk}").count() == 1
 
-    def test_exist_in_db(self, service: LeaveNotificationService, atlas_user: AtlasUser) -> None:
+    def test_exist_in_db(
+        self,
+        service: LeaveNotificationService,
+        supervisor_chat: SupervisorNotificationChat,
+    ) -> None:
         """Leave already exist in db. Must be removed old messages."""
+        _ = supervisor_chat
         leave_data = {
             "employee": "xxx",
-            "supervisor_tag": "xxx",
+            "supervisor_tag": "test_telegram_login",
             "start_date": date(2000, 1, 1),
             "end_date": date(2000, 1, 1),
             "type": LeaveType.DAY_OFF.value,
             "status": LeaveStatus.APPROVED.value,
-            "telegram_login": "@" + atlas_user.telegram,
+            "telegram_login": "test_telegram_login",
         }
         leave_orig = Leave.objects.create(**leave_data)
         for _ in range(2):
@@ -76,7 +83,7 @@ class TestLeaveServicePending:
         assert leave_orig.pk == leave.pk
         assert leave.status == LeaveStatus.PENDING.value
         assert leave.messages.count() == 1
-        assert leave.messages.filter(handler=service.handler).count() == 1
+        assert leave.messages.filter(handler=Handlers.KVA_USER.value).count() == 1
 
 
 @pytest.mark.django_db
