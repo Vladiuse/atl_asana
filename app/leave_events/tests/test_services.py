@@ -4,7 +4,7 @@ import pytest
 from django.utils import timezone
 from message_sender.models import AtlasUser, ScheduledMessage
 
-from leave_events.models import Leave, LeaveStatus, LeaveType
+from leave_events.models import Leave, LeaveStatus, LeaveType, SupervisorNotificationChat
 from leave_events.services import LeaveNotificationService
 
 
@@ -12,7 +12,10 @@ from leave_events.services import LeaveNotificationService
 def service() -> LeaveNotificationService:
     return LeaveNotificationService()
 
+
 USER_TAG = "TAG"
+
+
 @pytest.fixture
 def atlas_user() -> AtlasUser:
     return AtlasUser.objects.create(
@@ -27,16 +30,19 @@ def atlas_user() -> AtlasUser:
 
 @pytest.mark.django_db
 class TestLeaveServicePending:
-    def test_no_exist_in_db(self, service: LeaveNotificationService, atlas_user: AtlasUser) -> None:
+    def test_no_exist_in_db(
+        self, service: LeaveNotificationService, supervisor_chat: SupervisorNotificationChat,
+    ) -> None:
         """Leave no exist in db/ must be created."""
+        _ = supervisor_chat
         leave_data = {
             "employee": "xxx",
-            "supervisor_tag": "xxx",
+            "supervisor_tag": "test_telegram_login",
             "start_date": date(2000, 1, 1),
             "end_date": date(2000, 1, 1),
             "type": LeaveType.DAY_OFF.value,
             "status": LeaveStatus.PENDING.value,
-            "telegram_login": "@" + atlas_user.telegram,
+            "telegram_login": "test_telegram_login",
         }
         leave = service._need_agreed(leave_data=leave_data)
         assert Leave.objects.count() == 1
@@ -70,7 +76,7 @@ class TestLeaveServicePending:
         assert leave_orig.pk == leave.pk
         assert leave.status == LeaveStatus.PENDING.value
         assert leave.messages.count() == 1
-        assert leave.messages.filter(handler=service.handler).count() ==  1
+        assert leave.messages.filter(handler=service.handler).count() == 1
 
 
 @pytest.mark.django_db
@@ -135,8 +141,8 @@ class TestApproved:
         leave = service._approved(leave_data=leave_data)
         assert leave.status == LeaveStatus.APPROVED
         assert leave.messages.count() == 2
-        assert leave.messages.filter(user_tag=USER_TAG).count() ==  1
-        assert leave.messages.filter(handler=service.handler).count() ==  1
+        assert leave.messages.filter(user_tag=USER_TAG).count() == 1
+        assert leave.messages.filter(handler=service.handler).count() == 1
 
     @pytest.mark.parametrize(
         ("days_delta", "message_count"),
