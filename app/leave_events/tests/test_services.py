@@ -125,31 +125,36 @@ class TestApproved:
         with pytest.raises(AtlasUser.DoesNotExist):
             service._approved(leave_data=leave_data)
 
-    def test_exist_in_db(self, service: LeaveNotificationService, atlas_user: AtlasUser) -> None:
+    def test_exist_in_db(
+        self,
+        service: LeaveNotificationService,
+        supervisor_chat: SupervisorNotificationChat,
+    ) -> None:
+        _ = supervisor_chat
         start_date = date(3000, 1, 1)
         leave = Leave.objects.create(
             employee="xxx",
-            supervisor_tag="xxx",
+            supervisor_tag="test_telegram_login",
             start_date=start_date,
             end_date=date(2000, 1, 1),
             type=LeaveType.DAY_OFF,
             status=LeaveStatus.PENDING,
-            telegram_login=atlas_user.telegram,
+            telegram_login="test_telegram_login",
         )
         leave_data = {
             "employee": "xxx",
-            "supervisor_tag": "xxx",
+            "supervisor_tag": "test_telegram_login",
             "start_date": start_date,
             "end_date": date(2000, 1, 1),
             "type": LeaveType.DAY_OFF.value,
             "status": LeaveStatus.PENDING.value,
-            "telegram_login": atlas_user.telegram,
+            "telegram_login": "test_telegram_login",
         }
         leave = service._approved(leave_data=leave_data)
         assert leave.status == LeaveStatus.APPROVED
         assert leave.messages.count() == 2
         assert leave.messages.filter(user_tag=USER_TAG).count() == 1
-        assert leave.messages.filter(handler=service.handler).count() == 1
+        assert leave.messages.filter(handler=Handlers.KVA_USER.value).count() == 1
 
     @pytest.mark.parametrize(
         ("days_delta", "message_count"),
