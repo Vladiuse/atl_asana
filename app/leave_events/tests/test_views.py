@@ -8,7 +8,7 @@ from rest_framework import status
 from rest_framework.authtoken.models import Token
 from rest_framework.test import APIClient
 
-from leave_events.models import Leave, LeaveStatus, LeaveType
+from leave_events.models import Leave, LeaveStatus, LeaveType, SupervisorNotificationChat
 from leave_events.services import LeaveNotificationService
 
 
@@ -30,18 +30,6 @@ def service() -> LeaveNotificationService:
     return LeaveNotificationService()
 
 
-@pytest.fixture(autouse=True)
-def atlas_user() -> AtlasUser:
-    return AtlasUser.objects.create(
-        name="Test User",
-        email="test@example.com",
-        role="tester",
-        tag="test_tag",
-        telegram="test_telegram_login",
-        username="test_username",
-    )
-
-
 @pytest.mark.django_db
 class TestLeaveUpdateByStatusView:
     @property
@@ -60,10 +48,17 @@ class TestLeaveUpdateByStatusView:
             (LeaveStatus.PENDING, status.HTTP_200_OK),
         ],
     )
-    def test_leave_not_exists(self, auth_client: APIClient, leave_status: LeaveStatus, status_code: int) -> None:
+    def test_leave_not_exists(
+        self,
+        auth_client: APIClient,
+        leave_status: LeaveStatus,
+        status_code: int,
+        supervisor_chat: SupervisorNotificationChat,
+    ) -> None:
+        _ = supervisor_chat
         leave_data = {
             "employee": "xxx",
-            "supervisor_tag": "xxx",
+            "supervisor_tag": "test_telegram_login",
             "start_date": date(2025, 1, 1).isoformat(),
             "end_date": date(2025, 1, 1).isoformat(),
             "type": LeaveType.DAY_OFF.value,
