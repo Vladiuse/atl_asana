@@ -69,7 +69,6 @@ class TestLeaveUpdateByStatusView:
         assert response.status_code == status_code
 
     def test_employee_not_exist_in_db(self, auth_client: APIClient) -> None:
-        AtlasUser.objects.all().delete()
         leave_data = {
             "employee": "test_emp",
             "supervisor_tag": "test_sup",
@@ -82,10 +81,15 @@ class TestLeaveUpdateByStatusView:
         response = auth_client.post(self.url, data=leave_data, format="json")
         assert response.status_code == status.HTTP_400_BAD_REQUEST
 
-    def test_create_leave_in_db(self, auth_client: APIClient) -> None:
+    def test_create_leave_in_db(
+        self,
+        auth_client: APIClient,
+        supervisor_chat: SupervisorNotificationChat,
+    ) -> None:
+        _ = supervisor_chat
         leave_data = {
             "employee": "test_emp",
-            "supervisor_tag": "test_sup",
+            "supervisor_tag": "@test_telegram_login",
             "start_date": date(2025, 1, 1).isoformat(),
             "end_date": date(2025, 1, 1).isoformat(),
             "type": LeaveType.DAY_OFF.value,
@@ -95,7 +99,7 @@ class TestLeaveUpdateByStatusView:
         response = auth_client.post(self.url, data=leave_data, format="json")
         assert response.status_code == 200
         leave = Leave.objects.get(employee="test_emp", start_date="2025-01-01")
-        assert leave.supervisor_tag == "test_sup"
+        assert leave.supervisor_tag == "test_telegram_login"
         assert leave.type == LeaveType.DAY_OFF
         assert leave.status == LeaveStatus.PENDING
 
