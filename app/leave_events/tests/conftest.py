@@ -1,6 +1,7 @@
 from datetime import date
 
 import pytest
+from message_sender.client import Handlers
 from message_sender.models import AtlasUser
 
 from leave_events.models import Leave, LeaveType, SupervisorNotificationChat
@@ -42,4 +43,4 @@ def atlas_user() -> AtlasUser:
 
 @pytest.fixture
 def supervisor_chat(atlas_user: AtlasUser) -> SupervisorNotificationChat:
-    return SupervisorNotificationChat.objects.create(supervisor=atlas_user, chat="CHAT")
+    return SupervisorNotificationChat.objects.create(supervisor=atlas_user, chat=Handlers.KVA_USER.value)
