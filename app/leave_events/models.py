@@ -2,7 +2,8 @@ from typing import Any
 
 from django.db import models
 from django.db.models import QuerySet
-from message_sender.models import ScheduledMessage
+from message_sender.models import ScheduledMessage, AtlasUser
+from message_sender.client import Handlers
 
 
 class LeaveType(models.TextChoices):
@@ -69,3 +70,21 @@ class Leave(models.Model):
     def delete(self, *args: Any, **kwargs: Any) -> tuple[int, dict[str, int]]:  # noqa: ANN401
         ScheduledMessage.objects.filter(reference_id=f"leave-{self.pk}").delete()
         return super().delete(*args, **kwargs)
+
+
+class SupervisorNotificationChat(models.Model):
+    supervisor = models.ForeignKey(
+        to=AtlasUser,
+        on_delete=models.CASCADE,
+        unique=True,
+    )
+    chat = models.CharField(
+        max_length=30,
+        choices=[(handler.value, handler.value) for handler in Handlers],
+    )
+    created_at = models.DateTimeField(
+        auto_now_add=True,
+    )
+
+    def __str__(self) -> str:
+        return f"{self.supervisor} → {self.chat}"

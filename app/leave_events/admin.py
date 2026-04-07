@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from .models import Leave
+from .models import Leave, SupervisorNotificationChat
 
 
 @admin.register(Leave)
@@ -8,7 +8,7 @@ class LeaveNotificationAdmin(admin.ModelAdmin):  # type: ignore[type-arg]
     list_display = (
         "id",
         "employee",
-        "telegram_login", 
+        "telegram_login",
         "supervisor_tag",
         "type",
         "status",
@@ -21,3 +21,8 @@ class LeaveNotificationAdmin(admin.ModelAdmin):  # type: ignore[type-arg]
     ordering = ("-created",)
     date_hierarchy = "start_date"
 
+
+@admin.register(SupervisorNotificationChat)
+class SupervisorNotificationChatAdmin(admin.ModelAdmin):  # type: ignore[type-arg]
+    list_display = ("supervisor", "chat", "created_at")
+    autocomplete_fields = ("supervisor", )
