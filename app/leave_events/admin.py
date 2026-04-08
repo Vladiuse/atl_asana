@@ -26,3 +26,4 @@ class LeaveNotificationAdmin(admin.ModelAdmin):  # type: ignore[type-arg]
 class SupervisorNotificationChatAdmin(admin.ModelAdmin):  # type: ignore[type-arg]
     list_display = ("supervisor", "chat", "created_at")
     autocomplete_fields = ("supervisor", )
+    ordering = ("chat", )
