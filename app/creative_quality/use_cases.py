@@ -190,5 +190,4 @@ class DataIntegrityCheckUseCase:
     def execute(self) -> None:
         self._check_tasks_full_data()
         self._check_task_error_load_info()
-        # self._check_creatives_cant_send_message()
 
