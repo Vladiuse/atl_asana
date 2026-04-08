@@ -40,6 +40,7 @@ class Handlers(Enum):
     HR__FARM_DEP = "HR__FARM_DEP"
     HR__BIZ_DEV = "HR__BIZ_DEV"
     HR__VGA_TEAM = "HR__VGA_TEAM"
+    HR__CEO = "HR__CEO"
 
 
 class UserTag(Enum):
