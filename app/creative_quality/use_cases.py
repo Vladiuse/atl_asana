@@ -3,7 +3,6 @@ from typing import Any
 import gspread
 from django.conf import settings
 from django.db import IntegrityError
-from django.db.models import Q
 from google.oauth2.service_account import Credentials
 from gspread import Client
 from message_sender.tasks import send_log_message_task
@@ -190,4 +189,3 @@ class DataIntegrityCheckUseCase:
     def execute(self) -> None:
         self._check_tasks_full_data()
         self._check_task_error_load_info()
-
