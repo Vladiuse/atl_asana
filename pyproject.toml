@@ -26,6 +26,10 @@ ignore = [
   "TRY003",  # raise-vanilla-args
   "EM102",   # f-string-in-exception
   "TC006",   # runtime-cast-value
+  "TD002",   # todo author
+  "TD003",   # todo link
+  "FIX002",  #allow todo
+
 ]
 
 [tool.ruff.lint.per-file-ignores]
