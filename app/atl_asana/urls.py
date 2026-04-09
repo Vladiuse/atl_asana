@@ -12,5 +12,6 @@ urlpatterns = [
     path("leave-events/", include("leave_events.urls")),
     path("valentine-day/", include("valentine_day.urls")),
     path("fake-messages/", include("fake_message.urls")),
+    path("message-sender/", include("message_sender.urls")),
     * static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT),
 ]
