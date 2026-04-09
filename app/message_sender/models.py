@@ -11,7 +11,7 @@ class AtlasUser(models.Model):
     email = models.EmailField(blank=True)
     role = models.CharField(max_length=64)
     tag = models.CharField(max_length=64, null=True, unique=True, blank=True)
-    telegram = models.CharField(max_length=64, unique=True)
+    telegram = models.CharField(max_length=64, unique=True)  # TODO: try to use a postgres CITextField
     username = models.CharField(max_length=64, unique=True)
 
     def __str__(self) -> str:
