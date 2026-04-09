@@ -1,5 +1,6 @@
+from common.auth import BearerAuthentication
 from rest_framework import mixins, viewsets
-from rest_framework.authentication import SessionAuthentication, TokenAuthentication
+from rest_framework.authentication import SessionAuthentication
 from rest_framework.decorators import api_view, authentication_classes, permission_classes
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.request import Request
@@ -12,7 +13,7 @@ from .serializers import ScheduledMessageSerializer
 
 @api_view()
 @permission_classes(permission_classes=[IsAuthenticated])
-@authentication_classes(authentication_classes=[SessionAuthentication, TokenAuthentication])
+@authentication_classes(authentication_classes=[SessionAuthentication, BearerAuthentication])
 def api_root(request: Request) -> Response:
     _ = request
     data = {
@@ -22,7 +23,7 @@ def api_root(request: Request) -> Response:
 
 @api_view()
 @permission_classes(permission_classes=[IsAuthenticated])
-@authentication_classes(authentication_classes=[SessionAuthentication, TokenAuthentication])
+@authentication_classes(authentication_classes=[SessionAuthentication, BearerAuthentication])
 def atlas_users_telegram_logins(request: Request) -> Response:
     _ = request
     logins = AtlasUser.objects.exclude(telegram="").values_list("telegram", flat=True)
