@@ -45,7 +45,6 @@ class MessageSenderService:
             message.status = ScheduledMessageStatus.SENT
         except (ValueError, AtlasMessageSenderError):
             message.status = ScheduledMessageStatus.FAILED
-            message.save()
             raise
         finally:
             message.save()
