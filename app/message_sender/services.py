@@ -1,8 +1,12 @@
+import logging
+
 from django.db import transaction
 
 from .client import AtlasMessageSender, Handlers
 from .client.exceptions import AtlasMessageSenderError
 from .models import AtlasUser, ScheduledMessage, ScheduledMessageStatus
+
+logger = logging.getLogger(__name__)
 
 
 class UserService:
@@ -41,10 +45,16 @@ class MessageSenderService:
                 handler = Handlers(message.handler)
                 self.message_sender.send_message(handler=handler, message=message.text, html=True)
             else:
-                self.message_sender.send_message_to_user(user_tag=message.user_tag, message=message.text, html=True)
+                response = self.message_sender.send_message_to_user(
+                    user_tag=message.user_tag,
+                    message=message.text,
+                    html=True,
+                )
+                logger.debug("Send scheduled message: %s, response: %s", message.pk, response)
             message.status = ScheduledMessageStatus.SENT
         except (ValueError, AtlasMessageSenderError):
             message.status = ScheduledMessageStatus.FAILED
+            logger.exception("Cant send scheduled message: %s", message.pk)
             raise
         finally:
             message.save()

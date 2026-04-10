@@ -289,6 +289,12 @@ LOGGING = {
             "level": "DEBUG",
             "formatter": "default",
         },
+        "file.message_sender": {
+            "class": "logging.FileHandler",
+            "filename": BASE_DIR / "logs" / "message_sender.log",
+            "level": "DEBUG",
+            "formatter": "default",
+        },
     },
     "loggers": {
         "root": {
@@ -297,6 +303,11 @@ LOGGING = {
         },
         "offboarding": {
             "handlers": ["console", "file.offboarding"],
+            "propagate": False,
+            "level": "DEBUG",
+        },
+        "message_sender": {
+            "handlers": ["console", "file.message_sender"],
             "propagate": False,
             "level": "DEBUG",
         },
