@@ -16,7 +16,7 @@ REQUEST_TIMEOUT = 6
 
 def error_handler(func: Callable[..., ReturnType]) -> Callable[..., ReturnType]:
     @wraps(func)
-    def wrapper(self: AtlasMessageSender, *args: Any, **kwargs: Any) -> Any:  # noqa: ANN401
+    def wrapper(self: "AtlasMessageSender", *args: Any, **kwargs: Any) -> Any:  # noqa: ANN401
         try:
             return func(self, *args, **kwargs)
         except (RequestException, HTTPError, json.JSONDecodeError) as error:
@@ -62,14 +62,19 @@ class AtlasMessageSender:
         )
 
     def _handle_error(self, handler_name: str, error: Exception) -> NoReturn:
+        base = f"{AtlasMessageSenderError.__name__} {handler_name}:"
+
         if isinstance(error, HTTPError):
-            msg = f"{AtlasMessageSenderError.__class__.__name__} {handler_name}: {error.response.text}"
-            raise AtlasMessageSenderError(msg, response=error.response) from error
-        if isinstance(error, json.JSONDecodeError):
-            msg = f"{AtlasMessageSenderError.__class__.__name__} {handler_name}: Ошибка разбора JSON ответа"
+            msg = f"{base} response text: {error.response.text}"
+            response = error.response
+        elif isinstance(error, json.JSONDecodeError):
+            msg = f"{base} Ошибка разбора JSON ответа"
+            response = None
         else:
-            msg = f"{AtlasMessageSenderError.__class__.__name__} {handler_name}: Ошибка запроса клиента, {error}"
-        raise AtlasMessageSenderError(msg, response=None) from error
+            msg = f"{base} Ошибка запроса клиента, {error}"
+            response = None
+
+        raise AtlasMessageSenderError(msg, response=response) from error
 
     def _validate_user_tag(self, user_tag: str) -> None:
         """Validate user tag value.
@@ -92,6 +97,7 @@ class AtlasMessageSender:
     def base_url(self) -> str:
         return f"https://{self.host}/api"
 
+    @error_handler
     def send_message(
         self,
         handler: Handlers,
@@ -121,6 +127,7 @@ class AtlasMessageSender:
         response.raise_for_status()
         return response.json()
 
+    @error_handler
     def send_message_to_users(
         self,
         message: str,
