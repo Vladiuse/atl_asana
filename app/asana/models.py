@@ -8,11 +8,22 @@ from .utils import get_asana_profile_url_by_id
 
 
 class AtlasAsanaUser(models.Model):
-    user_id = models.CharField(unique=True)
-    membership_id = models.CharField(unique=True)
-    email = models.EmailField(blank=True)
-    name = models.CharField(max_length=254)
-    avatar_url = models.URLField(blank=True, max_length=254)
+    user_id = models.CharField(
+        unique=True,
+    )
+    membership_id = models.CharField(
+        unique=True,
+    )
+    email = models.EmailField(
+        blank=True,
+    )
+    name = models.CharField(
+        max_length=254,
+    )
+    avatar_url = models.URLField(
+        blank=True,
+        max_length=254,
+    )
     messenger_code = models.CharField(
         max_length=32,
         blank=True,
@@ -43,18 +54,36 @@ class AtlasAsanaUser(models.Model):
 
 
 class AsanaWebhook(models.Model):
-    name = models.CharField(max_length=100, unique=True)
-    resource_id = models.CharField(max_length=50)
-    resource_type = models.CharField(max_length=50, choices=AsanaResourceType)
-    resource_name = models.CharField(max_length=254, blank=True)
-    secret = models.CharField(max_length=100, blank=True)
-    description = models.TextField(blank=True)
+    name = models.CharField(
+        max_length=100,
+        unique=True,
+    )
+    resource_id = models.CharField(
+        max_length=50,
+    )
+    resource_type = models.CharField(
+        max_length=50,
+        choices=AsanaResourceType,
+    )
+    resource_name = models.CharField(
+        max_length=254,
+        blank=True,
+    )
+    secret = models.CharField(
+        max_length=100,
+        blank=True,
+    )
+    description = models.TextField(
+        blank=True,
+    )
     handlers: models.ManyToManyField[WebhookHandler, AsanaWebhook] = models.ManyToManyField(
         to="WebhookHandler",
         related_name="webhooks",
         blank=True,
     )
-    created = models.DateTimeField(auto_now_add=True)
+    created = models.DateTimeField(
+        auto_now_add=True,
+    )
 
     def __str__(self) -> str:
         return f"{self.resource_type}:{self.resource_name}" if self.resource_name else self.name
@@ -69,21 +98,40 @@ class ProcessingStatus(models.TextChoices):
 
 
 class AsanaWebhookRequestData(models.Model):
-    webhook = models.ForeignKey(to=AsanaWebhook, on_delete=models.CASCADE)
-    status = models.CharField(max_length=30, choices=ProcessingStatus, default=ProcessingStatus.PENDING)
+    webhook = models.ForeignKey(
+        to=AsanaWebhook,
+        on_delete=models.CASCADE,
+    )
+    status = models.CharField(
+        max_length=30,
+        choices=ProcessingStatus,
+        default=ProcessingStatus.PENDING,
+    )
     headers = models.JSONField()
     payload = models.JSONField()
-    additional_data = models.JSONField(blank=True, default=dict)
-    created = models.DateTimeField(auto_now_add=True)
+    additional_data = models.JSONField(
+        blank=True,
+        default=dict,
+    )
+    created = models.DateTimeField(
+        auto_now_add=True,
+    )
 
     def __str__(self) -> str:
         return f"<AsanaWebhookRequestData:{self.pk}>"
 
 
 class WebhookHandler(models.Model):
-    name = models.CharField(max_length=50, unique=True)
-    description = models.TextField(blank=True)
-    created = models.DateTimeField(auto_now_add=True)
+    name = models.CharField(
+        max_length=50,
+        unique=True,
+    )
+    description = models.TextField(
+        blank=True,
+    )
+    created = models.DateTimeField(
+        auto_now_add=True,
+    )
 
     def __str__(self) -> str:
         return self.name
