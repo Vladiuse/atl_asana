@@ -27,13 +27,13 @@ class AsanaUserRepository:
         membership_id = membership_data["gid"]
         name = membership_data["user"]["name"]
         email = user_data.get("email") or ""
+        photo = user_data.get("photo", {}).get("image_128x128", "")
         try:
             owner = AtlasUser.objects.get(email=email)
             position = map_messenger_position_to_asana(messenger_position=owner.role)
         except AtlasUser.DoesNotExist:
             owner = None
             position = None
-        photo = user_data["photo"].get("image_128x128", "") if user_data["photo"] else ""
         return AtlasAsanaUser.objects.create(
             membership_id=membership_id,
             name=name,
