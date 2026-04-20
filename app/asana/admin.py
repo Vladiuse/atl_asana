@@ -31,13 +31,12 @@ class AtlasUserAdmin(admin.ModelAdmin):  # type: ignore[type-arg]
         "name",
         "avatar_preview",
         "position",
-        "messenger_code",
         "asana_profile_link",
     )
     list_display_links = ("email", "name")
     list_filter = ("position",)
     search_fields = ("email", "name")
-    actions = ("send_test_sms_for_user", "update_asana_users")
+    actions = ("update_asana_users")
     autocomplete_fields = ("owner", )
 
     @admin.display(description="Avatar")
@@ -56,22 +55,6 @@ class AtlasUserAdmin(admin.ModelAdmin):  # type: ignore[type-arg]
             '<a href="{}" target="_blank">Открыть</a>',
             profile_link,
         )
-
-    @admin.action(description="Отправить тестовое смс в телеграм")
-    def send_test_sms_for_user(self, request: HttpRequest, queryset: QuerySet[AtlasAsanaUser]) -> None:
-        errors_send_user = []
-        success_send_count = 0
-        for asana_user in queryset:
-            try:
-                message = f"Test message for {asana_user.user_comment_mention}"
-                message_sender.send_message_to_user(message=message, user_tag=asana_user.messenger_code)
-                success_send_count += 1
-            except ValueError:
-                errors_send_user.append(asana_user)
-        for user in errors_send_user:
-            message = f'Не удалось отправить тестовое смс для {user} по тегу "{user.messenger_code}"'
-            self.message_user(request, message, level=messages.ERROR)
-        self.message_user(request, f"Успешно отправлено {success_send_count} сообщений", level=messages.SUCCESS)
 
     @admin.action(description="Обновить пользователей асаны (глобальный)")
     def update_asana_users(self, request: HttpRequest, queryset: QuerySet[AtlasAsanaUser]) -> None:

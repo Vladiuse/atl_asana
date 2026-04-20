@@ -24,10 +24,6 @@ class AtlasAsanaUser(models.Model):
         blank=True,
         max_length=254,
     )
-    messenger_code = models.CharField(
-        max_length=32,
-        blank=True,
-    )
     owner = models.ForeignKey(
         to=AtlasUser,
         on_delete=models.SET_NULL,
