@@ -12,6 +12,25 @@ from .models import AtlasAsanaUser
 from .services import map_messenger_position_to_asana
 
 
+@dataclass(frozen=True)
+class AsanaUserDTO:
+    membership_id: str
+    name: str
+    user_id: str
+    email: str
+    photo_url: str | None
+
+    @classmethod
+    def from_api(cls, *, membership_data: dict[str, Any], user_data: dict[str, Any]) -> "AsanaUserDTO":
+        return cls(
+            membership_id=membership_data["gid"],
+            name=membership_data["user"]["name"],
+            user_id=user_data["gid"],
+            email=user_data.get("email") or "",
+            photo_url=user_data.get("photo", {}).get("image_128x128"),
+        )
+
+
 class AsanaUserRepository:
     @dataclass(frozen=True)
     class UpdateUsersResult:
@@ -22,27 +41,36 @@ class AsanaUserRepository:
     def __init__(self, api_client: AsanaApiClient):
         self.api_client = api_client
 
-    def _create_user_by_data(self, *, membership_data: dict[str, Any], user_data: dict[str, Any]) -> AtlasAsanaUser:
-        user_id = user_data["gid"]
-        membership_id = membership_data["gid"]
-        name = membership_data["user"]["name"]
-        email = user_data.get("email") or ""
-        photo = user_data.get("photo", {}).get("image_128x128", "")
+    def _create_user_by_data(self, user_dto: AsanaUserDTO) -> AtlasAsanaUser:
         try:
-            owner = AtlasUser.objects.get(email=email)
+            owner = AtlasUser.objects.get(email=user_dto.email)
             position = map_messenger_position_to_asana(messenger_position=owner.role)
         except AtlasUser.DoesNotExist:
             owner = None
             position = None
         return AtlasAsanaUser.objects.create(
-            membership_id=membership_id,
-            name=name,
-            user_id=user_id,
-            avatar_url=photo,
-            email=email,
+            membership_id=user_dto.membership_id,
+            name=user_dto.name,
+            user_id=user_dto.user_id,
+            avatar_url=user_dto.photo_url if user_dto.photo_url else "",
+            email=user_dto.email,
             owner=owner,
             position=position if position else "",
         )
+
+    def _update_user(self, user: AtlasAsanaUser, user_dto: AsanaUserDTO) -> None:
+        user.name = user_dto.name
+        user.email = user_dto.email
+        user.avatar_url = user_dto.photo_url if user_dto.photo_url else ""
+        try:
+            owner = AtlasUser.objects.get(email=user_dto.email)
+            position = map_messenger_position_to_asana(messenger_position=owner.role)
+        except AtlasUser.DoesNotExist:
+            owner = None
+            position = None
+        user.owner = owner
+        user.position = position if position else ""
+        user.save()
 
     def _create_by_membership_id(self, membership_id: str) -> AtlasAsanaUser:
         """Create user by membership_id.
@@ -53,7 +81,11 @@ class AsanaUserRepository:
         """
         membership_data = self.api_client.get_workspace_membership(membership_id=membership_id)
         user_data = self.api_client.get_user(user_id=membership_data["user"]["gid"])
-        return self._create_user_by_data(membership_data=membership_data, user_data=user_data)
+        user_dto = AsanaUserDTO.from_api(
+            membership_data=membership_data,
+            user_data=user_data,
+        )
+        return self._create_user_by_data(user_dto=user_dto)
 
     def _create_by_user_id(self, user_id: str) -> AtlasAsanaUser:
         """Create AtlasUser by id.
@@ -74,7 +106,11 @@ class AsanaUserRepository:
             msg = f"Cant find Atlas membership for user: {user_id}"
             raise AppExceptionError(msg)
         membership_data = self.api_client.get_workspace_membership(membership_id=atlas_user_membership_id)
-        return self._create_user_by_data(membership_data=membership_data, user_data=user_data)
+        user_dto = AsanaUserDTO.from_api(
+            membership_data=membership_data,
+            user_data=user_data,
+        )
+        return self._create_user_by_data(user_dto=user_dto)
 
     def get(
         self,
@@ -120,23 +156,30 @@ class AsanaUserRepository:
         )
         logging.info("Memberships in asana: %s", len(atlas_asana_memberships))
         exist_memberships_in_db = [str(i) for i in AtlasAsanaUser.objects.values_list("membership_id", flat=True)]
-        actual_memberships_ids = [membership_data["gid"] for membership_data in atlas_asana_memberships]
+        actual_memberships_ids: set[str] = {membership_data["gid"] for membership_data in atlas_asana_memberships}
         deleted_count, deleted_by_model = AtlasAsanaUser.objects.exclude(
-            membership_id__in=actual_memberships_ids
+            membership_id__in=actual_memberships_ids,
         ).delete()
         logging.info("Deleted: %s", deleted_count)
         logging.info("Memberships in DB: %s", len(exist_memberships_in_db))
-        created_user_ids = []
+        created_ids: list[int] = []
+        updated_ids: list[int] = []
         for membership_data in atlas_asana_memberships:
             membership_id = membership_data["gid"]
+            user_data = self.api_client.get_user(user_id=membership_data["user"]["gid"])
+            user_dto = AsanaUserDTO.from_api(
+                membership_data=membership_data,
+                user_data=user_data,
+            )
             if membership_data["gid"] not in exist_memberships_in_db:
                 logging.info("Detect new Memberships: %s", membership_id)
-                user_data = self.api_client.get_user(user_id=membership_data["user"]["gid"])
-                user = self._create_user_by_data(membership_data=membership_data, user_data=user_data)
-                created_user_ids.append(user.pk)
-        logging.info("New created: %s", len(created_user_ids))
+                user = self._create_user_by_data(user_dto=user_dto)
+                created_ids.append(user.pk)
+            else:
+                logging.info("Update Memberships: %s", membership_id)
+        logging.info("New created: %s", len(created_ids))
         return self.UpdateUsersResult(
-            created_user_ids=created_user_ids,
-            created_count=len(created_user_ids),
+            created_user_ids=created_ids,
+            created_count=len(created_ids),
             deleted_count=deleted_count,
         )
