@@ -29,6 +29,10 @@ class AtlasAsanaUser(models.Model):
         null=True,
         blank=True,
     )
+    loaded_avatar_url = models.URLField(
+        blank=True,
+        max_length=254,
+    )
     owner = models.ForeignKey(
         to=AtlasUser,
         on_delete=models.SET_NULL,
