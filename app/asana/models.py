@@ -24,6 +24,11 @@ class AtlasAsanaUser(models.Model):
         blank=True,
         max_length=254,
     )
+    avatar = models.ImageField(
+        upload_to="asana/avatars/",
+        null=True,
+        blank=True,
+    )
     owner = models.ForeignKey(
         to=AtlasUser,
         on_delete=models.SET_NULL,

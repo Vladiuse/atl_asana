@@ -41,11 +41,11 @@ class AtlasUserAdmin(admin.ModelAdmin):  # type: ignore[type-arg]
 
     @admin.display(description="Avatar")
     def avatar_preview(self, obj: AtlasAsanaUser) -> str:
-        if not obj.avatar_url:
+        if not obj.avatar:
             return ""
         return format_html(
             '<img src="{}" width="60" height="60" style="border-radius:50%; object-fit:cover;" />',
-            obj.avatar_url,
+            obj.avatar.url,
         )
 
     @admin.display(description="Профиль")
