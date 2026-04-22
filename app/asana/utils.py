@@ -52,3 +52,13 @@ def get_date_field_value_from_task(
         msg = f'Field "{field_name}" not found in asana task data'
         raise FieldNotFoundError(msg)
     return default_value
+
+
+def clean_user_avatar_url(url: str) -> str:
+    """Clean asana avatar url (remove query params).
+
+    Example:
+        https://asaba.com/cb1e4_128x128.png?e=1777479093&v=0&t=nvRV34_0m931d --> https://asaba.com/cb1e4_128x128.png
+
+    """
+    return  url.split("?")[0]
