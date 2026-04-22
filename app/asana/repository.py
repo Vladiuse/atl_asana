@@ -6,15 +6,14 @@ import requests
 from common.exception import AppExceptionError
 from django.core.files.base import ContentFile
 from message_sender.models import AtlasUser
+from requests.exceptions import RequestException
 
 from asana.client import AsanaApiClient
 
 from .constants import ATLAS_WORKSPACE_ID
 from .models import AtlasAsanaUser
 from .services import map_messenger_position_to_asana
-from requests.exceptions import RequestException
-import logging
-
+from .utils import clean_user_avatar_url
 
 logger = logging.getLogger(__name__)
 
@@ -40,18 +39,15 @@ class AsanaUserDTO:
 
 
 class AvatarService:
+    """Download asana avatar by url for asana user model."""
+
     def _download_avatar(self, url: str) -> ContentFile:  # type: ignore[type-arg]
-        """Download asana avatar by url.
-
-        Raises:
-            RequestException
-
-        """
         resp = requests.get(url, timeout=10)
         resp.raise_for_status()
         return ContentFile(resp.content)
 
-    def load(self, asana_user: AtlasAsanaUser) -> None:
+    def load(self, asana_user: AtlasAsanaUser) -> bool:
+        is_avatar_update = False
         if asana_user.avatar_url:
             try:
                 avatar_file = self._download_avatar(url=asana_user.avatar_url)
@@ -64,6 +60,8 @@ class AvatarService:
                     avatar_file,
                     save=True,
                 )
+                is_avatar_update = True
+        return is_avatar_update
 
 
 class AsanaUserRepository:
@@ -75,6 +73,12 @@ class AsanaUserRepository:
 
     def __init__(self, api_client: AsanaApiClient):
         self.api_client = api_client
+        self.avatar_service = AvatarService()
+
+    def _is_need_update_avatar(self, asana_user: AtlasAsanaUser, user_dto: AsanaUserDTO) -> bool:
+        if user_dto.photo_url is not None:
+            return clean_user_avatar_url(url=asana_user.avatar_url) != clean_user_avatar_url(url=user_dto.photo_url)
+        return False
 
     def _create_user(self, user_dto: AsanaUserDTO) -> AtlasAsanaUser:
         try:
@@ -93,7 +97,7 @@ class AsanaUserRepository:
             position=position if position else "",
         )
 
-    def _update_user(self, user: AtlasAsanaUser, user_dto: AsanaUserDTO) -> None:
+    def _update_user(self, user: AtlasAsanaUser, user_dto: AsanaUserDTO) -> AtlasAsanaUser:
         user.name = user_dto.name
         user.email = user_dto.email
         user.avatar_url = user_dto.photo_url if user_dto.photo_url else ""
@@ -106,6 +110,7 @@ class AsanaUserRepository:
         user.owner = owner
         user.position = position if position else ""
         user.save()
+        return user
 
     def _create_by_membership_id(self, membership_id: str) -> AtlasAsanaUser:
         """Create user by membership_id.
@@ -211,12 +216,18 @@ class AsanaUserRepository:
                 logging.info("Detect new Memberships: %s", membership_id)
                 user = self._create_user(user_dto=user_dto)
                 created_ids.append(user.pk)
+                self.avatar_service.load(asana_user=user)
             else:
                 # update exist user
                 logging.info("Update Memberships: %s", membership_id)
                 user = AtlasAsanaUser.objects.get(membership_id=membership_data["gid"])
-                self._update_user(user=user, user_dto=user_dto)
+                is_need_update_avatar = self._is_need_update_avatar(asana_user=user, user_dto=user_dto)
+                user = self._update_user(user=user, user_dto=user_dto)
                 updated_ids.append(user.pk)
+                if is_need_update_avatar is True:
+                    logger.info("Need load new avatar for user %s", user)
+                    self.avatar_service.load(asana_user=user)
+
         logging.info("New created: %s", len(created_ids))
         logging.info("Updated: %s", len(updated_ids))
         return self.UpdateUsersResult(
