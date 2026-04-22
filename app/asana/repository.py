@@ -2,7 +2,9 @@ import logging
 from dataclasses import dataclass
 from typing import Any
 
+import requests
 from common.exception import AppExceptionError
+from django.core.files.base import ContentFile
 from message_sender.models import AtlasUser
 
 from asana.client import AsanaApiClient
@@ -10,6 +12,11 @@ from asana.client import AsanaApiClient
 from .constants import ATLAS_WORKSPACE_ID
 from .models import AtlasAsanaUser
 from .services import map_messenger_position_to_asana
+from requests.exceptions import RequestException
+import logging
+
+
+logger = logging.getLogger(__name__)
 
 
 @dataclass(frozen=True)
@@ -22,13 +29,41 @@ class AsanaUserDTO:
 
     @classmethod
     def from_api(cls, *, membership_data: dict[str, Any], user_data: dict[str, Any]) -> "AsanaUserDTO":
+        photo_url = user_data["photo"].get("image_128x128") if user_data["photo"] else None
         return cls(
             membership_id=membership_data["gid"],
             name=membership_data["user"]["name"],
             user_id=user_data["gid"],
             email=user_data.get("email") or "",
-            photo_url=user_data.get("photo", {}).get("image_128x128"),
+            photo_url=photo_url,
         )
+
+
+class AvatarService:
+    def _download_avatar(self, url: str) -> ContentFile:  # type: ignore[type-arg]
+        """Download asana avatar by url.
+
+        Raises:
+            RequestException
+
+        """
+        resp = requests.get(url, timeout=10)
+        resp.raise_for_status()
+        return ContentFile(resp.content)
+
+    def load(self, asana_user: AtlasAsanaUser) -> None:
+        if asana_user.avatar_url:
+            try:
+                avatar_file = self._download_avatar(url=asana_user.avatar_url)
+            except RequestException:
+                logger.exception("Cant load avatar for asana user %s, url: %s", asana_user, asana_user.avatar_url)
+            else:
+                filename = f"{asana_user.user_id}.png"
+                asana_user.avatar.save(
+                    filename,
+                    avatar_file,
+                    save=True,
+                )
 
 
 class AsanaUserRepository:
@@ -41,7 +76,7 @@ class AsanaUserRepository:
     def __init__(self, api_client: AsanaApiClient):
         self.api_client = api_client
 
-    def _create_user_by_data(self, user_dto: AsanaUserDTO) -> AtlasAsanaUser:
+    def _create_user(self, user_dto: AsanaUserDTO) -> AtlasAsanaUser:
         try:
             owner = AtlasUser.objects.get(email=user_dto.email)
             position = map_messenger_position_to_asana(messenger_position=owner.role)
@@ -85,7 +120,7 @@ class AsanaUserRepository:
             membership_data=membership_data,
             user_data=user_data,
         )
-        return self._create_user_by_data(user_dto=user_dto)
+        return self._create_user(user_dto=user_dto)
 
     def _create_by_user_id(self, user_id: str) -> AtlasAsanaUser:
         """Create AtlasUser by id.
@@ -110,7 +145,7 @@ class AsanaUserRepository:
             membership_data=membership_data,
             user_data=user_data,
         )
-        return self._create_user_by_data(user_dto=user_dto)
+        return self._create_user(user_dto=user_dto)
 
     def get(
         self,
@@ -172,12 +207,18 @@ class AsanaUserRepository:
                 user_data=user_data,
             )
             if membership_data["gid"] not in exist_memberships_in_db:
+                # create user
                 logging.info("Detect new Memberships: %s", membership_id)
-                user = self._create_user_by_data(user_dto=user_dto)
+                user = self._create_user(user_dto=user_dto)
                 created_ids.append(user.pk)
             else:
+                # update exist user
                 logging.info("Update Memberships: %s", membership_id)
+                user = AtlasAsanaUser.objects.get(membership_id=membership_data["gid"])
+                self._update_user(user=user, user_dto=user_dto)
+                updated_ids.append(user.pk)
         logging.info("New created: %s", len(created_ids))
+        logging.info("Updated: %s", len(updated_ids))
         return self.UpdateUsersResult(
             created_user_ids=created_ids,
             created_count=len(created_ids),
