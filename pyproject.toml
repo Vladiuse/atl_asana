@@ -54,6 +54,8 @@ ignore = [
   "T203", # pprint
 ]
 "**/scripts/**/x.py" = ["ALL"]
+"**/scripts/**/x_*.py" = ["ALL"]
+
 
 [tool.ruff.format]
 quote-style = "double"
