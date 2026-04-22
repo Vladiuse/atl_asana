@@ -1,5 +1,6 @@
 import logging
 from dataclasses import dataclass
+from enum import Enum
 from typing import Any
 
 import requests
@@ -18,7 +19,7 @@ from .utils import clean_user_avatar_url
 logger = logging.getLogger(__name__)
 
 
-@dataclass(frozen=True)
+@dataclass(frozen=False)
 class AsanaUserDTO:
     membership_id: str
     name: str
@@ -58,10 +59,17 @@ class AvatarService:
                 asana_user.avatar.save(
                     filename,
                     avatar_file,
-                    save=True,
+                    save=False,
                 )
+                asana_user.loaded_avatar_url = asana_user.avatar_url
+                asana_user.save()
                 is_avatar_update = True
         return is_avatar_update
+
+    def delete(self, asana_user: AtlasAsanaUser) -> None:
+        asana_user.avatar.delete(save=False)
+        asana_user.loaded_avatar_url = ""
+        asana_user.save()
 
 
 class AsanaUserRepository:
@@ -71,14 +79,35 @@ class AsanaUserRepository:
         created_count: int
         deleted_count: int
 
+    class AvatarSyncAction(Enum):
+        UPDATE = "update"
+        LOAD = "load"
+        DELETE = "delete"
+        NOTHING = "nothing"
+
     def __init__(self, api_client: AsanaApiClient):
         self.api_client = api_client
         self.avatar_service = AvatarService()
 
-    def _is_need_update_avatar(self, asana_user: AtlasAsanaUser, user_dto: AsanaUserDTO) -> bool:
-        if user_dto.photo_url is not None:
-            return clean_user_avatar_url(url=asana_user.avatar_url) != clean_user_avatar_url(url=user_dto.photo_url)
-        return False
+    def get_avatar_sync_action(self, user: AtlasAsanaUser, user_dto: AsanaUserDTO) -> AvatarSyncAction:
+        db_url: str | None = user.loaded_avatar_url
+        api_url: str | None = user_dto.photo_url
+
+        # asana avatar not exist
+        if api_url is None:
+            if db_url:
+                return self.AvatarSyncAction.DELETE
+            return self.AvatarSyncAction.NOTHING
+
+        # asana avatar exist
+        if not db_url:
+            return self.AvatarSyncAction.LOAD
+
+        # not equal urls
+        if clean_user_avatar_url(db_url) != clean_user_avatar_url(api_url):
+            return self.AvatarSyncAction.UPDATE
+
+        return self.AvatarSyncAction.NOTHING
 
     def _create_user(self, user_dto: AsanaUserDTO) -> AtlasAsanaUser:
         try:
@@ -137,7 +166,7 @@ class AsanaUserRepository:
         user_data = self.api_client.get_user(user_id=user_id)
         atlas_user_membership_id = None
         user_memberships = self.api_client.get_workspace_memberships_for_user(user_id=user_id)
-        logging.info("user_memberships: %s", user_memberships)
+        logger.info("user_memberships: %s", user_memberships)
         for membership_data in user_memberships:
             if membership_data["workspace"]["gid"] == str(ATLAS_WORKSPACE_ID):
                 atlas_user_membership_id = membership_data["gid"]
@@ -170,15 +199,15 @@ class AsanaUserRepository:
         try:
             if membership_id is not None:
                 user = AtlasAsanaUser.objects.get(membership_id=membership_id)
-                logging.info("Get user from DB by membership_id")
+                logger.info("Get user from DB by membership_id")
             else:
                 user = AtlasAsanaUser.objects.get(user_id=user_id)
-                logging.info("Get user from DB by user_id")
+                logger.info("Get user from DB by user_id")
         except AtlasAsanaUser.DoesNotExist:
             if membership_id is not None:
-                logging.info("Try load user from Asana by membership_id")
+                logger.info("Try load user from Asana by membership_id")
                 return self._create_by_membership_id(membership_id=membership_id)
-            logging.info("Try load user from Asana by user_id")
+            logger.info("Try load user from Asana by user_id")
             assert user_id is not None  # noqa: S101
             return self._create_by_user_id(user_id=user_id)
         else:
@@ -194,14 +223,14 @@ class AsanaUserRepository:
         atlas_asana_memberships = self.api_client.get_workspace_memberships_for_workspace(
             workspace_id=ATLAS_WORKSPACE_ID,
         )
-        logging.info("Memberships in asana: %s", len(atlas_asana_memberships))
+        logger.info("Memberships in asana: %s", len(atlas_asana_memberships))
         exist_memberships_in_db = [str(i) for i in AtlasAsanaUser.objects.values_list("membership_id", flat=True)]
         actual_memberships_ids: set[str] = {membership_data["gid"] for membership_data in atlas_asana_memberships}
         deleted_count, deleted_by_model = AtlasAsanaUser.objects.exclude(
             membership_id__in=actual_memberships_ids,
         ).delete()
-        logging.info("Deleted: %s", deleted_count)
-        logging.info("Memberships in DB: %s", len(exist_memberships_in_db))
+        logger.info("Deleted: %s", deleted_count)
+        logger.info("Memberships in DB: %s", len(exist_memberships_in_db))
         created_ids: list[int] = []
         updated_ids: list[int] = []
         for membership_data in atlas_asana_memberships:
@@ -213,23 +242,27 @@ class AsanaUserRepository:
             )
             if membership_data["gid"] not in exist_memberships_in_db:
                 # create user
-                logging.info("Detect new Memberships: %s", membership_id)
+                logger.info("Detect new Memberships: %s", membership_id)
                 user = self._create_user(user_dto=user_dto)
                 created_ids.append(user.pk)
                 self.avatar_service.load(asana_user=user)
             else:
                 # update exist user
-                logging.info("Update Memberships: %s", membership_id)
+                logger.info("Update Memberships: %s", membership_id)
                 user = AtlasAsanaUser.objects.get(membership_id=membership_data["gid"])
-                is_need_update_avatar = self._is_need_update_avatar(asana_user=user, user_dto=user_dto)
+                avatar_action = self.get_avatar_sync_action(user=user, user_dto=user_dto)
+                logger.info("Avatar action: %s", avatar_action)
                 user = self._update_user(user=user, user_dto=user_dto)
                 updated_ids.append(user.pk)
-                if is_need_update_avatar is True:
+                if avatar_action in (self.AvatarSyncAction.UPDATE, self.AvatarSyncAction.LOAD):
                     logger.info("Need load new avatar for user %s", user)
                     self.avatar_service.load(asana_user=user)
+                if avatar_action == self.AvatarSyncAction.DELETE:
+                    logger.info("Need delete avatar for user %s", user)
+                    self.avatar_service.delete(asana_user=user)
 
-        logging.info("New created: %s", len(created_ids))
-        logging.info("Updated: %s", len(updated_ids))
+        logger.info("New created: %s", len(created_ids))
+        logger.info("Updated: %s", len(updated_ids))
         return self.UpdateUsersResult(
             created_user_ids=created_ids,
             created_count=len(created_ids),
