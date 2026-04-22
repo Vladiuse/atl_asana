@@ -90,6 +90,7 @@ class AsanaUserRepository:
         self.avatar_service = AvatarService()
 
     def get_avatar_sync_action(self, user: AtlasAsanaUser, user_dto: AsanaUserDTO) -> AvatarSyncAction:
+        # TODO: not user api url, check url from model field
         db_url: str | None = user.loaded_avatar_url
         api_url: str | None = user_dto.photo_url
 
