@@ -1,5 +1,6 @@
 from datetime import date
 from typing import Any
+from urllib.parse import urlsplit, urlunsplit
 
 from .constants import AsanaResourceType
 from .exception import FieldNotFoundError
@@ -61,4 +62,5 @@ def clean_user_avatar_url(url: str) -> str:
         https://asaba.com/cb1e4_128x128.png?e=1777479093&v=0&t=nvRV34_0m931d --> https://asaba.com/cb1e4_128x128.png
 
     """
-    return  url.split("?")[0]
+    parts = urlsplit(url)
+    return urlunsplit((parts.scheme, parts.netloc, parts.path, "", ""))
