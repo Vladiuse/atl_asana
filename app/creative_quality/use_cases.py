@@ -141,19 +141,23 @@ class FetchMissingTasksUseCase:
         self.creative_project_section_service = creative_project_section_service
 
     def execute(self) -> dict[str, int | list[str]]:
+        logger.info("%s execute", self.__class__.__name__)
         sections = CreativeProjectSection.objects.all()
         new_found = []
         with_errors = []
         for section in sections:
+            logger.info("Section: %s %s", section.section_id, section.section_name)
             exist_task_ids = set(Task.objects.values_list("task_id", flat=True))
             section_task_ids = self.creative_project_section_service.fetch_tasks_ids(
                 creative_project_section=section,
             )
+            logger.info("Section tasks %s: %s", len(section_task_ids), section_task_ids)
             for task_id in section_task_ids:
                 if task_id not in exist_task_ids:
                     try:
                         Task.objects.create(task_id=task_id)
                         new_found.append(task_id)
+                        logger.info("Found new task: %s", task_id)
                     except IntegrityError:
                         logger.exception("Cant save task to db: %s", task_id)
                         with_errors.append(task_id)
