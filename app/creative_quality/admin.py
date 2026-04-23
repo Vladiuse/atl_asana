@@ -62,7 +62,7 @@ class CreativeAdmin(admin.ModelAdmin):  # type: ignore[type-arg]
         "display_estimate_url",
         "need_rated_at",
         "gsheet_sent",
-        "created",
+        "next_reminder_at",
     )
     list_filter = ("status",)
     search_fields = ("task__task_id", "task__task_name")
