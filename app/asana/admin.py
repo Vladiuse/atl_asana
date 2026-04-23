@@ -36,8 +36,8 @@ class AtlasUserAdmin(admin.ModelAdmin):  # type: ignore[type-arg]
     list_display_links = ("email", "name")
     list_filter = ("position",)
     search_fields = ("email", "name")
-    actions = ("update_asana_users")
-    autocomplete_fields = ("owner", )
+    actions = ("update_asana_users",)
+    autocomplete_fields = ("owner",)
 
     @admin.display(description="Avatar")
     def avatar_preview(self, obj: AtlasAsanaUser) -> str:
