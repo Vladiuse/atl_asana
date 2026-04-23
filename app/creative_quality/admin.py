@@ -23,6 +23,7 @@ class TaskAdmin(admin.ModelAdmin):  # type: ignore[type-arg]
         "task_id",
         "task_name",
         "status",
+        "load_failure_count",
         "is_completed_in_asana",
         "assignee_id",
         "bayer_code",
@@ -30,7 +31,7 @@ class TaskAdmin(admin.ModelAdmin):  # type: ignore[type-arg]
         "created",
         "url_display",
     )
-    list_filter = ("status",)
+    list_filter = ("status","is_complete", "is_completed_in_asana")
     search_fields = ("task_id", "task_name", "assignee_id", "bayer_code")
     ordering = ("-created",)
     actions = ("update_task_data", )

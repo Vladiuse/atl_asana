@@ -42,6 +42,7 @@ class CreativeSubTask:
 
 @dataclass(frozen=True)
 class CreativeTaskData:
+    completed: bool
     assignee_id: str
     name: str
     url: str
@@ -60,6 +61,7 @@ class CreativeService:
         url = task_data["permalink_url"]
         bayer_code = None
         work_url = None
+        completed = task_data["completed"]
         for field in task_data.get("custom_fields", []):
             if field["name"] == config.DESIGN_TASK_BAYER_CUSTOM_FIELD_NAME:
                 bayer_code = field.get("display_value", "")
@@ -74,6 +76,7 @@ class CreativeService:
             bayer_code=bayer_code,
             url=url,
             work_url=work_url,
+            completed=completed,
         )
 
     def _get_sub_tasks(self, creative_task: Task) -> list[CreativeSubTask]:
@@ -86,6 +89,7 @@ class CreativeService:
         creative_task.task_name = task_dto.name
         creative_task.url = task_dto.url
         creative_task.work_url = task_dto.work_url if task_dto.work_url else ""
+        creative_task.is_completed_in_asana = task_dto.completed
         if save:
             creative_task.save()
         return creative_task
