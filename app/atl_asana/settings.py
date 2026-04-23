@@ -295,6 +295,18 @@ LOGGING = {
             "level": "DEBUG",
             "formatter": "default",
         },
+        "file.asana": {
+            "class": "logging.FileHandler",
+            "filename": BASE_DIR / "logs" / "asana.log",
+            "level": "DEBUG",
+            "formatter": "default",
+        },
+        "file.creative_quality": {
+            "class": "logging.FileHandler",
+            "filename": BASE_DIR / "logs" / "creative_quality.log",
+            "level": "DEBUG",
+            "formatter": "default",
+        },
     },
     "loggers": {
         "root": {
@@ -308,6 +320,16 @@ LOGGING = {
         },
         "message_sender": {
             "handlers": ["console", "file.message_sender"],
+            "propagate": False,
+            "level": "DEBUG",
+        },
+        "asana": {
+            "handlers": ["console", "file.asana"],
+            "propagate": False,
+            "level": "DEBUG",
+        },
+        "creative_quality": {
+            "handlers": ["console", "file.creative_quality"],
             "propagate": False,
             "level": "DEBUG",
         },
