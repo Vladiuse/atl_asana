@@ -1,3 +1,4 @@
+import logging
 from dataclasses import dataclass
 from datetime import timedelta
 
@@ -12,6 +13,8 @@ from message_sender.client import AtlasMessageSender
 from message_sender.client.exceptions import AtlasMessageSenderError
 
 from .models import Creative, CreativeAdaptation, CreativeProjectSection, Task, TaskStatus
+
+logger = logging.getLogger(__name__)
 
 
 @dataclass
@@ -172,8 +175,10 @@ class SendEstimationMessageService:
         }
         message = self.message_renderer.render(template=self.message, context=context)
         try:
-            self.message_sender.send_message_to_user(message=message, user_tag=user_tag)
+            response = self.message_sender.send_message_to_user(message=message, user_tag=user_tag)
+            logger.info("Messenger response for %s: %s", creative, response)
         except AtlasMessageSenderError as error:
+            logger.exception("Cant send estimation message for %s", creative)
             creative.reminder_failure_count += 1
             if creative.reminder_failure_count >= config.SEND_REMINDER_TRY_COUNT:
                 creative.mark_reminder_limit_reached(save=False)

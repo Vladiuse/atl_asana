@@ -1,3 +1,4 @@
+import logging
 from typing import Any
 
 import gspread
@@ -10,6 +11,8 @@ from message_sender.tasks import send_log_message_task
 from creative_quality.creative_table import CreativeDto, CreativeGoogleTable
 from creative_quality.models import Creative, CreativeGeoData, CreativeProjectSection, CreativeStatus, Task, TaskStatus
 from creative_quality.services import CreativeProjectSectionService, CreativeService, SendEstimationMessageService
+
+logger = logging.getLogger(__name__)
 
 
 class CreateCreativesForNewTasksUseCase:
@@ -152,12 +155,14 @@ class FetchMissingTasksUseCase:
                         Task.objects.create(task_id=task_id)
                         new_found.append(task_id)
                     except IntegrityError:
+                        logger.exception("Cant save task to db: %s", task_id)
                         with_errors.append(task_id)
         if any([new_found, with_errors]):
             message = (
                 f"⚠️ {self.__class__.__name__}:\n"
                 f"Found new_found:{new_found} missing creatives tasks, errors: {with_errors}"
             )
+            logger.warning(message)
             send_log_message_task.delay(message=message)  # type: ignore[attr-defined]
         return {"new_found": new_found, "with_errors": with_errors}
 
@@ -169,6 +174,7 @@ class DataIntegrityCheckUseCase:
             tasks_ids = tasks_qs.values_list("task_id", flat=True)
             message = f"⚠️ {self.__class__.__name__}: Found tasks without required data: {tasks_ids}"
             send_log_message_task.delay(message=message)  # type: ignore[attr-defined]
+            logger.warning(message)
 
     def _check_task_error_load_info(self) -> None:
         tasks_qs = Task.objects.error_load_info()
@@ -176,15 +182,18 @@ class DataIntegrityCheckUseCase:
             tasks_ids = tasks_qs.values_list("task_id", flat=True)
             message = f"⚠️ {self.__class__.__name__}: Found tasks cant load info: {tasks_ids}"
             send_log_message_task.delay(message=message)  # type: ignore[attr-defined]
+            logger.warning(message)
 
     def _check_creatives_cant_send_message(self) -> None:
         creatives_qs = Creative.objects.filter(status=CreativeStatus.REMINDER_LIMIT_REACHED)
         if creatives_qs.exists():
             creatives_ids = creatives_qs.values_list("pk", flat=True)
-            message = (f"⚠️ {self.__class__.__name__}:\n "
+            message = (
+                f"⚠️ {self.__class__.__name__}:\n "
                 f"Found creatives with status {CreativeStatus.REMINDER_LIMIT_REACHED}: {creatives_ids}"
             )
             send_log_message_task.delay(message=message)  # type: ignore[attr-defined]
+            logger.warning(message)
 
     def execute(self) -> None:
         self._check_tasks_full_data()
