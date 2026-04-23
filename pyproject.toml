@@ -19,7 +19,6 @@ ignore = [
   "FA102",
   "RUF001",  # ambiguous-unicode-character-string
   "PERF203", # try-except-in-loop
-  "LOG015",  # using global logger
   "D203",    # incorrect-blank-line-before-class
   "D213",    # multi-line-summary-second-line
   "EM101",   # raw-string-in-exception
