@@ -31,10 +31,10 @@ class TaskAdmin(admin.ModelAdmin):  # type: ignore[type-arg]
         "created",
         "url_display",
     )
-    list_filter = ("status","is_complete", "is_completed_in_asana")
+    list_filter = ("status", "is_complete", "is_completed_in_asana")
     search_fields = ("task_id", "task_name", "assignee_id", "bayer_code")
     ordering = ("-created",)
-    actions = ("update_task_data", )
+    actions = ("update_task_data",)
 
     @admin.display(description="url")
     def url_display(self, obj: Task) -> str:
@@ -59,6 +59,7 @@ class CreativeAdmin(admin.ModelAdmin):  # type: ignore[type-arg]
         "id",
         "task",
         "status",
+        "display_send_estimation_attempts",
         "display_estimate_url",
         "need_rated_at",
         "gsheet_sent",
@@ -71,6 +72,10 @@ class CreativeAdmin(admin.ModelAdmin):  # type: ignore[type-arg]
     @admin.display(description="Estimate url")
     def display_estimate_url(self, obj: Creative) -> str:
         return format_html('<a href="{}" target="_blank">url</a>', obj.get_estimate_url())
+
+    @admin.display(description="Attempts")
+    def display_send_estimation_attempts(self, obj: Creative) -> str:
+        return f"{obj.reminder_success_count}:{obj.reminder_failure_count}"
 
 
 @admin.register(CreativeAdaptation)
