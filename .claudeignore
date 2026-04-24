@@ -1,0 +1,42 @@
+# Python
+venv/
+env/
+__pycache__/
+*.pyc
+*.pyo
+*.egg-info/
+dist/
+build/
+.pytest_cache/
+
+# Django
+*.log
+db.sqlite3
+media/
+staticfiles/
+
+# Окружение
+.env
+.env.local
+.env.*.local
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Git
+.git/
+.gitignore
+
+# Node (если есть фронтенд)
+node_modules/
+npm-debug.log
+
+# Docker
+.dockerignore
+
+# OS
+.DS_Store
+Thumbs.db
