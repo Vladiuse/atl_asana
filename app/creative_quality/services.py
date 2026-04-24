@@ -176,7 +176,8 @@ class SendEstimationMessageService:
         message = self.message_renderer.render(template=self.message, context=context)
         try:
             response = self.message_sender.send_message_to_user(message=message, user_tag=user_tag)
-            logger.info("Messenger response for %s: %s", creative, response)
+            logger.info("Send estimation message for %s, user %s", creative, bayer_code)
+            logger.debug("Messenger response for %s: %s", creative, response)
         except AtlasMessageSenderError as error:
             logger.exception("Cant send estimation message for %s", creative)
             creative.reminder_failure_count += 1
