@@ -80,8 +80,7 @@ class AtlasMessageSender:
         """Validate user tag value.
 
         Raises:
-            TypeError: If user_tag is not a string.
-            ValueError: If user_tag is an empty string.
+            AtlasMessageSenderError
 
         """
         if not isinstance(user_tag, str):
@@ -173,8 +172,7 @@ class AtlasMessageSender:
         """Send message to user by user tag.
 
         Raises:
-            TypeError: Propagated from _validate_user_tag.
-            ValueError: Propagated from _validate_user_tag.
+            AtlasMessageSenderError: Propagated from _validate_user_tag.
 
         """
         self._validate_user_tag(user_tag=user_tag)
