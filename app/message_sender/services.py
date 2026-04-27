@@ -49,6 +49,7 @@ class MessageSenderService:
                     user_tag=message.user_tag,
                     message=message.text,
                     html=True,
+                    timeout=15,
                 )
                 logger.debug("Send scheduled message: %s, response: %s", message.pk, response)
             message.status = ScheduledMessageStatus.SENT
